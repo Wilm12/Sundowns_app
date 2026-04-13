@@ -1,0 +1,2 @@
+class MembershipService:
+    pass

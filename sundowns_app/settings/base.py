@@ -8,7 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='replace-me')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=lambda v: v.split(','))
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='',
+    cast=lambda v: [host.strip() for host in v.split(',') if host.strip()]
+)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -24,8 +28,12 @@ INSTALLED_APPS = [
     'transport',
     'promotions',
     'communications',
-    'points',
+    'rewards',
     'common',
+    'users',
+    'branches',
+    'authentication',
+    'matches',
 ]
 
 AUTH_USER_MODEL = 'users.User'

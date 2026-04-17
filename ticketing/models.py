@@ -1,22 +1,24 @@
+
+
 from django.db import models
-from membership.models import Membership
+from django.conf import settings
+import uuid
 
-
-class Event(models.Model):
-    name = models.CharField(max_length=200)
-    date = models.DateTimeField()
-    location = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
+User = settings.AUTH_USER_MODEL
 
 class Ticket(models.Model):
-    membership = models.ForeignKey(Membership, on_delete=models.CASCADE)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    seat_number = models.CharField(max_length=10)
-    ticket_date = models.DateTimeField(auto_now_add=True)
+    STATUS_CHOICES = (
+        ('booked', 'Booked'),
+        ('used', 'Used'),
+        ('cancelled', 'Cancelled'),
+        ('expired', 'Expired'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets')
+    match = models.ForeignKey('matches.Match', on_delete=models.CASCADE, related_name='tickets')
+    qr_code = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Ticket {self.id} - {self.membership.user.username} - {self.event.name}"
-
+        return f"Ticket {self.id}"

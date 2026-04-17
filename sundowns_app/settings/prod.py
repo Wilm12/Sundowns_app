@@ -1,39 +1,34 @@
-# sundowns_app/settings/prod.py
 from .base import *
+from decouple import config
 
 DEBUG = False
-ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
+
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='yourdomain.com,www.yourdomain.com',
+    cast=lambda v: [host.strip() for host in v.split(',') if host.strip()]
+)
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sundowns_prod',
-        'USER': 'postgres',
-        'PASSWORD': 'securepassword',
-        'HOST': 'prod-db-host',   # e.g. RDS, managed DB
-        'PORT': '5432',
+        'NAME': config('DB_NAME', default='sundowns_prod'),
+        'USER': config('DB_USER', default='postgres'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='prod-db-host'),
+        'PORT': config('DB_PORT', default='5432'),
     }
 }
 
-# Static & media files served via CDN or cloud storage
-STATIC_URL = '/static/'
-STATIC_ROOT = '/var/www/sundowns/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/sundowns/media/'
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
-# Production logging
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': '/var/log/sundowns/django_errors.log',
-        },
-    },
-    'root': {
-        'handlers': ['file'],
-        'level': 'ERROR',
-    },
-}
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'

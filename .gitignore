@@ -1,5 +1,9 @@
 # Ignore environment files
 .env*
+.env
+.env.dev
+.env.prod
+.env.tes
 # Ignore local database
 db.sqlite3
 # Ignore Python cache

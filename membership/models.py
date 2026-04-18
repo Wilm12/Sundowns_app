@@ -10,17 +10,26 @@ class Membership(models.Model):
         ('golden', 'Golden'),
     )
 
+    TIER_PRICES = {
+        "basic": 100,
+        "premium": 200,
+        "golden": 300,
+    }
+
     STATUS_CHOICES = (
         ('active', 'Active'),
         ('expired', 'Expired'),
         ('suspended', 'Suspended'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='membership')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='memberships')
     tier = models.CharField(max_length=10, choices=TIER_CHOICES)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     start_date = models.DateField()
     expiry_date = models.DateField()
+
+    def expected_price(self):
+        return self.TIER_PRICES[self.tier]
 
     def __str__(self):
         return f"{self.user} - {self.tier}"

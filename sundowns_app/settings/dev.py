@@ -17,7 +17,3 @@ DATABASES = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-print("USING DEV SETTINGS")
-print("DEBUG =", DEBUG)
-print("ALLOWED_HOSTS =", ALLOWED_HOSTS)

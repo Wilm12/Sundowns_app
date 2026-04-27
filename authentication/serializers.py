@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -37,16 +37,13 @@ class MeSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'role', 'branch']
 
 
-class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
-    email = serializers.EmailField(required=False)
-    username = serializers.CharField(required=False)
+class EmailTokenObtainPairSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        email = attrs.get('email') or attrs.get('username')
+        email = attrs.get('email')
         password = attrs.get('password')
-
-        if not email or not password:
-            raise serializers.ValidationError("Email and password are required.")
 
         try:
             user = User.objects.get(email=email)
@@ -59,7 +56,7 @@ class EmailTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not user.is_active:
             raise serializers.ValidationError("This account is inactive.")
 
-        refresh = self.get_token(user)
+        refresh = RefreshToken.for_user(user)
 
         return {
             'refresh': str(refresh),

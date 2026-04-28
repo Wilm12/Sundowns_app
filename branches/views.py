@@ -1,3 +1,13 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
-# Create your views here.
+from authentication.permissions import IsAdminOrReadOnly
+from .models import Branch
+from .serializers import BranchSerializer
+
+
+class BranchViewSet(viewsets.ModelViewSet):
+    queryset = Branch.objects.all().order_by('name')
+    serializer_class = BranchSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+

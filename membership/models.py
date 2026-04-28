@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 
-User = settings.AUTH_USER_MODEL
 
 class Membership(models.Model):
     TIER_CHOICES = (
@@ -17,19 +16,25 @@ class Membership(models.Model):
     }
 
     STATUS_CHOICES = (
+        ('pending', 'Pending'),
         ('active', 'Active'),
         ('expired', 'Expired'),
         ('suspended', 'Suspended'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='memberships')
-    tier = models.CharField(max_length=10, choices=TIER_CHOICES)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
-    start_date = models.DateField()
-    expiry_date = models.DateField()
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='memberships'
+    )
+    tier = models.CharField(max_length=10, choices=TIER_CHOICES, default='basic')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    start_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def expected_price(self):
         return self.TIER_PRICES[self.tier]
 
     def __str__(self):
-        return f"{self.user} - {self.tier}"
+        return f"{self.user} - {self.tier} - {self.status}"

@@ -45,5 +45,9 @@ class Payment(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+        if self.status == 'successful':
+            self.membership.status = 'active'
+            self.membership.save()
+
     def __str__(self):
         return f"{self.user} - {self.membership} - {self.amount} - {self.status}"

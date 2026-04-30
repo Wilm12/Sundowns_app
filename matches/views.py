@@ -1,3 +1,12 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
-# Create your views here.
+from authentication.permissions import IsAdminOrReadOnly
+from .models import Match
+from .serializers import MatchSerializer
+
+
+class MatchViewSet(viewsets.ModelViewSet):
+    queryset = Match.objects.all().order_by('-date')
+    serializer_class = MatchSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]

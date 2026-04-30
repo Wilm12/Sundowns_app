@@ -2,22 +2,35 @@ from django.contrib import admin
 from .models import Payment
 
 
+@admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'membership', 'amount', 'status', 'payment_date')
-    list_filter = ('status', 'payment_date')
-    search_fields = ('membership__user__username', 'membership__user__email')
-    date_hierarchy = 'payment_date'
-    readonly_fields = ('payment_date', 'id')
-    fieldsets = (
-        ('Payment Information', {
-            'fields': ('id', 'membership', 'amount', 'status')
-        }),
-        ('Timestamp', {
-            'fields': ('payment_date',),
-            'classes': ('collapse',)
-        }),
+    list_display = (
+        'id',
+        'user',
+        'membership',
+        'amount',
+        'status',
+        'reference',
+        'paid_at',
+        'created_at',
     )
-    list_per_page = 50
 
+    list_filter = (
+        'status',
+        'created_at',
+        'paid_at',
+    )
 
-admin.site.register(Payment, PaymentAdmin)
+    search_fields = (
+        'user__username',
+        'user__email',
+        'membership__user__username',
+        'membership__user__email',
+        'reference',
+    )
+
+    readonly_fields = (
+        'created_at',
+    )
+
+    date_hierarchy = 'created_at'

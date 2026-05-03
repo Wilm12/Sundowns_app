@@ -41,9 +41,24 @@ class TransportBookingSerializer(serializers.ModelSerializer):
             'created_at',
         ]
 
+        read_only_fields = [
+            'id',
+            'ticket_qr',
+            'verified_at',
+            'created_at',
+        ]
+
     def validate(self, attrs):
+        request = self.context.get('request')
+        user = request.user if request and request.user.is_authenticated else None
+
         ticket = attrs.get('ticket')
         transport = attrs.get('transport')
+
+        if ticket and user and ticket.user_id != user.id:
+            raise serializers.ValidationError({
+                'ticket': 'You can only book transport using your own ticket.'
+           })
 
         if ticket and ticket.status != 'booked':
             raise serializers.ValidationError({
@@ -58,7 +73,7 @@ class TransportBookingSerializer(serializers.ModelSerializer):
         if transport and transport.status != 'active':
             raise serializers.ValidationError({
                 'transport': 'Transport is not active.'
-            })
+           })
 
         if transport and transport.available_seats() <= 0:
             raise serializers.ValidationError({

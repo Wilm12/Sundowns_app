@@ -22,15 +22,23 @@ class TransportDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class TransportBookingListCreateView(generics.ListCreateAPIView):
-    queryset = TransportBooking.objects.all().order_by('-created_at')
     serializer_class = TransportBookingSerializer
-    permission_classes = [IsAdminRole]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return TransportBooking.objects.filter(
+            ticket__user=self.request.user
+        ).order_by('-created_at')
 
 
 class TransportBookingDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = TransportBooking.objects.all()
     serializer_class = TransportBookingSerializer
-    permission_classes = [IsAdminRole]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return TransportBooking.objects.filter(
+            ticket__user=self.request.user
+        )
 
 
 class MyTransportBookingsView(generics.ListAPIView):

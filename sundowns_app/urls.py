@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.http import JsonResponse
 from common.views import home_view
 from common.views import home_view, dashboard_view
+from matches.views import match_list_page
 
 
 def health_check(request):
@@ -23,5 +24,6 @@ urlpatterns = [
     path('api/matches/', include('matches.urls')),
     path('api/transport/', include('transport.urls')),
     path('dashboard/', dashboard_view, name='dashboard'),
+    path('matches/', match_list_page, name='match_list_page'),
     
 ]

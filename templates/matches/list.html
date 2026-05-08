@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Matches | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-8">
+    <h1 class="text-3xl font-bold text-green-900 mb-6">
+        Upcoming Matches
+    </h1>
+
+    {% if matches %}
+        <div class="space-y-4">
+            {% for match in matches %}
+                <div class="border rounded-lg p-5 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-green-900">
+                            Sundowns vs {{ match.opponent }}
+                        </h2>
+
+                        <p class="text-gray-700">
+                            {{ match.location }}
+                        </p>
+
+                        <p class="text-gray-500">
+                            {{ match.date }}
+                        </p>
+                    </div>
+
+                    <a
+                        href="#"
+                        class="bg-yellow-500 text-green-900 px-5 py-2 rounded font-semibold hover:bg-yellow-400"
+                    >
+                        Book Ticket
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-600">
+            No matches available yet.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
+from common.views import home_view
 
 
 def health_check(request):
@@ -8,6 +9,7 @@ def health_check(request):
 
 
 urlpatterns = [
+    path('', home_view, name='home'),
     path('health/', health_check),
 
     path('admin/', admin.site.urls),
@@ -19,4 +21,5 @@ urlpatterns = [
     path('api/tickets/', include('ticketing.urls')),
     path('api/matches/', include('matches.urls')),
     path('api/transport/', include('transport.urls')),
+    
 ]

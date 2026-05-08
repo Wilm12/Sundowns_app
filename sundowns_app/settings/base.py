@@ -3,7 +3,7 @@ from pathlib import Path
 import os
 from decouple import config  # or django-environ
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='replace-me')
 DEBUG = config('DEBUG', default=False, cast=bool)

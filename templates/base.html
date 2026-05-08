@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sundowns WPA{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <nav class="bg-yellow-500 text-green-900 shadow">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="font-bold text-xl">
+                Sundowns WPA
+            </a>
+
+            <div class="space-x-4">
+                <a href="/" class="hover:underline">Home</a>
+                <a href="/dashboard/" class="hover:underline">Dashboard</a>
+                <a href="/matches/" class="hover:underline">Matches</a>
+                <a href="/tickets/" class="hover:underline">My Tickets</a>
+                <a href="/transport/" class="hover:underline">Transport</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                    <div class="p-4 rounded bg-white border">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>

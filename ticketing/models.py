@@ -17,7 +17,7 @@ class Ticket(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tickets')
     match = models.ForeignKey('matches.Match', on_delete=models.CASCADE, related_name='tickets')
     qr_code = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='booked')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

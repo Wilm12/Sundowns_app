@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
 from common.views import home_view
+from common.views import home_view, dashboard_view
 
 
 def health_check(request):
@@ -21,5 +22,6 @@ urlpatterns = [
     path('api/tickets/', include('ticketing.urls')),
     path('api/matches/', include('matches.urls')),
     path('api/transport/', include('transport.urls')),
+    path('dashboard/', dashboard_view, name='dashboard'),
     
 ]

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Match Detail | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <div class="bg-white rounded-lg shadow p-8">
+        <h1 class="text-3xl font-bold text-green-900 mb-3">
+            Sundowns vs {{ match.opponent }}
+        </h1>
+
+        <p class="text-gray-700">
+            {{ match.location }}
+        </p>
+
+        <p class="text-gray-500 mb-6">
+            {{ match.date }}
+        </p>
+
+        <a
+            href="{% url 'book_ticket_page' match.id %}"
+            class="inline-block bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700"
+        >
+            Book Ticket
+        </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-8">
+        <h2 class="text-2xl font-bold text-green-900 mb-4">
+            Available Transport
+        </h2>
+
+        {% if transports %}
+            <div class="space-y-4">
+                {% for transport in transports %}
+                    <div class="border rounded-lg p-5">
+                        <h3 class="text-xl font-bold text-green-900">
+                            {{ transport.branch.name }}
+                        </h3>
+
+                        <p class="text-gray-700">
+                            Capacity: {{ transport.capacity }}
+                        </p>
+
+                        <p class="text-gray-700">
+                            Available seats: {{ transport.available_seats }}
+                        </p>
+
+                        <a
+                            href="/transport/"
+                            class="inline-block mt-3 bg-yellow-500 text-green-900 px-4 py-2 rounded font-semibold hover:bg-yellow-400"
+                        >
+                            Book Transport
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-600">
+                No transport options available for this match yet.
+            </p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

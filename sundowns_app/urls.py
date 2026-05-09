@@ -3,8 +3,7 @@ from django.urls import path, include
 from django.http import JsonResponse
 
 from common.views import home_view, dashboard_view
-from matches.views import match_list_page
-
+from matches.views import match_list_page, match_detail_page
 
 def health_check(request):
     return JsonResponse({"status": "ok"})
@@ -19,6 +18,7 @@ urlpatterns = [
     # Frontend/template routes
     path('dashboard/', dashboard_view, name='dashboard'),
     path('matches/', match_list_page, name='match_list_page'),
+    path('matches/<int:match_id>/', match_detail_page, name='match_detail_page'),
     path('tickets/', include('ticketing.frontend_urls')),
     path('transport/', include('transport.frontend_urls')),
     path('membership/', include('membership.frontend_urls')),

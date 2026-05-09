@@ -2,6 +2,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
 
+from common.views import (
+    home_view,
+    dashboard_view,
+    admin_dashboard_view,
+)
+
 from common.views import home_view, dashboard_view
 from matches.views import match_list_page, match_detail_page
 
@@ -22,6 +28,7 @@ urlpatterns = [
     path('tickets/', include('ticketing.frontend_urls')),
     path('transport/', include('transport.frontend_urls')),
     path('membership/', include('membership.frontend_urls')),
+    path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),
 
     # API routes
     path('api/auth/', include('authentication.urls')),

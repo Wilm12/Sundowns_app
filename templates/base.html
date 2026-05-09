@@ -27,6 +27,10 @@
                     <a href="/transport/" class="hover:underline">Transport</a>
 
                     {% if request.user.role == "admin" %}
+                        <a href="/admin-dashboard/" class="hover:underline font-semibold">
+                            Admin Dashboard
+                        </a>
+
                         <a href="/tickets/verify/" class="hover:underline font-semibold">
                             Verify Tickets
                         </a>

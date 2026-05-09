@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <div class="bg-white rounded-lg shadow p-8">
+        <h1 class="text-3xl font-bold text-green-900 mb-2">
+            Admin Dashboard
+        </h1>
+
+        <p class="text-gray-700">
+            System overview and operational statistics.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">
+                Users
+            </p>
+
+            <h2 class="text-3xl font-bold text-green-900">
+                {{ total_users }}
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">
+                Active Memberships
+            </p>
+
+            <h2 class="text-3xl font-bold text-green-900">
+                {{ active_memberships }}
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">
+                Tickets
+            </p>
+
+            <h2 class="text-3xl font-bold text-green-900">
+                {{ total_tickets }}
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">
+                Verified Tickets
+            </p>
+
+            <h2 class="text-3xl font-bold text-green-900">
+                {{ verified_tickets }}
+            </h2>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <p class="text-sm text-gray-500">
+                Transport Bookings
+            </p>
+
+            <h2 class="text-3xl font-bold text-green-900">
+                {{ total_transport_bookings }}
+            </h2>
+        </div>
+
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-8">
+
+        <h2 class="text-2xl font-bold text-green-900 mb-4">
+            Admin Actions
+        </h2>
+
+        <div class="flex flex-wrap gap-4">
+
+            <a
+                href="/tickets/verify/"
+                class="bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700"
+            >
+                Verify Tickets
+            </a>
+
+            <a
+                href="/admin/"
+                class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400"
+            >
+                Django Admin
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

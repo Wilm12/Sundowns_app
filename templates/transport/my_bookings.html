@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}My Transport Bookings | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-8">
+    <h1 class="text-3xl font-bold text-green-900 mb-6">
+        My Transport Bookings
+    </h1>
+
+    {% if bookings %}
+        <div class="space-y-5">
+            {% for booking in bookings %}
+                <div class="border rounded-lg p-5">
+                    <h2 class="text-xl font-bold text-green-900">
+                        Sundowns vs {{ booking.ticket.match.opponent }}
+                    </h2>
+
+                    <p class="text-gray-700">
+                        Branch: {{ booking.transport.branch.name }}
+                    </p>
+
+                    <p class="text-gray-700">
+                        Ticket: #{{ booking.ticket.id }}
+                    </p>
+
+                    <p class="text-gray-700">
+                        Status: {{ booking.status }}
+                    </p>
+
+                    <p class="text-gray-500">
+                        QR: {{ booking.ticket.qr_code }}
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-600">
+            You do not have any transport bookings yet.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

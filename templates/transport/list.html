@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Transport | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-8">
+    <h1 class="text-3xl font-bold text-green-900 mb-6">
+        Transport Options
+    </h1>
+
+    {% if transports %}
+        <div class="space-y-5">
+            {% for transport in transports %}
+                <div class="border rounded-lg p-5">
+                    <h2 class="text-xl font-bold text-green-900">
+                        {{ transport.branch.name }} Transport
+                    </h2>
+
+                    <p class="text-gray-700">
+                        Match: Sundowns vs {{ transport.match.opponent }}
+                    </p>
+
+                    <p class="text-gray-700">
+                        Capacity: {{ transport.capacity }}
+                    </p>
+
+                    <p class="text-gray-700 mb-4">
+                        Available seats: {{ transport.available_seats }}
+                    </p>
+
+                    {% for ticket in tickets %}
+                        {% if ticket.match_id == transport.match_id %}
+                            <a
+                                href="{% url 'book_transport_page' transport.id ticket.id %}"
+                                class="inline-block bg-yellow-500 text-green-900 px-5 py-2 rounded font-semibold hover:bg-yellow-400"
+                            >
+                                Book with Ticket #{{ ticket.id }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-600">
+            No active transport options available.
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -101,3 +101,30 @@ def book_ticket_page(request, match_id):
 
     messages.success(request, "Ticket booked successfully.")
     return redirect("match_list_page")
+
+@login_required
+def verify_ticket_page(request):
+    if request.user.role != "admin":
+        messages.error(request, "Only admins can verify tickets.")
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        qr_code = request.POST.get("qr_code")
+
+        ticket = Ticket.objects.filter(qr_code=qr_code).first()
+
+        if not ticket:
+            messages.error(request, "Invalid ticket QR code.")
+            return redirect("verify_ticket_page")
+
+        if ticket.status != "booked":
+            messages.error(request, f"Ticket cannot be verified because it is {ticket.status}.")
+            return redirect("verify_ticket_page")
+
+        ticket.status = "used"
+        ticket.save()
+
+        messages.success(request, "Ticket verified successfully.")
+        return redirect("verify_ticket_page")
+
+    return render(request, "ticketing/verify_ticket.html")

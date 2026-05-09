@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Membership | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow p-8">
+
+    <h1 class="text-3xl font-bold text-green-900 mb-6">
+        My Membership
+    </h1>
+
+    {% if membership %}
+
+        <div class="space-y-4">
+
+            <div>
+                <p class="text-sm text-gray-500">
+                    Tier
+                </p>
+
+                <p class="text-xl font-bold text-green-900">
+                    {{ membership.tier|title }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">
+                    Status
+                </p>
+
+                <span class="px-4 py-2 rounded bg-yellow-500 text-green-900 font-semibold">
+                    {{ membership.status|title }}
+                </span>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">
+                    Start Date
+                </p>
+
+                <p>
+                    {{ membership.start_date }}
+                </p>
+            </div>
+
+            <div>
+                <p class="text-sm text-gray-500">
+                    Expiry Date
+                </p>
+
+                <p>
+                    {{ membership.expiry_date }}
+                </p>
+            </div>
+
+        </div>
+
+    {% else %}
+
+        <p class="text-gray-600">
+            You do not have an active membership.
+        </p>
+
+    {% endif %}
+
+</div>
+{% endblock %}

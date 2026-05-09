@@ -21,6 +21,7 @@ urlpatterns = [
     path('matches/', match_list_page, name='match_list_page'),
     path('tickets/', include('ticketing.frontend_urls')),
     path('transport/', include('transport.frontend_urls')),
+    path('membership/', include('membership.frontend_urls')),
 
     # API routes
     path('api/auth/', include('authentication.urls')),

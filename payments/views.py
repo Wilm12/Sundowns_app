@@ -65,7 +65,7 @@ def create_membership_payment_page(request):
         user=request.user,
         membership=membership,
         amount=membership.expected_price(),
-        status="success",
+        status="successful",
     )
 
     messages.success(request, "Payment successful. Membership activated.")

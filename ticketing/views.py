@@ -82,7 +82,7 @@ def book_ticket_page(request, match_id):
 
     if not has_active_membership:
         messages.error(request, "You need an active membership to book a ticket.")
-        return redirect("match_list_page")
+        return redirect("/matches/")
 
     existing_ticket = Ticket.objects.filter(
         user=request.user,
@@ -91,7 +91,7 @@ def book_ticket_page(request, match_id):
 
     if existing_ticket:
         messages.error(request, "You already have a ticket for this match.")
-        return redirect("match_list_page")
+        return redirect("/matches/")
 
     Ticket.objects.create(
         user=request.user,
@@ -100,7 +100,7 @@ def book_ticket_page(request, match_id):
     )
 
     messages.success(request, "Ticket booked successfully.")
-    return redirect("match_list_page")
+    return redirect("/matches/")
 
 @login_required
 def verify_ticket_page(request):

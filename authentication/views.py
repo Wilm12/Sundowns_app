@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from branches.models import Branch
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
@@ -69,16 +70,25 @@ def logout_page(request):
     return redirect("home")
 
 def register_page(request):
+    branches = Branch.objects.all().order_by("name")
+
     if request.method == "POST":
         serializer = RegisterSerializer(data=request.POST)
 
         if serializer.is_valid():
             serializer.save()
-            messages.success(request, "Account created successfully. You can now log in.")
+
+            messages.success(
+                request,
+                "Account created successfully. You can now log in."
+            )
+
             return redirect("login_page")
 
         for field, errors in serializer.errors.items():
             for error in errors:
                 messages.error(request, f"{field}: {error}")
 
-    return render(request, "authentication/register.html")
+    return render(request, "authentication/register.html", {
+        "branches": branches,
+    })

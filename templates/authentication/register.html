@@ -4,19 +4,66 @@
 
 {% block content %}
 <div class="max-w-md mx-auto bg-white rounded-lg shadow p-8">
-    <h1 class="text-2xl font-bold text-green-900 mb-6">Register</h1>
+
+    <h1 class="text-2xl font-bold text-green-900 mb-6">
+        Register
+    </h1>
 
     <form method="POST" class="space-y-4">
         {% csrf_token %}
 
-        <input name="username" placeholder="Username" class="w-full border rounded px-4 py-2" required>
-        <input name="email" type="email" placeholder="Email" class="w-full border rounded px-4 py-2" required>
-        <input name="password" type="password" placeholder="Password" class="w-full border rounded px-4 py-2" required>
-        <input name="password_confirm" type="password" placeholder="Confirm password" class="w-full border rounded px-4 py-2" required>
+        <input
+            name="username"
+            placeholder="Username"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
 
-        <button class="w-full bg-green-800 text-white py-3 rounded font-semibold hover:bg-green-700">
+        <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <select
+            name="branch"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+            <option value="">Select your branch</option>
+
+            {% for branch in branches %}
+                <option value="{{ branch.id }}">
+                    {{ branch.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <input
+            name="password_confirm"
+            type="password"
+            placeholder="Confirm password"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <button
+            type="submit"
+            class="w-full bg-green-800 text-white py-3 rounded font-semibold hover:bg-green-700"
+        >
             Register
         </button>
     </form>
+
 </div>
 {% endblock %}

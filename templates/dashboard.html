@@ -13,6 +13,22 @@
         <p class="text-gray-700">
             Here is your Sundowns WPA membership overview.
         </p>
+
+        {% if request.user.branch %}
+            <p class="text-gray-600 mt-3">
+                Branch:
+                <span class="font-semibold text-green-900">
+                    {{ request.user.branch.name }}
+                </span>
+            </p>
+        {% else %}
+            <p class="text-gray-600 mt-3">
+                Branch:
+                <span class="font-semibold text-red-600">
+                    Not assigned
+                </span>
+            </p>
+        {% endif %}
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -79,17 +95,22 @@
         </h2>
 
         <div class="flex flex-wrap gap-4">
-            <a href="/matches/" class="bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700">
+
+            <a href="/matches/"
+               class="bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700">
                 Book Ticket
             </a>
 
-            <a href="/transport/" class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400">
+            <a href="/transport/"
+               class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400">
                 Book Transport
             </a>
 
-            <a href="/tickets/my-tickets/" class="bg-gray-900 text-white px-5 py-3 rounded font-semibold hover:bg-gray-800">
+            <a href="/tickets/my-tickets/"
+               class="bg-gray-900 text-white px-5 py-3 rounded font-semibold hover:bg-gray-800">
                 View QR Tickets
             </a>
+
         </div>
     </div>
 

@@ -29,6 +29,7 @@ urlpatterns = [
     path('payments/', include('payments.frontend_urls')),
     path('transport/', include('transport.frontend_urls')),
     path('membership/', include('membership.frontend_urls')),
+    path('branches/', include('branches.frontend_urls')),
     path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),
 
     # API routes

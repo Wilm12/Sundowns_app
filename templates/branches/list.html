@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Branches | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-8">
+
+    <h1 class="text-3xl font-bold text-green-900 mb-6">
+        Branches
+    </h1>
+
+    {% if branches %}
+        <div class="space-y-4">
+
+            {% for branch in branches %}
+                <a
+                    href="{% url 'branch_detail_page' branch.id %}"
+                    class="block border rounded-lg p-5 hover:bg-gray-50"
+                >
+                    <h2 class="text-xl font-bold text-green-900">
+                        {{ branch.name }}
+                    </h2>
+
+                    <p class="text-gray-600">
+                        {{ branch.location }}
+                    </p>
+                </a>
+            {% endfor %}
+
+        </div>
+    {% else %}
+        <p class="text-gray-600">
+            No branches available.
+        </p>
+    {% endif %}
+
+</div>
+{% endblock %}

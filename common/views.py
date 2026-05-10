@@ -1,6 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from branches.models import Branch
 from django.contrib import messages
+from django.utils import timezone
+from datetime import timedelta
 
 from users.models import User
 from membership.models import Membership
@@ -65,4 +68,51 @@ def admin_dashboard_view(request):
         "total_tickets": total_tickets,
         "verified_tickets": verified_tickets,
         "total_transport_bookings": total_transport_bookings,
+    })
+
+
+@login_required
+def user_settings_view(request):
+    branches = Branch.objects.all().order_by("name")
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        email = request.POST.get("email")
+        new_branch_id = request.POST.get("branch")
+
+        request.user.username = username
+        request.user.email = email
+
+        current_branch_id = request.user.branch_id
+
+        if new_branch_id and str(current_branch_id) != str(new_branch_id):
+            today = timezone.now().date()
+
+            if not request.user.branch_change_window_start:
+                request.user.branch_change_window_start = today
+                request.user.branch_change_count = 0
+
+            window_end = request.user.branch_change_window_start + timedelta(days=365)
+
+            if today > window_end:
+                request.user.branch_change_window_start = today
+                request.user.branch_change_count = 0
+
+            if request.user.branch_change_count >= 2:
+                messages.error(
+                    request,
+                    "You can only change your branch twice within a 12-month period."
+                )
+                return redirect("user_settings")
+
+            request.user.branch_id = new_branch_id
+            request.user.branch_change_count += 1
+
+        request.user.save()
+
+        messages.success(request, "Settings updated successfully.")
+        return redirect("user_settings")
+
+    return render(request, "settings.html", {
+        "branches": branches,
     })

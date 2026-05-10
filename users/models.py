@@ -10,6 +10,8 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='member')
+    branch_change_count = models.PositiveIntegerField(default=0)
+    branch_change_window_start = models.DateField(null=True, blank=True)
     branch = models.ForeignKey(
         'branches.Branch',
         on_delete=models.SET_NULL,

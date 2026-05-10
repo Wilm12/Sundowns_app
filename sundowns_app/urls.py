@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
+from common.views import user_settings_view
 from django.http import JsonResponse
+from matches.views import match_list_page, match_detail_page
 
 from common.views import (
     home_view,
@@ -23,13 +25,13 @@ urlpatterns = [
 
     # Frontend/template routes
     path('dashboard/', dashboard_view, name='dashboard'),
-    path('matches/', match_list_page, name='match_list_page'),
-    path('matches/<int:match_id>/', match_detail_page, name='match_detail_page'),
+    path('matches/', include('matches.frontend_urls')),
     path('tickets/', include('ticketing.frontend_urls')),
     path('payments/', include('payments.frontend_urls')),
     path('transport/', include('transport.frontend_urls')),
     path('membership/', include('membership.frontend_urls')),
     path('branches/', include('branches.frontend_urls')),
+    path("settings/", user_settings_view, name="user_settings"),
     path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),
 
     # API routes

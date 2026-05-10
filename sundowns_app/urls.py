@@ -26,6 +26,7 @@ urlpatterns = [
     path('matches/', match_list_page, name='match_list_page'),
     path('matches/<int:match_id>/', match_detail_page, name='match_detail_page'),
     path('tickets/', include('ticketing.frontend_urls')),
+    path('payments/', include('payments.frontend_urls')),
     path('transport/', include('transport.frontend_urls')),
     path('membership/', include('membership.frontend_urls')),
     path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),

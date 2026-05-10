@@ -8,6 +8,8 @@ from common.views import (
     home_view,
     dashboard_view,
     admin_dashboard_view,
+    user_settings_view,
+    change_password_view,
 )
 
 from common.views import home_view, dashboard_view
@@ -32,6 +34,7 @@ urlpatterns = [
     path('membership/', include('membership.frontend_urls')),
     path('branches/', include('branches.frontend_urls')),
     path("settings/", user_settings_view, name="user_settings"),
+    path("settings/change-password/", change_password_view, name="change_password"),
     path('admin-dashboard/', admin_dashboard_view, name='admin_dashboard'),
 
     # API routes

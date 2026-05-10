@@ -4,6 +4,8 @@ from branches.models import Branch
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 
 from users.models import User
 from membership.models import Membership
@@ -116,3 +118,22 @@ def user_settings_view(request):
     return render(request, "settings.html", {
         "branches": branches,
     })
+
+
+@login_required
+def change_password_view(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+
+            messages.success(request, "Password changed successfully.")
+            return redirect("user_settings")
+
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(request, error)
+
+    return redirect("user_settings")

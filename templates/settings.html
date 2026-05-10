@@ -3,6 +3,48 @@
 {% block title %}Settings | Sundowns WPA{% endblock %}
 
 {% block content %}
+
+<div class="mt-8 border-t pt-6">
+    <h2 class="text-2xl font-bold text-green-900 mb-4">
+        Change Password
+    </h2>
+
+    <form method="POST" action="{% url 'change_password' %}" class="space-y-4">
+        {% csrf_token %}
+
+        <input
+            type="password"
+            name="old_password"
+            placeholder="Current password"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <input
+            type="password"
+            name="new_password1"
+            placeholder="New password"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <input
+            type="password"
+            name="new_password2"
+            placeholder="Confirm new password"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <button
+            type="submit"
+            class="w-full bg-gray-900 text-white py-3 rounded font-semibold hover:bg-gray-800"
+        >
+            Change Password
+        </button>
+    </form>
+</div>
+
 <div class="max-w-xl mx-auto bg-white rounded-lg shadow p-8">
 
     <h1 class="text-3xl font-bold text-green-900 mb-6">
@@ -62,3 +104,44 @@
 
 </div>
 {% endblock %}
+
+<div class="mt-8 border-t pt-6">
+    <h2 class="text-2xl font-bold text-green-900 mb-4">
+        Change Password
+    </h2>
+
+    <form method="POST" action="{% url 'change_password' %}" class="space-y-4">
+        {% csrf_token %}
+
+        <input
+            type="password"
+            name="old_password"
+            placeholder="Current password"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <input
+            type="password"
+            name="new_password1"
+            placeholder="New password"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <input
+            type="password"
+            name="new_password2"
+            placeholder="Confirm new password"
+            class="w-full border rounded px-4 py-2"
+            required
+        >
+
+        <button
+            type="submit"
+            class="w-full bg-gray-900 text-white py-3 rounded font-semibold hover:bg-gray-800"
+        >
+            Change Password
+        </button>
+    </form>
+</div>

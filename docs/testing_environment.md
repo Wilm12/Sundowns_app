@@ -70,3 +70,15 @@ Registration requires a branch. Any registration test must create a Branch objec
 ## Login test
 
 The login test verifies that a registered user can authenticate and receive JWT access and refresh tokens.
+
+## Ticket booking membership rule
+
+Ticket booking requires an active membership. Tests must verify that users with inactive memberships cannot successfully create tickets.
+
+## Ticket booking flow
+
+1. User must have an active membership.
+2. Ticket is created after successful booking.
+3. User is redirected to a transport prompt page.
+4. Choosing "Yes" redirects to transport options for the selected match.
+5. Choosing "No" redirects to the user's tickets page.

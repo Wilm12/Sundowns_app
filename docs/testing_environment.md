@@ -61,3 +61,8 @@ docker compose up -d
 - **Database Connection Errors**: Verify `HOST = "db"` in test settings (not `localhost`)
 - **Missing Python Modules**: Install via pip and add to `requirements.txt`
 - **Security Warnings**: Use secret keys with sufficient length (32+ characters)
+
+
+## Authentication registration test
+
+The first business-flow test verifies that a new user can register successfully through the API and is created with the default member role.

@@ -63,6 +63,10 @@ docker compose up -d
 - **Security Warnings**: Use secret keys with sufficient length (32+ characters)
 
 
-## Authentication registration test
+## Registration test rule
 
-The first business-flow test verifies that a new user can register successfully through the API and is created with the default member role.
+Registration requires a branch. Any registration test must create a Branch object, include the branch ID in the payload, and assert that the created user belongs to that branch.
+
+## Login test
+
+The login test verifies that a registered user can authenticate and receive JWT access and refresh tokens.

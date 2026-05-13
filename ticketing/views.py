@@ -93,14 +93,26 @@ def book_ticket_page(request, match_id):
         messages.error(request, "You already have a ticket for this match.")
         return redirect("/matches/")
 
-    Ticket.objects.create(
-        user=request.user,
-        match=match,
-        status="booked"
+    ticket = Ticket.objects.create(
+    user=request.user,
+    match=match,
+    status="booked"
     )
 
     messages.success(request, "Ticket booked successfully.")
-    return redirect("/matches/")
+    return redirect("transport_prompt_page", ticket_id=ticket.id)
+
+@login_required
+def transport_prompt_page(request, ticket_id):
+    ticket = get_object_or_404(
+        Ticket,
+        id=ticket_id,
+        user=request.user
+    )
+
+    return render(request, "ticketing/transport_prompt.html", {
+        "ticket": ticket,
+    })
 
 @login_required
 def verify_ticket_page(request):

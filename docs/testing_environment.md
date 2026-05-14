@@ -101,3 +101,13 @@ Test coverage verifies:
 - Verified tickets are updated to `"used"`.
 - Verification endpoint returns HTTP 200 on success.
 - Non-admin users are blocked from verification
+
+## Duplicate Ticket Booking
+
+A user cannot book more than one ticket for the same match.
+
+Test coverage verifies:
+
+- First ticket exists for the user and match.
+- Second booking attempt is blocked.
+- Ticket count remains `1`.

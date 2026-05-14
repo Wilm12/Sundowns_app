@@ -35,7 +35,7 @@ SECRET_KEY = "test-secret-key-for-sundowns-project-at-least-32-chars"
 
 Upon successful configuration:
 ```
-Ran 3 tests in 0.087s
+Test suite should complete successfully with all tests passing.
 
 OK
 ```
@@ -82,3 +82,20 @@ Ticket booking requires an active membership. Tests must verify that users with 
 3. User is redirected to a transport prompt page.
 4. Choosing "Yes" redirects to transport options for the selected match.
 5. Choosing "No" redirects to the user's tickets page.
+
+## QR Ticket Verification
+
+QR ticket verification is restricted to admin users.
+
+Verification flow:
+
+1. Member books a ticket.
+2. Ticket is created with status `"booked"`.
+3. Admin submits the QR code to the verification endpoint.
+4. Ticket status changes from `"booked"` to `"used"`.
+
+Test coverage verifies:
+
+- Admin users can verify valid QR codes.
+- Verified tickets are updated to `"used"`.
+- Verification endpoint returns HTTP 200 on success.

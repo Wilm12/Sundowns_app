@@ -94,8 +94,10 @@ Verification flow:
 3. Admin submits the QR code to the verification endpoint.
 4. Ticket status changes from `"booked"` to `"used"`.
 
+
 Test coverage verifies:
 
 - Admin users can verify valid QR codes.
 - Verified tickets are updated to `"used"`.
 - Verification endpoint returns HTTP 200 on success.
+- Non-admin users are blocked from verification

@@ -2,6 +2,7 @@ from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404, render
@@ -11,8 +12,8 @@ from membership.models import Membership
 from .models import Ticket
 
 from authentication.permissions import IsAdminRole
-from .models import Ticket
 from .serializers import TicketSerializer, TicketVerifySerializer
+
 
 @login_required
 def my_tickets_page(request):
@@ -25,6 +26,8 @@ def my_tickets_page(request):
         "ticketing/my_tickets.html",
         {"tickets": tickets}
     )
+
+
 class TicketVerifyView(APIView):
     permission_classes = [IsAdminRole]
 
@@ -32,14 +35,14 @@ class TicketVerifyView(APIView):
         serializer = TicketVerifySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        ticket = serializer.validated_data['ticket']
-        ticket.status = 'used'
+        ticket = serializer.validated_data["ticket"]
+        ticket.status = "used"
         ticket.save()
 
         return Response(
             {
-                'message': 'Ticket verified successfully.',
-                'ticket': TicketSerializer(ticket).data,
+                "message": "Ticket verified successfully.",
+                "ticket": TicketSerializer(ticket).data,
             },
             status=status.HTTP_200_OK
         )
@@ -50,7 +53,9 @@ class TicketListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Ticket.objects.filter(user=self.request.user).order_by('-created_at')
+        return Ticket.objects.filter(
+            user=self.request.user
+        ).order_by("-created_at")
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -69,7 +74,10 @@ class MyTicketsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Ticket.objects.filter(user=self.request.user).order_by('-created_at')
+        return Ticket.objects.filter(
+            user=self.request.user
+        ).order_by("-created_at")
+
 
 @login_required
 def book_ticket_page(request, match_id):
@@ -94,14 +102,24 @@ def book_ticket_page(request, match_id):
         return redirect("/matches/")
 
     ticket = Ticket.objects.create(
+<<<<<<< HEAD
     user=request.user,
     match=match,
     status="booked"
+=======
+        user=request.user,
+        match=match,
+        status="booked",
+>>>>>>> feature/testing-environment
     )
 
     messages.success(request, "Ticket booked successfully.")
     return redirect("transport_prompt_page", ticket_id=ticket.id)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> feature/testing-environment
 @login_required
 def transport_prompt_page(request, ticket_id):
     ticket = get_object_or_404(
@@ -110,9 +128,27 @@ def transport_prompt_page(request, ticket_id):
         user=request.user
     )
 
+<<<<<<< HEAD
     return render(request, "ticketing/transport_prompt.html", {
         "ticket": ticket,
     })
+=======
+    if request.method == "POST":
+        choice = request.POST.get("transport_choice")
+
+        if choice == "no":
+            return redirect("my_tickets_page")
+
+        if choice == "yes":
+            return redirect("/transport/")
+
+    return render(
+        request,
+        "ticketing/transport_prompt.html",
+        {"ticket": ticket}
+    )
+
+>>>>>>> feature/testing-environment
 
 @login_required
 def verify_ticket_page(request):
@@ -130,7 +166,10 @@ def verify_ticket_page(request):
             return redirect("verify_ticket_page")
 
         if ticket.status != "booked":
-            messages.error(request, f"Ticket cannot be verified because it is {ticket.status}.")
+            messages.error(
+                request,
+                f"Ticket cannot be verified because it is {ticket.status}."
+            )
             return redirect("verify_ticket_page")
 
         ticket.status = "used"

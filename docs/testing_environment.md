@@ -121,3 +121,13 @@ Test coverage verifies:
 - A transport option with full capacity blocks additional bookings.
 - No extra TransportBooking is created.
 - Available seats remains `0`.
+
+## Transport Match Consistency
+
+Transport bookings must belong to the same match as the ticket.
+
+Test coverage verifies:
+
+- Tickets cannot book transport assigned to a different match.
+- Invalid transport bookings are blocked.
+- No TransportBooking record is created for mismatched matches.

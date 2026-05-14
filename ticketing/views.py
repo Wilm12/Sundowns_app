@@ -102,24 +102,15 @@ def book_ticket_page(request, match_id):
         return redirect("/matches/")
 
     ticket = Ticket.objects.create(
-<<<<<<< HEAD
-    user=request.user,
-    match=match,
-    status="booked"
-=======
         user=request.user,
         match=match,
         status="booked",
->>>>>>> feature/testing-environment
     )
 
     messages.success(request, "Ticket booked successfully.")
     return redirect("transport_prompt_page", ticket_id=ticket.id)
 
-<<<<<<< HEAD
-=======
 
->>>>>>> feature/testing-environment
 @login_required
 def transport_prompt_page(request, ticket_id):
     ticket = get_object_or_404(
@@ -128,19 +119,14 @@ def transport_prompt_page(request, ticket_id):
         user=request.user
     )
 
-<<<<<<< HEAD
-    return render(request, "ticketing/transport_prompt.html", {
-        "ticket": ticket,
-    })
-=======
     if request.method == "POST":
         choice = request.POST.get("transport_choice")
 
-        if choice == "no":
-            return redirect("my_tickets_page")
-
         if choice == "yes":
             return redirect("/transport/")
+
+        if choice == "no":
+            return redirect("my_tickets_page")
 
     return render(
         request,
@@ -148,7 +134,6 @@ def transport_prompt_page(request, ticket_id):
         {"ticket": ticket}
     )
 
->>>>>>> feature/testing-environment
 
 @login_required
 def verify_ticket_page(request):

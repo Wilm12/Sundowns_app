@@ -11,8 +11,8 @@ from membership.models import Membership
 from .models import Ticket
 
 from authentication.permissions import IsAdminRole
-from .models import Ticket
 from .serializers import TicketSerializer, TicketVerifySerializer
+
 
 @login_required
 def my_tickets_page(request):
@@ -25,6 +25,8 @@ def my_tickets_page(request):
         "ticketing/my_tickets.html",
         {"tickets": tickets}
     )
+
+
 class TicketVerifyView(APIView):
     permission_classes = [IsAdminRole]
 
@@ -71,6 +73,7 @@ class MyTicketsView(generics.ListAPIView):
     def get_queryset(self):
         return Ticket.objects.filter(user=self.request.user).order_by('-created_at')
 
+
 @login_required
 def book_ticket_page(request, match_id):
     match = get_object_or_404(Match, id=match_id)
@@ -93,14 +96,27 @@ def book_ticket_page(request, match_id):
         messages.error(request, "You already have a ticket for this match.")
         return redirect("/matches/")
 
-    Ticket.objects.create(
+    ticket = Ticket.objects.create(
         user=request.user,
         match=match,
-        status="booked"
+        status="booked",
     )
 
     messages.success(request, "Ticket booked successfully.")
-    return redirect("/matches/")
+    return redirect(f"/tickets/{ticket.id}/transport-prompt/")
+
+@login_required
+def transport_prompt_page(request, ticket_id):
+    ticket = get_object_or_404(
+        Ticket,
+        id=ticket_id,
+        user=request.user
+    )
+
+    return render(request, "ticketing/transport_prompt.html", {
+        "ticket": ticket,
+    })
+
 
 @login_required
 def verify_ticket_page(request):

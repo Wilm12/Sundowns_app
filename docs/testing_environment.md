@@ -111,3 +111,13 @@ Test coverage verifies:
 - First ticket exists for the user and match.
 - Second booking attempt is blocked.
 - Ticket count remains `1`.
+
+## Transport Capacity Rule
+
+Transport bookings cannot exceed available seats.
+
+Test coverage verifies:
+
+- A transport option with full capacity blocks additional bookings.
+- No extra TransportBooking is created.
+- Available seats remains `0`.

@@ -48,13 +48,43 @@ Primary goals:
 
 ## Development Characteristics
 
-| Feature       | Development Environment  |
-| ------------- | ------------------------ |
-| DEBUG         | True                     |
-| Server        | Django runserver         |
-| Database      | Development database     |
-| Testing style | Manual + browser testing |
-| Purpose       | Feature building         |
+| Feature        | Development Environment   |
+| -------------- | ------------------------- |
+| DEBUG          | True                      |
+| Server         | Django development server |
+| Database       | PostgreSQL container      |
+| Infrastructure | Docker Compose            |
+| Testing style  | Manual + browser testing  |
+| Purpose        | Feature building          |
+
+---
+
+## Development Environment
+
+The development environment runs inside Docker Compose for consistency.
+
+It uses:
+
+* Django development server
+* `sundowns_app.settings.dev`
+* `.env.dev`
+* PostgreSQL container
+* Redis container
+* Celery container
+* `DEBUG=True`
+* manual browser testing
+
+Typical command:
+
+```bash
+docker compose up -d
+```
+
+Then access:
+
+```text
+http://127.0.0.1:8000/
+```
 
 ---
 
@@ -165,6 +195,17 @@ Primary goals:
 | Testing style | Automated                 |
 | Execution     | Docker-based              |
 | Purpose       | Workflow validation       |
+
+---
+
+## Testing Environment
+
+The testing environment also runs inside Docker Compose, but uses:
+
+* `sundowns_app.settings.test`
+* temporary test database
+* automated Django/DRF tests
+* isolated test data
 
 ---
 

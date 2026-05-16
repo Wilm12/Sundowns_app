@@ -89,8 +89,11 @@ def book_ticket_page(request, match_id):
     ).exists()
 
     if not has_active_membership:
-        messages.error(request, "You need an active membership to book a ticket.")
-        return redirect("/matches/")
+        messages.error(
+            request,
+            "You need an active membership to book tickets. Please complete payment to activate your membership."
+        )
+        return redirect("/payments/")
 
     existing_ticket = Ticket.objects.filter(
         user=request.user,

@@ -432,6 +432,53 @@ docker compose down
 
 ---
 
+## Development Runtime Evolution
+
+Earlier in the project, the development setup was hybrid:
+
+```text
+Docker Compose
+→ PostgreSQL/Redis containers
+
+Local Windows runtime
+→ python manage.py runserver
+
+In that setup, Django ran directly on the local machine while the database ran inside Docker.
+
+That is why the database host was sometimes:
+
+DB_HOST=localhost
+
+because local Django reached the PostgreSQL container through the exposed host port.
+
+Later, the project moved to a fully containerized development runtime:
+
+Docker Compose
+→ web container
+→ PostgreSQL container
+→ Redis container
+→ Celery container
+
+In that setup, Django runs inside the web container and communicates with PostgreSQL through Docker's internal network.
+
+That is why the database host becomes:
+
+DB_HOST=db
+
+because the web container talks to the db container using the Docker Compose service name.
+
+Current preferred development flow:
+
+docker compose up -d
+
+This starts the full stack, including the Django application container.
+
+Manual local execution with:
+
+python manage.py runserver
+
+is no longer required for the normal Docker-based development workflow.
+
 # Current Automated Test Coverage
 
 Implemented automated tests currently validate:

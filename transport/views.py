@@ -2,12 +2,18 @@ from rest_framework import generics, permissions
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 
 from ticketing.models import Ticket
-from .models import Transport, TransportBooking
 
 from authentication.permissions import IsAdminRole, IsAdminOrReadOnly
-from .models import Transport, TransportBooking, TransportSettlement
+
+from .models import (
+    Transport,
+    TransportBooking,
+    TransportSettlement,
+)
+
 from .serializers import (
     TransportSerializer,
     TransportBookingSerializer,
@@ -131,3 +137,36 @@ def my_transport_bookings_page(request):
     return render(request, 'transport/my_bookings.html', {
         'bookings': bookings,
     })
+
+@login_required
+def verify_transport_booking_page(request):
+    if request.user.role != "admin":
+        messages.error(request, "Only admins can verify transport boarding.")
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        qr_code = request.POST.get("qr_code")
+
+        ticket = Ticket.objects.filter(qr_code=qr_code).first()
+
+        if not ticket:
+            messages.error(request, "Invalid ticket QR code.")
+            return redirect("verify_transport_booking_page")
+
+        booking = TransportBooking.objects.filter(
+            ticket=ticket,
+            status="booked"
+        ).first()
+
+        if not booking:
+            messages.error(request, "No active transport booking found for this ticket.")
+            return redirect("verify_transport_booking_page")
+
+        booking.status = "boarded"
+        booking.verified_at = timezone.now()
+        booking.save()
+
+        messages.success(request, "Transport boarding verified successfully.")
+        return redirect("verify_transport_booking_page")
+
+    return render(request, "transport/verify_transport.html")

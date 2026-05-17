@@ -1,3 +1,5 @@
+"""Transport views for managing transport options, bookings, and settlements."""
+
 from rest_framework import generics, permissions
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -22,18 +24,21 @@ from .serializers import (
 
 
 class TransportListCreateView(generics.ListCreateAPIView):
+    """API endpoint for listing and creating transport options."""
     queryset = Transport.objects.all().order_by('-created_at')
     serializer_class = TransportSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 
 class TransportDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """API endpoint for retrieving, updating, and deleting transports."""
     queryset = Transport.objects.all()
     serializer_class = TransportSerializer
     permission_classes = [IsAdminOrReadOnly]
 
 
 class TransportBookingListCreateView(generics.ListCreateAPIView):
+    """API endpoint for listing and creating bookings for the current user."""
     serializer_class = TransportBookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -44,6 +49,7 @@ class TransportBookingListCreateView(generics.ListCreateAPIView):
 
 
 class TransportBookingDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """API endpoint for retrieving, updating, and deleting transport bookings."""
     serializer_class = TransportBookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -54,6 +60,7 @@ class TransportBookingDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class MyTransportBookingsView(generics.ListAPIView):
+    """API endpoint listing transport bookings for the authenticated user."""
     serializer_class = TransportBookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -64,18 +71,21 @@ class MyTransportBookingsView(generics.ListAPIView):
 
 
 class TransportSettlementListCreateView(generics.ListCreateAPIView):
+    """Admin API endpoint for transport settlement records."""
     queryset = TransportSettlement.objects.all().order_by('-created_at')
     serializer_class = TransportSettlementSerializer
     permission_classes = [IsAdminRole]
 
 
 class TransportSettlementDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Admin API endpoint for transport settlement detail operations."""
     queryset = TransportSettlement.objects.all()
     serializer_class = TransportSettlementSerializer
     permission_classes = [IsAdminRole]
 
 @login_required
 def transport_list_page(request):
+    """Render available transport options for the authenticated user."""
     tickets = Ticket.objects.filter(
         user=request.user,
         status='booked'
@@ -93,6 +103,7 @@ def transport_list_page(request):
 
 @login_required
 def book_transport_page(request, transport_id, ticket_id):
+    """Book transport only for a valid booked ticket and matching match."""
     transport = get_object_or_404(Transport, id=transport_id)
     ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
 
@@ -130,6 +141,7 @@ def book_transport_page(request, transport_id, ticket_id):
 
 @login_required
 def my_transport_bookings_page(request):
+    """Render the current user's transport bookings page."""
     bookings = TransportBooking.objects.filter(
         ticket__user=request.user
     ).select_related('ticket', 'ticket__match', 'transport', 'transport__branch')
@@ -140,6 +152,7 @@ def my_transport_bookings_page(request):
 
 @login_required
 def verify_transport_booking_page(request):
+    """Render and process admin transport boarding verification."""
     if request.user.role != "admin":
         messages.error(request, "Only admins can verify transport boarding.")
         return redirect("dashboard")

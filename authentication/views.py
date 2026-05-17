@@ -1,3 +1,9 @@
+"""Views for authentication workflows and user token management.
+
+This module contains class-based and function-based views for registration,
+login, session management, and role-restricted access checks.
+"""
+
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,11 +17,19 @@ from .serializers import RegisterSerializer, MeSerializer, EmailTokenObtainPairS
 
 
 class RegisterView(generics.CreateAPIView):
+    """API view for creating new user accounts.
+
+    Allows unauthenticated access for account creation while enforcing serializer
+    validation for passwords, email uniqueness, and branch assignment.
+    """
+
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
 
 class LoginView(APIView):
+    """API view for issuing JWT tokens after user authentication."""
+
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -25,6 +39,8 @@ class LoginView(APIView):
 
 
 class MeView(APIView):
+    """API view returning the authenticated user's profile data."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -33,6 +49,8 @@ class MeView(APIView):
 
 
 class AdminOnlyView(APIView):
+    """API view accessible only to admin users."""
+
     permission_classes = [IsAdminRole]
 
     def get(self, request):
@@ -40,12 +58,16 @@ class AdminOnlyView(APIView):
 
 
 class MemberOnlyView(APIView):
+    """API view accessible only to member users."""
+
     permission_classes = [IsMemberRole]
 
     def get(self, request):
         return Response({"message": "Welcome, member."})
 
+
 def login_page(request):
+    """Render and process the authentication login page."""
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
@@ -66,10 +88,15 @@ def login_page(request):
 
 
 def logout_page(request):
+    """Log out the current user and redirect to the home page."""
+
     logout(request)
     return redirect("home")
 
+
 def register_page(request):
+    """Render and process the user registration page."""
+
     branches = Branch.objects.all().order_by("name")
 
     if request.method == "POST":

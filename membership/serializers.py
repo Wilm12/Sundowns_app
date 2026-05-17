@@ -1,8 +1,11 @@
+"""Serializer for membership details and computed membership pricing."""
+
 from rest_framework import serializers
 from .models import Membership
 
 
 class MembershipSerializer(serializers.ModelSerializer):
+    """Serializer exposing membership and related user data."""
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     expected_price = serializers.SerializerMethodField()
@@ -30,4 +33,6 @@ class MembershipSerializer(serializers.ModelSerializer):
         ]
 
     def get_expected_price(self, obj):
+        """Return the computed price for the membership tier."""
+
         return obj.expected_price()

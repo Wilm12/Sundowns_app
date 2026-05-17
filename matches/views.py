@@ -1,3 +1,5 @@
+"""Match views and API viewsets for match data and transport association."""
+
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
@@ -15,6 +17,7 @@ from transport.models import Transport
 
 @login_required
 def match_detail_page(request, match_id):
+    """Render match detail pages including related transport options."""
     match = get_object_or_404(Match, id=match_id)
 
     transports = Transport.objects.filter(
@@ -29,10 +32,14 @@ def match_detail_page(request, match_id):
 
 @login_required
 def match_list_page(request):
-     matches = Match.objects.all().order_by("date")
-     return render(request, "matches/list.html", {"matches": matches})
+    """Render a list of upcoming matches."""
+
+    matches = Match.objects.all().order_by("date")
+    return render(request, "matches/list.html", {"matches": matches})
 
 class MatchViewSet(viewsets.ModelViewSet):
+    """API viewset for CRUD operations on matches."""
+
     queryset = Match.objects.all().order_by('-date')
     serializer_class = MatchSerializer
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]

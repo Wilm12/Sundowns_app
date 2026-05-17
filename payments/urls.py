@@ -1,3 +1,5 @@
+"""URL configuration for payments endpoints."""
+
 from django.urls import path
 from .views import PaymentListCreateView, PaymentDetailView, MyPaymentsView
 

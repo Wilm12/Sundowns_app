@@ -1,8 +1,12 @@
+"""Common models for user and branch management in the Sundowns project."""
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 
 class UserManager(BaseUserManager):
+    """Custom manager handling user creation and superuser setup."""
+
     def create_user(self, username, email, password=None):
         if not email:
             raise ValueError('Users must have an email address')
@@ -26,6 +30,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    """Core user model for the Sundowns application."""
+
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=128)
@@ -45,6 +51,8 @@ class User(AbstractBaseUser):
 
 
 class Branch(models.Model):
+    """Represents a branch location in the organization."""
+
     name = models.CharField(max_length=100)
 
     def __str__(self):

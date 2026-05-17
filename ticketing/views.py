@@ -1,3 +1,5 @@
+"""Ticketing views for booking, verification, and ticket listing."""
+
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -17,6 +19,8 @@ from .serializers import TicketSerializer, TicketVerifySerializer
 
 @login_required
 def my_tickets_page(request):
+    """Render the current user's ticket history page."""
+
     tickets = Ticket.objects.filter(
         user=request.user
     ).order_by("-created_at")
@@ -29,6 +33,8 @@ def my_tickets_page(request):
 
 
 class TicketVerifyView(APIView):
+    """Admin-only API view for verifying a ticket QR code."""
+
     permission_classes = [IsAdminRole]
 
     def post(self, request):
@@ -49,6 +55,8 @@ class TicketVerifyView(APIView):
 
 
 class TicketListCreateView(generics.ListCreateAPIView):
+    """API endpoint for listing and booking tickets for the authenticated user."""
+
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
 
@@ -62,6 +70,8 @@ class TicketListCreateView(generics.ListCreateAPIView):
 
 
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """API endpoint for ticket detail, update, and delete operations."""
+
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
 
@@ -70,6 +80,8 @@ class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class MyTicketsView(generics.ListAPIView):
+    """API endpoint listing the authenticated user's tickets."""
+
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
 
@@ -81,6 +93,8 @@ class MyTicketsView(generics.ListAPIView):
 
 @login_required
 def book_ticket_page(request, match_id):
+    """Book a ticket for a match if the user has an active membership."""
+
     match = get_object_or_404(Match, id=match_id)
 
     has_active_membership = Membership.objects.filter(
@@ -116,6 +130,7 @@ def book_ticket_page(request, match_id):
 
 @login_required
 def transport_prompt_page(request, ticket_id):
+    """Prompt the user to select transport after booking a ticket."""
     ticket = get_object_or_404(
         Ticket,
         id=ticket_id,
@@ -140,6 +155,8 @@ def transport_prompt_page(request, ticket_id):
 
 @login_required
 def verify_ticket_page(request):
+    """Render the ticket verification page and process admin ticket verification."""
+
     if request.user.role != "admin":
         messages.error(request, "Only admins can verify tickets.")
         return redirect("dashboard")

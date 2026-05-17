@@ -1,3 +1,5 @@
+"""Payment API and page views for managing membership payments."""
+
 from rest_framework import generics, permissions
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -12,18 +14,23 @@ from .serializers import PaymentSerializer
 
 
 class PaymentListCreateView(generics.ListCreateAPIView):
+    """Admin API endpoint for listing and creating payments."""
+
     queryset = Payment.objects.all().order_by('-created_at')
     serializer_class = PaymentSerializer
     permission_classes = [IsAdminRole]
 
 
 class PaymentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """Admin API endpoint for retrieving, updating, and deleting payment records."""
     queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
     permission_classes = [IsAdminRole]
 
 
 class MyPaymentsView(generics.ListAPIView):
+    """API endpoint returning payments for the current authenticated user."""
+
     serializer_class = PaymentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -32,8 +39,10 @@ class MyPaymentsView(generics.ListAPIView):
             user=self.request.user
         ).order_by('-created_at')
 
+
 @login_required
 def payment_page(request):
+    """Render the payment history page for the authenticated user."""
     membership = Membership.objects.filter(
         user=request.user
     ).order_by("-start_date").first()
@@ -53,6 +62,7 @@ def payment_page(request):
 
 @login_required
 def create_membership_payment_page(request):
+    """Create a membership payment and activate the user's membership."""
     membership = Membership.objects.filter(
         user=request.user
     ).order_by("-start_date").first()

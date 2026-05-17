@@ -1,8 +1,11 @@
+"""Membership models describing tiers, pricing, and status tracking."""
+
 from django.db import models
 from django.conf import settings
 
 
 class Membership(models.Model):
+    """Represents a user's membership tier and lifecycle state."""
     TIER_CHOICES = (
         ('basic', 'Basic'),
         ('premium', 'Premium'),
@@ -34,6 +37,8 @@ class Membership(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def expected_price(self):
+        """Return the expected price for the selected membership tier."""
+
         return self.TIER_PRICES[self.tier]
 
     def __str__(self):

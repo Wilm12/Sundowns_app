@@ -1,5 +1,8 @@
+"""URL configuration placeholder for shared common endpoints."""
+
 from django.urls import path
 
-urlpatterns = [`n    # TODO: Add common URLs
+urlpatterns = [
+    # TODO: Add common URLs
 ]
 

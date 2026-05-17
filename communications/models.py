@@ -1,9 +1,12 @@
+"""Communication models for audit and notification history."""
+
 from django.db import models
 from django.conf import settings
 
 User = settings.AUTH_USER_MODEL
 
 class CommunicationLog(models.Model):
+    """Stores a record of user-facing notifications and delivery status."""
     CHANNEL_CHOICES = (
         ('email', 'Email'),
         ('sms', 'SMS'),

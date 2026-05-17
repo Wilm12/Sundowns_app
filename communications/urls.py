@@ -1,5 +1,8 @@
+"""URL configuration placeholder for communications endpoints."""
+
 from django.urls import path
 
-urlpatterns = [`n    # TODO: Add communications URLs
+urlpatterns = [
+    # TODO: Add communications URLs
 ]
 

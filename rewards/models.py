@@ -1,9 +1,12 @@
+"""Reward models for point ledger entries and reward tracking."""
+
 from django.db import models
 from django.conf import settings
 
 User = settings.AUTH_USER_MODEL
 
 class PointsLedger(models.Model):
+    """Represents a point transaction for a user."""
     STATUS_CHOICES = (
         ('active', 'Active'),
         ('redeemed', 'Redeemed'),

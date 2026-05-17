@@ -1,3 +1,5 @@
+"""Common views for dashboard, settings, and shared user workflows."""
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from branches.models import Branch
@@ -14,6 +16,8 @@ from transport.models import TransportBooking
 
 @login_required
 def dashboard_view(request):
+    """Render the user dashboard with membership, ticket, transport, and match counts."""
+
     from membership.models import Membership
     from ticketing.models import Ticket
     from transport.models import TransportBooking
@@ -42,10 +46,15 @@ def dashboard_view(request):
 
 
 def home_view(request):
+    """Render the public home page."""
+
     return render(request, "home.html")
+
 
 @login_required
 def admin_dashboard_view(request):
+    """Render the admin dashboard, restricting access to admin users only."""
+
     if request.user.role != "admin":
         messages.error(request, "Only admins can access the admin dashboard.")
         return redirect("dashboard")
@@ -75,6 +84,8 @@ def admin_dashboard_view(request):
 
 @login_required
 def user_settings_view(request):
+    """Render and process the user settings page, including branch changes."""
+
     branches = Branch.objects.all().order_by("name")
 
     if request.method == "POST":
@@ -122,6 +133,8 @@ def user_settings_view(request):
 
 @login_required
 def change_password_view(request):
+    """Process a password change request and update the user session."""
+
     if request.method == "POST":
         form = PasswordChangeForm(request.user, request.POST)
 

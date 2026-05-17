@@ -1,3 +1,9 @@
+"""Serializers for authentication, registration, and JWT token handling.
+
+This module validates registration data, enforces password policy, and issues
+user profile responses for authenticated sessions.
+"""
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
@@ -7,6 +13,12 @@ User = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """Serializer for new user registration.
+
+    Validates password confirmation, email uniqueness, and creates a new user
+    with hashed credentials.
+    """
+
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True, min_length=8)
 
@@ -15,11 +27,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'email', 'branch', 'password', 'password_confirm']
 
     def validate_email(self, value):
+        """Validate that the submitted email address is unique."""
+
         if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("A user with this email already exists.")
         return value
 
     def validate(self, attrs):
+        """Validate password confirmation and enforce Django password rules."""
+
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({"password": "Passwords do not match."})
 
@@ -27,21 +43,29 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        """Create a new user instance after removing confirmation data."""
+
         validated_data.pop('password_confirm')
         return User.objects.create_user(**validated_data)
 
 
 class MeSerializer(serializers.ModelSerializer):
+    """Serializer exposing authenticated user profile data."""
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'role', 'branch']
 
 
 class EmailTokenObtainPairSerializer(serializers.Serializer):
+    """Serializer for validating credentials and issuing JWT refresh/access tokens."""
+
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
+        """Validate credentials and return authenticated JWT data."""
+
         email = attrs.get('email')
         password = attrs.get('password')
 

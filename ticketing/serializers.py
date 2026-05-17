@@ -1,3 +1,5 @@
+"""Serializers for ticket booking and verification workflows."""
+
 from rest_framework import serializers
 
 from membership.models import Membership
@@ -5,6 +7,7 @@ from .models import Ticket
 
 
 class TicketSerializer(serializers.ModelSerializer):
+    """Serializer for ticket details and user-facing ticket metadata."""
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     opponent = serializers.CharField(source='match.opponent', read_only=True)
@@ -57,6 +60,7 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class TicketVerifySerializer(serializers.Serializer):
+    """Serializer validating ticket QR code verification requests."""
     qr_code = serializers.UUIDField()
 
     def validate(self, attrs):

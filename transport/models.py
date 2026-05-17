@@ -1,7 +1,10 @@
+"""Transport domain models for vehicle options, bookings, and settlements."""
+
 from django.db import models
 
 
 class Transport(models.Model):
+    """Represents a transport option associated with a match and branch."""
     STATUS_CHOICES = (
         ('active', 'Active'),
         ('inactive', 'Inactive'),
@@ -25,6 +28,8 @@ class Transport(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def available_seats(self):
+        """Return the number of seats still available for this transport."""
+
         booked_count = self.bookings.filter(status='booked').count()
         return self.capacity - booked_count
 
@@ -33,6 +38,7 @@ class Transport(models.Model):
 
 
 class TransportBooking(models.Model):
+    """Represents a booking made by a ticket holder for a transport option."""
     STATUS_CHOICES = (
         ('booked', 'Booked'),
         ('boarded', 'Boarded'),
@@ -59,6 +65,7 @@ class TransportBooking(models.Model):
 
 
 class TransportSettlement(models.Model):
+    """Tracks settlement data owed to transport providers."""
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('paid', 'Paid'),

@@ -1,3 +1,9 @@
+"""Views for branch administration, listing, and detail pages.
+
+This module provides both API endpoints and page views for branch data,
+including admin-restricted operations and member dashboard navigation.
+"""
+
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
@@ -11,6 +17,8 @@ from django.contrib import messages
 
 @login_required
 def my_branch_page(request):
+    """Redirect the logged in user to their assigned branch detail page."""
+
     if not request.user.branch:
         messages.error(request, "You are not assigned to a branch.")
         return redirect("dashboard")
@@ -19,12 +27,17 @@ def my_branch_page(request):
 
 
 class BranchViewSet(viewsets.ModelViewSet):
+    """API viewset for branch CRUD operations."""
+
     queryset = Branch.objects.all().order_by('name')
     serializer_class = BranchSerializer
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
 
+
 @login_required
 def branch_list_page(request):
+    """Render the branch listing page for authenticated users."""
+
     branches = Branch.objects.all().order_by("name")
 
     return render(request, "branches/list.html", {
@@ -34,6 +47,8 @@ def branch_list_page(request):
 
 @login_required
 def branch_detail_page(request, branch_id):
+    """Render the branch detail page, including members and active transport."""
+
     branch = get_object_or_404(Branch, id=branch_id)
 
     members = User.objects.filter(

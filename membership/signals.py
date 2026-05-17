@@ -1,3 +1,5 @@
+"""Signal handlers for membership creation and lifecycle events."""
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
@@ -9,6 +11,7 @@ User = settings.AUTH_USER_MODEL
 
 @receiver(post_save, sender=User)
 def create_membership(sender, instance, created, **kwargs):
+    """Automatically create a default membership when a new user is created."""
     if created:
         Membership.objects.create(
             user=instance,

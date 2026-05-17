@@ -1,9 +1,12 @@
+"""Promotion models for offers, redemption, and tracking."""
+
 from django.db import models
 from django.conf import settings
 
 User = settings.AUTH_USER_MODEL
 
 class Promotion(models.Model):
+    """Represents a promotion or offer targeted at users."""
     title = models.CharField(max_length=255)
     description = models.TextField()
     target_tier = models.CharField(max_length=10, null=True, blank=True)
@@ -15,6 +18,7 @@ class Promotion(models.Model):
 
 
 class PromotionRedemption(models.Model):
+    """Tracks when users redeem a promotion and its outcome."""
     STATUS_CHOICES = (
         ('redeemed', 'Redeemed'),
         ('failed', 'Failed'),

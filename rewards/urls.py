@@ -1,5 +1,8 @@
+"""URL configuration placeholder for rewards endpoints."""
+
 from django.urls import path
 
-urlpatterns = [`n    # TODO: Add points URLs
+urlpatterns = [
+    # TODO: Add points URLs
 ]
 

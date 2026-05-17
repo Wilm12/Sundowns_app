@@ -7,6 +7,7 @@ import uuid
 User = settings.AUTH_USER_MODEL
 
 class Ticket(models.Model):
+    """Represents a booked or verified match ticket."""
     STATUS_CHOICES = (
         ('booked', 'Booked'),
         ('used', 'Used'),

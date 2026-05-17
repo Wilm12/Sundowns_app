@@ -1,9 +1,12 @@
+"""Payment models representing membership payments and validation rules."""
+
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
 
 class Payment(models.Model):
+    """Represents a payment toward a user's membership."""
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('successful', 'Successful'),
@@ -27,6 +30,8 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
+        """Validate payment amount and ensure the payment belongs to the membership user."""
+
         if not self.membership_id:
             return
 
@@ -42,6 +47,8 @@ class Payment(models.Model):
             })
 
     def save(self, *args, **kwargs):
+        """Ensure the payment is valid before saving and activate membership on success."""
+
         self.full_clean()
         super().save(*args, **kwargs)
 

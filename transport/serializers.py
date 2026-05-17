@@ -1,8 +1,11 @@
+"""Serializers for transport, transport bookings, and settlement resources."""
+
 from rest_framework import serializers
 from .models import Transport, TransportBooking, TransportSettlement
 
 
 class TransportSerializer(serializers.ModelSerializer):
+    """Serializer for transport options and available seat counts."""
     branch_name = serializers.CharField(source='branch.name', read_only=True)
     opponent = serializers.CharField(source='match.opponent', read_only=True)
     available_seats = serializers.SerializerMethodField()
@@ -23,10 +26,12 @@ class TransportSerializer(serializers.ModelSerializer):
         ]
 
     def get_available_seats(self, obj):
+        """Return the number of seats available for the transport option."""
         return obj.available_seats()
 
 
 class TransportBookingSerializer(serializers.ModelSerializer):
+    """Serializer for creating and displaying transport bookings."""
     ticket_qr = serializers.UUIDField(source='ticket.qr_code', read_only=True)
 
     class Meta:
@@ -49,6 +54,7 @@ class TransportBookingSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
+        """Validate transport booking constraints and ticket ownership."""
         request = self.context.get('request')
         user = request.user if request and request.user.is_authenticated else None
 
@@ -84,6 +90,7 @@ class TransportBookingSerializer(serializers.ModelSerializer):
 
 
 class TransportSettlementSerializer(serializers.ModelSerializer):
+    """Serializer for transport settlement records."""
     class Meta:
         model = TransportSettlement
         fields = [

@@ -1,3 +1,5 @@
+"""URL configuration for user profile endpoints."""
+
 from django.urls import path
 from .views import UserProfileView
 

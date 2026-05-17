@@ -5,16 +5,16 @@
 {% block content %}
 <div class="max-w-3xl mx-auto bg-white rounded-lg shadow p-8">
 
-    <h1 class="text-3xl font-bold text-green-900 mb-6">
+    <h1 class="text-3xl font-bold text-green-900 mb-8">
         My Membership
     </h1>
 
     {% if membership %}
 
-        <div class="space-y-4">
+        <div class="space-y-6">
 
             <div>
-                <p class="text-sm text-gray-500">
+                <p class="text-sm text-gray-500 mb-2">
                     Tier
                 </p>
 
@@ -24,31 +24,31 @@
             </div>
 
             <div>
-                <p class="text-sm text-gray-500">
+                <p class="text-sm text-gray-500 mb-2">
                     Status
                 </p>
 
-                <span class="px-4 py-2 rounded bg-yellow-500 text-green-900 font-semibold">
+                <span class="inline-block px-4 py-2 rounded bg-yellow-500 text-green-900 font-semibold">
                     {{ membership.status|title }}
                 </span>
             </div>
 
             <div>
-                <p class="text-sm text-gray-500">
+                <p class="text-sm text-gray-500 mb-2">
                     Start Date
                 </p>
 
-                <p>
+                <p class="text-gray-800">
                     {{ membership.start_date }}
                 </p>
             </div>
 
             <div>
-                <p class="text-sm text-gray-500">
+                <p class="text-sm text-gray-500 mb-2">
                     Expiry Date
                 </p>
 
-                <p>
+                <p class="text-gray-800">
                     {{ membership.expiry_date }}
                 </p>
             </div>

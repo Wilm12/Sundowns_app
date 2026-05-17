@@ -3,7 +3,8 @@
 {% block title %}Home | Sundowns WPA{% endblock %}
 
 {% block content %}
-<section class="bg-white rounded-lg shadow p-8">
+<section class="bg-gradient-to-br from-white to-yellow-50 rounded-lg shadow p-8 border border-yellow-100">
+
     <h1 class="text-3xl font-bold text-green-900 mb-4">
         Welcome to Sundowns WPA
     </h1>
@@ -13,13 +14,42 @@
     </p>
 
     <div class="flex gap-4">
-        <a href="/dashboard/" class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400">
-            Go to Dashboard
-        </a>
 
-        <a href="/matches/" class="bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700">
-            View Matches
-        </a>
+        {% if request.user.is_authenticated %}
+
+            <a
+                href="/dashboard/"
+                class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400"
+            >
+                Go to Dashboard
+            </a>
+
+            <a
+                href="/matches/"
+                class="bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700"
+            >
+                View Matches
+            </a>
+
+        {% else %}
+
+            <a
+                href="/api/auth/login-page/"
+                class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400"
+            >
+                Login
+            </a>
+
+            <a
+                href="/api/auth/register-page/"
+                class="bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700"
+            >
+                Register
+            </a>
+
+        {% endif %}
+
     </div>
+
 </section>
 {% endblock %}

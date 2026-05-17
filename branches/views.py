@@ -1,15 +1,21 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
-
+from django.shortcuts import render, get_object_or_404, redirect
 from users.models import User
 from transport.models import Transport
 from .models import Branch
-
 from authentication.permissions import IsAdminOrReadOnly
-from .models import Branch
 from .serializers import BranchSerializer
+from django.contrib import messages
+
+@login_required
+def my_branch_page(request):
+    if not request.user.branch:
+        messages.error(request, "You are not assigned to a branch.")
+        return redirect("dashboard")
+
+    return redirect("branch_detail_page", branch_id=request.user.branch.id)
 
 
 class BranchViewSet(viewsets.ModelViewSet):
@@ -44,3 +50,4 @@ def branch_detail_page(request, branch_id):
         "members": members,
         "transport": transport,
     })
+

@@ -1,6 +1,19 @@
+
 services:
-  web:
-    command: gunicorn sundowns_app.wsgi:application --bind 0.0.0.0:8000 --workers 1 --timeout 120 --log-level debug
+  db:
     env_file:
       - .env.prod
-    restart: always
+    environment:
+      POSTGRES_DB: sundowns_prod
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: securepassword
+
+  web:
+    command: gunicorn sundowns_app.wsgi:application --bind 0.0.0.0:8000 --workers 1 --timeout 120 --access-logfile -
+    env_file:
+      - .env.prod
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis

@@ -14,6 +14,9 @@ from membership.models import Membership
 from ticketing.models import Ticket
 from transport.models import TransportBooking
 
+from django.http import JsonResponse
+from django.db import connection
+
 @login_required
 def dashboard_view(request):
     """Render the user dashboard with membership, ticket, transport, and match counts."""
@@ -150,3 +153,23 @@ def change_password_view(request):
                 messages.error(request, error)
 
     return redirect("user_settings")
+
+def health_check(request):
+    """
+    Basic health check endpoint for deployment and container monitoring.
+    Verifies that the Django app can respond and connect to the database.
+    """
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1;")
+
+        return JsonResponse({
+            "status": "healthy",
+            "database": "connected",
+        })
+
+    except Exception:
+        return JsonResponse({
+            "status": "unhealthy",
+            "database": "disconnected",
+        }, status=500)

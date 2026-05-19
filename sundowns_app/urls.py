@@ -22,7 +22,7 @@ def health_check(request):
 urlpatterns = [
     path('', home_view, name='home'),
     path('health/', health_check),
-
+    path("common/", include("common.urls")),
     path('admin/', admin.site.urls),
 
     # Frontend/template routes

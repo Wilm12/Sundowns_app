@@ -216,4 +216,6 @@ Test coverage verifies:
 
 ## CI/CD Readiness
 
-The current automated test suite is designed to run inside Docker and is suitable for future CI/CD integration using GitHub Actions or other pipeline tools.
+The current automated test suite is designed to run inside Docker and is already integrated with GitHub Actions.
+The CI workflow runs the `test` job and then a `docker-build` job that builds the Docker image named `sundowns-app-ci`.
+This makes the repository ready for production pipeline validation and Docker-based deployment checks.

@@ -495,6 +495,8 @@ Implemented automated tests currently validate:
 * transport capacity validation
 * transport-match consistency
 
+The project also uses GitHub Actions for CI. The current `.github/workflows/ci.yml` workflow runs `test` first and then a `docker-build` job to verify the Docker image build.
+
 ---
 
 # Documentation Workflow

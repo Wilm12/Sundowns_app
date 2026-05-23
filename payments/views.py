@@ -9,8 +9,11 @@ from membership.models import Membership
 from .models import Payment
 
 from authentication.permissions import IsAdminRole
-from .models import Payment
 from .serializers import PaymentSerializer
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentListCreateView(generics.ListCreateAPIView):
@@ -63,6 +66,11 @@ def payment_page(request):
 @login_required
 def create_membership_payment_page(request):
     """Create a membership payment and activate the user's membership."""
+
+    logger.info(
+        f"User {request.user.id} started membership payment process"
+    )
+
     membership = Membership.objects.filter(
         user=request.user
     ).order_by("-start_date").first()

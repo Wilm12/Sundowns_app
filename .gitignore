@@ -17,5 +17,8 @@ __pycache__/
 *.pyo
 *.pyd
 
+backups/
+*.sql
+
 # Ignore virtual environments
 venv/

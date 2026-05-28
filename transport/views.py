@@ -91,9 +91,19 @@ def transport_list_page(request):
         status='booked'
     ).select_related('match')
 
-    transports = Transport.objects.filter(
-        status='active'
-    ).select_related('branch', 'match').order_by('-created_at')
+    if not request.user.branch_id:
+        messages.info(
+            request,
+            'No transport options available because your account does not have a branch assigned.'
+        )
+        transports = Transport.objects.none()
+    else:
+        ticket_match_ids = tickets.values_list('match_id', flat=True).distinct()
+        transports = Transport.objects.filter(
+            status='active',
+            branch_id=request.user.branch_id,
+            match_id__in=ticket_match_ids,
+        ).select_related('branch', 'match').order_by('-created_at')
 
     return render(request, 'transport/list.html', {
         'tickets': tickets,

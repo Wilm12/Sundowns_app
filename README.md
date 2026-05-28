@@ -317,3 +317,21 @@ GitHub: [Wilm12](https://github.com/Wilm12)
 Portfolio: [DevOps Portfolio](https://github.com/Wilm12/devops)
 
 ````
+
+## Architecture Diagram
+
+```mermaid
+flowchart TD
+    User[User Browser] --> DNS[DuckDNS Domain]
+    DNS --> SG[AWS EC2 Security Group]
+    SG --> Nginx[Nginx Container<br/>HTTPS / Reverse Proxy]
+    Nginx --> Gunicorn[Gunicorn Web Container]
+    Gunicorn --> Django[Django Application]
+    Django --> Postgres[(PostgreSQL Container)]
+    Django --> Redis[(Redis Container)]
+    Gunicorn --> Logs[Gunicorn / Django Logs]
+    Postgres --> Backup[Automated DB Backups<br/>Cron + pg_dump]
+    GitHub[GitHub Repository] --> Actions[GitHub Actions CI]
+    Actions --> Tests[Tests + Docker Build Validation]
+```
+

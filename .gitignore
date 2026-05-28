@@ -3,15 +3,22 @@
 .env
 .env.dev
 .env.prod
-.env.tes
+.env.test
+
+# Allow safe example env template
+!.env.prod.example
+
 # Ignore local database
 db.sqlite3
+
 # Ignore Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+backups/
+*.sql
+
 # Ignore virtual environments
 venv/
-.env/
-

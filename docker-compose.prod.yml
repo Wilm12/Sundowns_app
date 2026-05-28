@@ -8,6 +8,7 @@ services:
       POSTGRES_DB: sundowns_prod
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: securepassword
+    restart: unless-stopped
 
   web:
     command: gunicorn sundowns_app.wsgi:application --bind 0.0.0.0:8000 --workers 1 --timeout 120 --access-logfile -
@@ -23,6 +24,7 @@ services:
     depends_on:
       - db
       - redis
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine
@@ -41,4 +43,5 @@ services:
       retries: 3
     depends_on:
       - web
+    restart: unless-stopped
 

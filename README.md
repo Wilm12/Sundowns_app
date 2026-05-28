@@ -310,14 +310,6 @@ Current deployment maturity:
 
 ---
 
-## Author
-
-William Mabelane
-GitHub: [Wilm12](https://github.com/Wilm12)
-Portfolio: [DevOps Portfolio](https://github.com/Wilm12/devops)
-
-````
-
 ## Architecture Diagram
 
 ```mermaid
@@ -334,4 +326,15 @@ flowchart TD
     GitHub[GitHub Repository] --> Actions[GitHub Actions CI]
     Actions --> Tests[Tests + Docker Build Validation]
 ```
+
+
+
+
+## Author
+
+William Mabelane
+GitHub: [Wilm12](https://github.com/Wilm12)
+Portfolio: [DevOps Portfolio](https://github.com/Wilm12/devops)
+
+````
 

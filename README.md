@@ -1,9 +1,8 @@
-````markdown
 # Sundowns WPA Platform
 
-A production-style Django membership and operations platform for managing supporter memberships, branches, match tickets, payments, transport bookings, and verification workflows.
+A production-deployed membership, ticketing, and transport management platform built with Django, PostgreSQL, Redis, Docker, AWS EC2, Nginx, HTTPS, and GitHub Actions CI/CD.
 
-This project was built as a backend, DevOps, and cloud deployment portfolio project, focusing on real-world application delivery, containerization, CI/CD, infrastructure operations, and production-readiness practices.
+This project demonstrates end-to-end software delivery, covering backend development, containerization, cloud deployment, production operations, infrastructure management, and automated deployment pipelines.
 
 ---
 
@@ -21,6 +20,28 @@ Sundowns WPA is a membership platform that allows supporters to:
 - Handle membership payment activation flows
 
 The project also includes production-style infrastructure using Docker, Nginx, Gunicorn, PostgreSQL, Redis, health checks, logging, automated backups, and AWS EC2 deployment.
+
+---
+
+## Live Environment
+
+Production URL:
+
+https://sundownswpa.duckdns.org
+
+The application is deployed on AWS EC2 behind Nginx with HTTPS enabled through Let's Encrypt SSL certificates.
+
+Production stack:
+
+- AWS EC2
+- Docker & Docker Compose
+- Nginx Reverse Proxy
+- Gunicorn Application Server
+- PostgreSQL Database
+- Redis
+- GitHub Actions CI/CD
+- DuckDNS
+- Let's Encrypt
 
 ---
 
@@ -83,7 +104,7 @@ Browser
 → Django
 → PostgreSQL
 → Redis
-````
+```
 
 ### Container Services
 
@@ -202,12 +223,15 @@ This verifies that Django can respond and connect to the database.
 
 GitHub Actions is configured to:
 
-* Install dependencies
-* Start PostgreSQL and Redis services
-* Run Django checks
-* Run migrations
-* Run automated tests
-* Validate Docker image build
+- Install dependencies
+- Start PostgreSQL and Redis services
+- Run Django checks
+- Run migrations
+- Run automated tests
+- Validate Docker image build
+- Build and push Docker images
+- Deploy to AWS EC2 via SSH
+- Restart containers with updated images
 
 Workflow file:
 
@@ -247,12 +271,12 @@ A cron job can be configured for automated daily backups.
 
 The project includes:
 
-* Django console logging
-* Gunicorn access logs
-* Gunicorn error logs
-* Docker container health checks
-* Health endpoint monitoring
-* Docker stats inspection
+- Django console logging
+- Gunicorn access logs
+- Gunicorn error logs
+- Docker container health checks
+- Health endpoint monitoring
+- Docker stats inspection
 
 Logs are stored in:
 
@@ -282,31 +306,57 @@ docker compose exec web python manage.py test --settings=sundowns_app.settings.t
 
 Current deployment maturity:
 
-* Local development environment complete
-* Production-style Docker runtime complete
-* Nginx reverse proxy configured
-* Health checks configured
-* GitHub Actions CI/CD configured
-* AWS EC2 deployment tested
-* Elastic IP configured
-* Backup automation started
-* Logging and observability started
+- Local development environment ✅
+- Production-style Docker runtime ✅
+- Nginx reverse proxy configured ✅
+- HTTPS with Let’s Encrypt ✅
+- Domain-based deployment ✅
+- Health checks configured ✅
+- GitHub Actions CI/CD configured ✅
+- AWS EC2 deployment complete ✅
+- Elastic IP configured ✅
+- Backup automation started ✅
+- Logging and observability started ✅
+- Transport workflow implemented ✅
 
 ---
 
 ## Future Improvements
 
-* HTTPS with Let’s Encrypt
-* Domain-based deployment
-* Prometheus and Grafana monitoring
-* Centralized logging
-* AWS RDS migration
-* Redis managed service migration
-* Kubernetes deployment
-* Helm charts
-* GitOps with ArgoCD
-* Terraform infrastructure automation
-* Automated deployment pipeline
+### Infrastructure
+
+- AWS S3 for media storage
+- AWS RDS for managed PostgreSQL
+- Managed Redis service
+- Terraform infrastructure provisioning
+
+### Monitoring
+
+- Prometheus monitoring
+- Grafana dashboards
+- Centralized log aggregation
+- Alerting and notifications
+
+### Deployment
+
+- Dedicated deployment user
+- Deployment rollback strategy
+- Staging environment automation
+- Blue/Green deployment workflow
+
+### Platform Features
+
+- Celery production workloads
+- Background notification processing
+- Membership renewal automation
+- Reporting dashboards
+
+### Advanced DevOps
+
+- Kubernetes deployment
+- Helm charts
+- GitOps with ArgoCD
+- Infrastructure as Code
 
 ---
 
@@ -323,18 +373,51 @@ flowchart TD
     Django --> Redis[(Redis Container)]
     Gunicorn --> Logs[Gunicorn / Django Logs]
     Postgres --> Backup[Automated DB Backups<br/>Cron + pg_dump]
-    GitHub[GitHub Repository] --> Actions[GitHub Actions CI]
+    GitHub[GitHub Repository] --> Actions[GitHub Actions CI/CD]
     Actions --> Tests[Tests + Docker Build Validation]
+    Actions --> Deploy[Automated Deployment to AWS EC2]
 ```
 
+---
 
+## DevOps Technologies Demonstrated
 
+This project demonstrates practical experience with:
+
+- Linux Administration
+- Docker
+- Docker Compose
+- Nginx
+- Gunicorn
+- PostgreSQL
+- Redis
+- AWS EC2
+- HTTPS/TLS
+- DNS Management
+- Git
+- GitHub Actions
+- CI/CD Pipelines
+- Environment Management
+- Production Troubleshooting
+- Infrastructure Documentation
+- Health Checks
+- Backup Automation
+
+---
 
 ## Author
 
 William Mabelane
-GitHub: [Wilm12](https://github.com/Wilm12)
-Portfolio: [DevOps Portfolio](https://github.com/Wilm12/devops)
 
-````
+GitHub: https://github.com/Wilm12
 
+Project Highlights:
+
+- Production AWS Deployment
+- Dockerized Infrastructure
+- HTTPS with Let's Encrypt
+- GitHub Actions CI/CD
+- PostgreSQL & Redis
+- Django REST Framework
+- Linux Administration
+- DevOps Practices

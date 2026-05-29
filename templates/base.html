@@ -9,14 +9,15 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    <nav class="bg-yellow-500 text-green-900 shadow">
+    <nav class="bg-yellow-500 text-green-900 shadow mb-4">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
 
             <a href="/" class="font-bold text-xl">
                 Sundowns WPA
             </a>
 
-            <div class="space-x-4">
+            <!-- Desktop Navigation (hidden on mobile & tablet) -->
+            <div class="hidden lg:flex space-x-4">
                 <a href="/" class="hover:underline">Home</a>
 
                 {% if request.user.is_authenticated %}
@@ -46,8 +47,56 @@
                 {% endif %}
             </div>
 
+            <!-- Mobile/Tablet Hamburger Menu Button -->
+            <button id="menu-toggle" class="lg:hidden inline-flex items-center justify-center p-3 rounded-lg text-green-900 focus:outline-none focus:ring-2 focus:ring-green-900">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+        </div>
+
+        <!-- Mobile/Tablet Navigation Menu (hidden by default) -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-yellow-400 border-t border-green-900">
+            <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col space-y-2">
+                <a href="/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Home</a>
+
+                {% if request.user.is_authenticated %}
+                    <a href="/dashboard/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Dashboard</a>
+                    <a href="/membership/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Membership</a>
+                    <a href="/matches/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Matches</a>
+                    <a href="/tickets/my-tickets/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">My Tickets</a>
+                    <a href="/transport/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Transport</a>
+                    <a href="/payments/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Payments</a>
+                    <a href="/settings/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Settings</a>
+                    <a href="/branches/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Branch</a>
+                    
+                    {% if request.user.role == "admin" %}
+                        <a href="/admin-dashboard/" class="block rounded-lg px-3 py-3 text-lg font-semibold hover:bg-yellow-300 transition-colors">
+                            Admin Dashboard
+                        </a>
+
+                        <a href="/tickets/verify/" class="block rounded-lg px-3 py-3 text-lg font-semibold hover:bg-yellow-300 transition-colors">
+                            Verify Tickets
+                        </a>
+                    {% endif %}
+
+                    <a href="/api/auth/logout/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Logout</a>
+                {% else %}
+                    <a href="/api/auth/login-page/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Login</a>
+                    <a href="/api/auth/register-page/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Register</a>
+                {% endif %}
+            </div>
         </div>
     </nav>
+
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
 
     <main class="max-w-6xl mx-auto px-4 py-8">
 

@@ -185,21 +185,19 @@ Separation practices:
 
 Health checks used in Sundowns:
 
-- HTTP health endpoint: `/health/` — should return HTTP 200 and a small JSON payload.
+Health checks used in Sundowns:
 
-Example health check implementation expectations:
-
-- Path: `/health/`
-- Returns: `200 OK` and body like `{"status": "ok", "db": "ok"}`
+- `/health/` — lightweight root health check (optional). Returns `200 OK` with a small JSON payload like `{"status": "ok"}`. Useful for external load-balancer or uptime probes that do not need database verification.
+- `/common/health/` — primary application health check. Performs Django setup and a quick DB verification; recommended for container or orchestration health probes.
 
 Example probe (for load balancer / docker healthcheck):
 
 ```bash
-# Container health check
+# Container health check (recommended to use the application probe):
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD curl -f http://localhost:8000/health/ || exit 1
+  CMD curl -f http://localhost:8000/common/health/ || exit 1
 
-# External probe (load balancer)
+# Lightweight external probe (optional):
 curl -f https://example.com/health/
 ```
 

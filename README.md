@@ -217,6 +217,11 @@ Expected response:
 
 This verifies that Django can respond and connect to the database.
 
+Notes on endpoints:
+
+- `/health/` — lightweight root health check (optional). Returns a simple `{"status": "ok"}` and is useful for external load-balancer or uptime probes that don't need DB verification.
+- `/common/health/` — full application health check. Verifies Django startup and database connectivity; used by container or orchestration health probes.
+
 ---
 
 ## CI/CD

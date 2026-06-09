@@ -10,6 +10,8 @@ from ticketing.models import Ticket
 
 from authentication.permissions import IsAdminRole, IsAdminOrReadOnly
 
+from membership.models import Membership
+
 from .models import (
     Transport,
     TransportBooking,
@@ -91,7 +93,24 @@ def transport_list_page(request):
         status='booked'
     ).select_related('match')
 
-    if not request.user.branch_id:
+    active_membership = Membership.objects.filter(
+        user=request.user,
+        status='active'
+    ).order_by('-start_date').first()
+
+    if not active_membership:
+        messages.info(
+            request,
+            'No transport options available because you do not have an active membership.'
+        )
+        transports = Transport.objects.none()
+    elif not active_membership.allows_transport():
+        messages.info(
+            request,
+            'Your membership tier does not allow transport bookings.'
+        )
+        transports = Transport.objects.none()
+    elif not request.user.branch_id:
         messages.info(
             request,
             'No transport options available because your account does not have a branch assigned.'
@@ -116,6 +135,19 @@ def book_transport_page(request, transport_id, ticket_id):
     """Book transport only for a valid booked ticket and matching match."""
     transport = get_object_or_404(Transport, id=transport_id)
     ticket = get_object_or_404(Ticket, id=ticket_id, user=request.user)
+
+    active_membership = Membership.objects.filter(
+        user=request.user,
+        status='active'
+    ).order_by('-start_date').first()
+
+    if not active_membership:
+        messages.error(request, 'Active membership required to book transport.')
+        return redirect('transport_list_page')
+
+    if not active_membership.allows_transport():
+        messages.error(request, 'Your membership tier does not allow transport bookings.')
+        return redirect('transport_list_page')
 
     if ticket.status != 'booked':
         messages.error(request, 'Only booked tickets can be used for transport booking.')

@@ -50,7 +50,7 @@ class CoreFlowTests(TestCase):
         Payment.objects.create(
             user=self.user,
             membership=membership,
-            amount="100.00",
+            amount="50.00",
             status="successful",
             reference="TEST-PAY-001",
         )

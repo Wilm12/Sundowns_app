@@ -1,6 +1,8 @@
 """Serializers for transport, transport bookings, and settlement resources."""
 
 from rest_framework import serializers
+
+from membership.models import Membership
 from .models import Transport, TransportBooking, TransportSettlement
 
 
@@ -65,6 +67,22 @@ class TransportBookingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'ticket': 'You can only book transport using your own ticket.'
            })
+
+        if ticket:
+            membership = Membership.objects.filter(
+                user=ticket.user,
+                status='active'
+            ).order_by('-start_date').first()
+
+            if not membership:
+                raise serializers.ValidationError({
+                    'ticket': 'An active membership is required to book transport.'
+                })
+
+            if not membership.allows_transport():
+                raise serializers.ValidationError({
+                    'ticket': 'Your membership tier does not allow transport bookings.'
+                })
 
         if ticket and ticket.status != 'booked':
             raise serializers.ValidationError({

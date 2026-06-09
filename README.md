@@ -81,7 +81,7 @@ Production stack:
 
 - User registration and authentication
 - Branch assignment during registration
-- Membership management
+- Membership management with centralized tier rule support for future points, rewards, promotions, and merchandise benefits
 - Membership activation through payment flow
 - Match listing
 - Ticket booking

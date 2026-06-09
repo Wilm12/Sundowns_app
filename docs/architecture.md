@@ -101,6 +101,24 @@ Membership
 
 Membership controls access to ticket booking.
 
+Membership Architecture
+
+Basic
+- R50
+- Giveaway promotions
+- 30% merchandise discount
+
+Premium
+- R100
+- Branch transport eligibility
+- 60% merchandise discount
+
+Golden
+- R150
+- Expanded transport eligibility
+- 70% merchandise discount
+- VIP benefits
+
 Flow:
 
 Register

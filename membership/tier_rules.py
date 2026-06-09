@@ -19,6 +19,42 @@ class MembershipTierRule:
     def allows_transport(self) -> bool:
         return self.transport_eligibility in ("branch", "expanded")
 
+    def promotion_label(self) -> str:
+        if not self.promotion_categories:
+            return "Promotions"
+        labels = [category.title() for category in self.promotion_categories]
+        return f"{', '.join(labels)} promotions"
+
+    def transport_description(self) -> str:
+        return {
+            "none": "No included transport",
+            "branch": "Branch-region transport eligibility",
+            "expanded": "Expanded transport eligibility",
+        }.get(self.transport_eligibility, "Transport eligibility")
+
+    def benefit_lines(self) -> Tuple[str, ...]:
+        lines = [f"Price: R{self.price}"]
+
+        if self.student_price == 0:
+            lines.append("Student price: Free")
+        else:
+            lines.append(f"Student price: R{self.student_price}")
+
+        if self.home_game_tickets:
+            lines.append("Home game tickets")
+
+        lines.append(f"{self.merchandise_discount}% merchandise discount")
+        lines.append(self.promotion_label())
+        lines.append(self.transport_description())
+
+        if self.children_under_16_allowed:
+            lines.append("Children under 16 option")
+
+        if self.vip_ticket_discount:
+            lines.append("VIP ticket discount")
+
+        return tuple(lines)
+
 
 TIER_RULES: Dict[str, MembershipTierRule] = {
     "basic": MembershipTierRule(

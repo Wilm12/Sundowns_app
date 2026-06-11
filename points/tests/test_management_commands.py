@@ -4,15 +4,24 @@ from io import StringIO
 from django.test import TestCase
 from django.core.management import call_command
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
 
 from branches.models import Branch
 from points.models import PointsAccount
+from points.signals import create_points_account
 
 User = get_user_model()
 
 
 class BackfillPointsAccountsCommandTestCase(TestCase):
     """Test suite for the backfill_points_accounts management command."""
+
+    def create_user_without_points(self, **kwargs):
+        post_save.disconnect(create_points_account, sender=User)
+        try:
+            return User.objects.create_user(**kwargs)
+        finally:
+            post_save.connect(create_points_account, sender=User)
 
     def test_backfill_empty_database(self):
         """Test backfill when database has users but no PointsAccounts."""
@@ -23,7 +32,7 @@ class BackfillPointsAccountsCommandTestCase(TestCase):
 
         # Create 5 users without PointsAccounts
         for i in range(5):
-            User.objects.create_user(
+            self.create_user_without_points(
                 username=f"user{i}",
                 email=f"user{i}@example.com",
                 password="testpass123",
@@ -53,7 +62,7 @@ class BackfillPointsAccountsCommandTestCase(TestCase):
 
         # Create users with existing PointsAccounts
         for i in range(3):
-            user = User.objects.create_user(
+            user = self.create_user_without_points(
                 username=f"existing_user{i}",
                 email=f"existing{i}@example.com",
                 password="testpass123",
@@ -84,7 +93,7 @@ class BackfillPointsAccountsCommandTestCase(TestCase):
 
         # Create 3 users with PointsAccounts
         for i in range(3):
-            user = User.objects.create_user(
+            user = self.create_user_without_points(
                 username=f"with_account{i}",
                 email=f"with{i}@example.com",
                 password="testpass123",
@@ -94,7 +103,7 @@ class BackfillPointsAccountsCommandTestCase(TestCase):
 
         # Create 2 users without PointsAccounts
         for i in range(2):
-            User.objects.create_user(
+            self.create_user_without_points(
                 username=f"without_account{i}",
                 email=f"without{i}@example.com",
                 password="testpass123",
@@ -125,7 +134,7 @@ class BackfillPointsAccountsCommandTestCase(TestCase):
 
         # Create 4 users
         for i in range(4):
-            User.objects.create_user(
+            self.create_user_without_points(
                 username=f"idempotent_user{i}",
                 email=f"idempotent{i}@example.com",
                 password="testpass123",
@@ -160,7 +169,7 @@ class BackfillPointsAccountsCommandTestCase(TestCase):
 
         # Create 2 users
         for i in range(2):
-            User.objects.create_user(
+            self.create_user_without_points(
                 username=f"format_user{i}",
                 email=f"format{i}@example.com",
                 password="testpass123",
@@ -185,7 +194,7 @@ class BackfillPointsAccountsCommandTestCase(TestCase):
             location="Test Location"
         )
 
-        user = User.objects.create_user(
+        user = self.create_user_without_points(
             username="properties_test",
             email="props@example.com",
             password="testpass123",

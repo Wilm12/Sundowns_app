@@ -9,6 +9,7 @@ from users.models import User
 from membership.models import Membership
 from matches.models import Match
 from ticketing.models import Ticket
+from points.models import PointsTransaction
 
 
 class TicketBookingTests(TestCase):
@@ -61,3 +62,257 @@ class TicketBookingTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(tickets_count, 1)
+
+    def test_new_booked_ticket_awards_points(self):
+        branch = Branch.objects.create(
+            name="Johannesburg Branch",
+            location="Johannesburg",
+        )
+
+        user = User.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+
+        Membership.objects.create(
+            user=user,
+            tier="basic",
+            status="active",
+            start_date=timezone.now().date(),
+            expiry_date=timezone.now().date() + timedelta(days=30),
+        )
+
+        match = Match.objects.create(
+            opponent="Kaizer Chiefs",
+            location="FNB Stadium",
+            date=timezone.now(),
+        )
+
+        Ticket.objects.create(
+            user=user,
+            match=match,
+            status="booked",
+        )
+
+        transaction = PointsTransaction.objects.filter(
+            account=user.points_account
+        ).first()
+
+        self.assertIsNotNone(transaction)
+        self.assertEqual(transaction.points, 10)
+        self.assertEqual(transaction.transaction_type, 'ticket_booking')
+        self.assertEqual(user.points_account.balance, 10)
+
+    def test_cancelled_to_booked_awards_points(self):
+        branch = Branch.objects.create(
+            name="Johannesburg Branch",
+            location="Johannesburg",
+        )
+
+        user = User.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+
+        Membership.objects.create(
+            user=user,
+            tier="basic",
+            status="active",
+            start_date=timezone.now().date(),
+            expiry_date=timezone.now().date() + timedelta(days=30),
+        )
+
+        match = Match.objects.create(
+            opponent="Kaizer Chiefs",
+            location="FNB Stadium",
+            date=timezone.now(),
+        )
+
+        ticket = Ticket.objects.create(
+            user=user,
+            match=match,
+            status="cancelled",
+        )
+
+        self.assertEqual(PointsTransaction.objects.filter(account=user.points_account).count(), 0)
+
+        ticket.status = 'booked'
+        ticket.save()
+
+        transaction = PointsTransaction.objects.filter(
+            account=user.points_account
+        ).first()
+
+        self.assertIsNotNone(transaction)
+        self.assertEqual(transaction.points, 10)
+        self.assertEqual(transaction.transaction_type, 'ticket_booking')
+
+    def test_expired_to_booked_awards_points(self):
+        branch = Branch.objects.create(
+            name="Johannesburg Branch",
+            location="Johannesburg",
+        )
+
+        user = User.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+
+        Membership.objects.create(
+            user=user,
+            tier="basic",
+            status="active",
+            start_date=timezone.now().date(),
+            expiry_date=timezone.now().date() + timedelta(days=30),
+        )
+
+        match = Match.objects.create(
+            opponent="Kaizer Chiefs",
+            location="FNB Stadium",
+            date=timezone.now(),
+        )
+
+        ticket = Ticket.objects.create(
+            user=user,
+            match=match,
+            status="expired",
+        )
+
+        self.assertEqual(PointsTransaction.objects.filter(account=user.points_account).count(), 0)
+
+        ticket.status = 'booked'
+        ticket.save()
+
+        transaction = PointsTransaction.objects.filter(
+            account=user.points_account
+        ).first()
+
+        self.assertIsNotNone(transaction)
+        self.assertEqual(transaction.points, 10)
+        self.assertEqual(transaction.transaction_type, 'ticket_booking')
+
+    def test_booked_to_used_does_not_award_points(self):
+        branch = Branch.objects.create(
+            name="Johannesburg Branch",
+            location="Johannesburg",
+        )
+
+        user = User.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+
+        Membership.objects.create(
+            user=user,
+            tier="basic",
+            status="active",
+            start_date=timezone.now().date(),
+            expiry_date=timezone.now().date() + timedelta(days=30),
+        )
+
+        match = Match.objects.create(
+            opponent="Kaizer Chiefs",
+            location="FNB Stadium",
+            date=timezone.now(),
+        )
+
+        ticket = Ticket.objects.create(
+            user=user,
+            match=match,
+            status="booked",
+        )
+
+        self.assertEqual(PointsTransaction.objects.filter(account=user.points_account).count(), 1)
+
+        ticket.status = 'used'
+        ticket.save()
+
+        self.assertEqual(PointsTransaction.objects.filter(account=user.points_account).count(), 1)
+
+    def test_booked_to_cancelled_does_not_award_points(self):
+        branch = Branch.objects.create(
+            name="Johannesburg Branch",
+            location="Johannesburg",
+        )
+
+        user = User.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+
+        Membership.objects.create(
+            user=user,
+            tier="basic",
+            status="active",
+            start_date=timezone.now().date(),
+            expiry_date=timezone.now().date() + timedelta(days=30),
+        )
+
+        match = Match.objects.create(
+            opponent="Kaizer Chiefs",
+            location="FNB Stadium",
+            date=timezone.now(),
+        )
+
+        ticket = Ticket.objects.create(
+            user=user,
+            match=match,
+            status="booked",
+        )
+
+        self.assertEqual(PointsTransaction.objects.filter(account=user.points_account).count(), 1)
+
+        ticket.status = 'cancelled'
+        ticket.save()
+
+        self.assertEqual(PointsTransaction.objects.filter(account=user.points_account).count(), 1)
+
+    def test_multiple_saves_do_not_duplicate_point_transactions(self):
+        branch = Branch.objects.create(
+            name="Johannesburg Branch",
+            location="Johannesburg",
+        )
+
+        user = User.objects.create_user(
+            username="testuser",
+            email="testuser@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+
+        Membership.objects.create(
+            user=user,
+            tier="basic",
+            status="active",
+            start_date=timezone.now().date(),
+            expiry_date=timezone.now().date() + timedelta(days=30),
+        )
+
+        match = Match.objects.create(
+            opponent="Kaizer Chiefs",
+            location="FNB Stadium",
+            date=timezone.now(),
+        )
+
+        ticket = Ticket.objects.create(
+            user=user,
+            match=match,
+            status="booked",
+        )
+
+        self.assertEqual(PointsTransaction.objects.filter(account=user.points_account).count(), 1)
+
+        ticket.save()
+        ticket.save()
+
+        self.assertEqual(PointsTransaction.objects.filter(account=user.points_account).count(), 1)

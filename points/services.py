@@ -1,5 +1,7 @@
 """Reusable points service layer for awarding points."""
 
+from django.db import transaction
+
 from .models import PointsTransaction
 from .rules import PointEvent, POINT_RULES
 
@@ -36,6 +38,30 @@ def award_points(user, *, event, description, reference_id=None):
         raise ValueError('User must have a points account before awarding points')
 
     points = POINT_RULES[event]
+
+    if reference_id is not None:
+        with transaction.atomic():
+            transaction_obj, created = PointsTransaction.objects.get_or_create(
+                account=account,
+                reference_id=reference_id,
+                defaults={
+                    'transaction_type': event.value,
+                    'points': points,
+                    'description': description,
+                }
+            )
+
+        if not created:
+            if (
+                transaction_obj.transaction_type != event.value
+                or transaction_obj.points != points
+                or transaction_obj.description != description
+            ):
+                raise ValueError(
+                    'Existing points transaction conflicts with requested award details.'
+                )
+
+        return transaction_obj
 
     return PointsTransaction.objects.create(
         account=account,

@@ -3,6 +3,9 @@ from django.db import models
 from django.conf import settings
 import uuid
 
+from points.rules import PointEvent
+from points.services import award_points
+
 User = settings.AUTH_USER_MODEL
 
 class Ticket(models.Model):
@@ -19,6 +22,24 @@ class Ticket(models.Model):
     qr_code = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='booked')
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        """Award ticket booking points when a ticket becomes booked."""
+        is_create = self.pk is None
+        old_status = None
+
+        if not is_create:
+            old_status = Ticket.objects.filter(pk=self.pk).values_list('status', flat=True).first()
+
+        super().save(*args, **kwargs)
+
+        if self.status == 'booked' and (is_create or old_status != 'booked'):
+            award_points(
+                user=self.user,
+                event=PointEvent.TICKET_BOOKING,
+                description=f"Ticket booked for {self.match}",
+                reference_id=f"ticket_booking:{self.pk}"
+            )
 
     def __str__(self):
         return f"Ticket {self.id}"

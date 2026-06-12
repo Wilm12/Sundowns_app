@@ -2,6 +2,9 @@
 
 from django.db import models
 
+from points.rules import PointEvent
+from points.services import award_points
+
 
 class Transport(models.Model):
     """Represents a transport option associated with a match and branch."""
@@ -59,6 +62,24 @@ class TransportBooking(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='booked')
     verified_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        """Award transport booking points only once when the booking becomes booked."""
+        is_create = self.pk is None
+        old_status = None
+
+        if not is_create:
+            old_status = TransportBooking.objects.filter(pk=self.pk).values_list('status', flat=True).first()
+
+        super().save(*args, **kwargs)
+
+        if self.status == 'booked' and (is_create or old_status != 'booked'):
+            award_points(
+                user=self.ticket.user,
+                event=PointEvent.TRANSPORT_BOOKING,
+                description=f"Transport booking for ticket {self.ticket.id}",
+                reference_id=f"transport_booking:{self.pk}"
+            )
 
     def __str__(self):
         return f"Booking {self.id}"

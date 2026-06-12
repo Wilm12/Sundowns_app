@@ -55,6 +55,25 @@ class PointsServiceTestCase(TestCase):
         self.assertEqual(transaction.transaction_type, 'transport_booking')
         self.assertEqual(self.user.points_account.balance, 5)
 
+    def test_award_points_is_idempotent_for_same_reference(self):
+        transaction_one = award_points(
+            self.user,
+            event=PointEvent.TRANSPORT_BOOKING,
+            description='Award points for transport booking',
+            reference_id='transport_002'
+        )
+
+        transaction_two = award_points(
+            self.user,
+            event=PointEvent.TRANSPORT_BOOKING,
+            description='Award points for transport booking',
+            reference_id='transport_002'
+        )
+
+        self.assertEqual(transaction_one.pk, transaction_two.pk)
+        self.user.points_account.refresh_from_db()
+        self.assertEqual(self.user.points_account.balance, 5)
+
     def test_balance_updates_correctly_through_transactions(self):
         award_points(
             self.user,

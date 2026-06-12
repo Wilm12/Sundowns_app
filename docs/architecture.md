@@ -152,6 +152,7 @@ Ticketing
 Ticketing handles:
 
 ticket booking
+points awarding on booked tickets
 duplicate prevention
 QR code generation
 QR verification

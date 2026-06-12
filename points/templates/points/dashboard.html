@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}My Points | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-8">
+
+    <h1 class="text-3xl font-bold text-green-900 mb-6">My Points</h1>
+
+    <div class="mb-8 p-6 rounded-lg bg-yellow-50 border border-yellow-200">
+        <p class="text-sm uppercase tracking-wide text-green-900 font-semibold">Current Balance</p>
+        <p class="text-5xl font-bold text-green-900 mt-3">{{ account.balance|default:0 }}</p>
+    </div>
+
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-green-900 mb-3">Recent Activity</h2>
+        {% if transactions %}
+            <div class="space-y-4">
+                {% for tx in transactions %}
+                    <div class="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <p class="text-lg font-semibold text-green-900">{{ tx.get_transaction_type_display }}</p>
+                            <p class="text-gray-700">{{ tx.description }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xl font-bold text-gray-900">{{ tx.points }}</p>
+                            <p class="text-sm text-gray-500">{{ tx.created_at }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-600">No points transactions yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

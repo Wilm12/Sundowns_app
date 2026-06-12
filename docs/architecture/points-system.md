@@ -4,6 +4,7 @@
 
 - Membership Payment = +50
 - Ticket Booking = +10
+- Transport Booking = +5
 
 ## Architecture
 
@@ -18,6 +19,8 @@ Points are awarded only on business-event transitions.
 - Membership:
     - not successful -> successful
 - Ticket:
+    - not booked -> booked
+- Transport:
     - not booked -> booked
 
 ## Duplicate Prevention

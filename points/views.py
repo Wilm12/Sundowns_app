@@ -1,7 +1,26 @@
 """Views for points system.
 
-This module will contain API views for points operations.
-Currently empty as Sprint 1 focuses on foundational models and signals.
+This module contains views for supporter-facing points pages.
 """
 
-# Views to be implemented in future sprints
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+from .models import PointsAccount, PointsTransaction
+
+
+@login_required
+def points_dashboard(request):
+    """Render the supporter-facing points dashboard."""
+    account = getattr(request.user, 'points_account', None)
+    if account is None:
+        account = PointsAccount.objects.filter(user=request.user).first()
+
+    transactions = []
+    if account is not None:
+        transactions = PointsTransaction.objects.filter(account=account).order_by('-created_at')
+
+    return render(request, 'points/dashboard.html', {
+        'account': account,
+        'transactions': transactions,
+    })

@@ -148,6 +148,12 @@ Tests must verify that users with inactive memberships cannot successfully creat
 
 ---
 
+## Ticket Booking Points
+
+A ticket created with status `booked` earns the user `+10` points. Tests should assert that the corresponding `PointsTransaction` is created and recorded on the user's points account.
+
+---
+
 ## Ticket Booking Flow
 
 1. User must have an active membership.

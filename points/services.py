@@ -37,7 +37,18 @@ def award_points(user, *, event, description, reference_id=None):
     if account is None:
         raise ValueError('User must have a points account before awarding points')
 
-    points = POINT_RULES[event]
+    # apply promotion multiplier when present
+    base_points = POINT_RULES[event]
+    try:
+        # import here to avoid circular import at module load
+        from promotions.services import get_points_multiplier
+    except Exception:
+        # if promotions app not available, fall back to multiplier 1
+        def get_points_multiplier(_):
+            return 1
+
+    multiplier = get_points_multiplier(event)
+    points = base_points * multiplier
 
     if reference_id is not None:
         with transaction.atomic():

@@ -3,17 +3,20 @@ from .models import Promotion, PromotionRedemption
 
 
 class PromotionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'target_tier', 'status', 'expiry_date')
-    list_filter = ('status', 'target_tier', 'expiry_date')
-    search_fields = ('title', 'description')
-    date_hierarchy = 'expiry_date'
-    readonly_fields = ('id',)
+    list_display = ('name', 'event_type', 'multiplier', 'is_active', 'start_date', 'end_date')
+    list_filter = ('is_active', 'event_type', 'start_date')
+    search_fields = ('name', 'title', 'description')
+    readonly_fields = ('id', 'created_at', 'updated_at')
     fieldsets = (
         ('Promotion Details', {
-            'fields': ('id', 'title', 'description', 'target_tier')
+            'fields': ('id', 'name', 'title', 'description')
         }),
-        ('Status & Dates', {
-            'fields': ('status', 'expiry_date')
+        ('Rules', {
+            'fields': ('event_type', 'multiplier', 'is_active')
+        }),
+        ('Timing', {
+            'fields': ('start_date', 'end_date', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
         }),
     )
     list_per_page = 50
@@ -22,7 +25,7 @@ class PromotionAdmin(admin.ModelAdmin):
 class PromotionRedemptionAdmin(admin.ModelAdmin):
     list_display = ('user', 'promotion', 'status', 'redeemed_at')
     list_filter = ('status', 'redeemed_at', 'promotion')
-    search_fields = ('user__username', 'user__email', 'promotion__title')
+    search_fields = ('user__username', 'user__email', 'promotion__name', 'promotion__title')
     date_hierarchy = 'redeemed_at'
     readonly_fields = ('redeemed_at', 'id')
     fieldsets = (

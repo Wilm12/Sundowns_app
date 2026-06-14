@@ -28,7 +28,7 @@
                         </a>
                         <p class="text-sm text-gray-600 mt-1">Required Tier: <strong>{{ reward.get_minimum_tier_display }}</strong></p>
                         {% if not reward.is_eligible_for_user %}
-                            <p class="text-sm text-red-600">You must reach {{ reward.get_minimum_tier_display }} tier to redeem this reward.</p>
+                            <p class="text-sm text-red-600">Requires {{ reward.get_minimum_tier_display }} tier. You are currently {{ user_tier|capfirst }}.</p>
                         {% endif %}
                         <span class="px-4 py-2 rounded bg-yellow-100 text-yellow-700">Points: {{ reward.points_cost }}</span>
                     </div>

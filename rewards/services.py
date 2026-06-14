@@ -5,6 +5,7 @@ from django.db.models import F
 
 from .models import Reward, RewardRedemption
 from points.models import PointsTransaction
+from points import tiers as tier_helpers
 
 
 def redeem_reward(user, reward):
@@ -23,6 +24,12 @@ def redeem_reward(user, reward):
     account = getattr(user, 'points_account', None)
     if account is None:
         raise ValueError('User must have a points account before redeeming rewards.')
+
+    # Tier eligibility check
+    user_tier = tier_helpers.get_user_tier(user)
+    required = getattr(reward, 'minimum_tier', 'bronze')
+    if tier_helpers.get_tier_rank(user_tier) < tier_helpers.get_tier_rank(required):
+        raise ValueError(f'User does not meet minimum tier requirement: {required}')
 
     if not reward.is_active:
         raise ValueError('Reward is not active.')

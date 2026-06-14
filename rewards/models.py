@@ -35,6 +35,15 @@ class Reward(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    MINIMUM_TIER_CHOICES = (
+        ('bronze', 'Bronze'),
+        ('silver', 'Silver'),
+        ('gold', 'Gold'),
+        ('platinum', 'Platinum'),
+    )
+
+    minimum_tier = models.CharField(max_length=10, choices=MINIMUM_TIER_CHOICES, default='bronze')
 
     def __str__(self):
         return self.name

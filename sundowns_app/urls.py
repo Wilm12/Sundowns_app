@@ -33,6 +33,7 @@ urlpatterns = [
     path('transport/', include('transport.frontend_urls')),
     path('membership/', include('membership.frontend_urls')),
     path('branches/', include('branches.frontend_urls')),
+    path('rewards/', include('rewards.urls')),
     path('', include('points.urls')),
     path("settings/", user_settings_view, name="user_settings"),
     path("settings/change-password/", change_password_view, name="change_password"),

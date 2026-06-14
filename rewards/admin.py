@@ -20,13 +20,13 @@ class PointsLedgerAdmin(admin.ModelAdmin):
 
 
 class RewardAdmin(admin.ModelAdmin):
-    list_display = ('name', 'points_cost', 'quantity_available', 'is_active', 'created_at', 'updated_at')
-    list_filter = ('is_active',)
+    list_display = ('name', 'points_cost', 'quantity_available', 'minimum_tier', 'is_active', 'created_at', 'updated_at')
+    list_filter = ('is_active', 'minimum_tier')
     search_fields = ('name', 'description')
     readonly_fields = ('created_at', 'updated_at')
     fieldsets = (
         ('Reward Details', {
-            'fields': ('name', 'description', 'points_cost', 'quantity_available', 'is_active')
+            'fields': ('name', 'description', 'points_cost', 'quantity_available', 'minimum_tier', 'is_active')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

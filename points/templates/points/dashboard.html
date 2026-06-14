@@ -12,6 +12,15 @@
         <p class="text-5xl font-bold text-green-900 mt-3">{{ account.balance|default:0 }}</p>
     </div>
 
+    <div class="mb-6 p-6 rounded-lg bg-white border">
+        <p class="text-sm uppercase tracking-wide text-green-900 font-semibold">Current Tier</p>
+        <p class="text-2xl font-bold text-green-900 mt-2">{{ current_tier|capfirst }}</p>
+        <p class="text-sm text-gray-600 mt-1">Next tier: {{ next_tier|default:'—'|capfirst }}</p>
+        {% if points_until_next and points_until_next > 0 %}
+            <p class="text-sm text-gray-700">{{ points_until_next }} points until {{ next_tier|capfirst }}</p>
+        {% endif %}
+    </div>
+
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-green-900 mb-3">Recent Activity</h2>
         {% if transactions %}

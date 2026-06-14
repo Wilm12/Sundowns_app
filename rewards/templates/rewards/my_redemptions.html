@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}My Reward Redemptions | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-8">
+    <h1 class="text-3xl font-bold text-green-900 mb-6">My Reward Redemptions</h1>
+
+    {% if redemptions %}
+        <div class="space-y-4">
+            {% for redemption in redemptions %}
+                <div class="border rounded-lg p-5">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+                        <div>
+                            <h2 class="text-xl font-bold text-green-900">{{ redemption.reward.name }}</h2>
+                            <p class="text-gray-600">Redeemed at: {{ redemption.created_at|date:'F j, Y, g:i a' }}</p>
+                        </div>
+                        <span class="rounded-full bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-800">{{ redemption.get_status_display }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-600">You have not redeemed any rewards yet.</p>
+    {% endif %}
+
+    <div class="mt-6">
+        <a href="{% url 'reward_list_page' %}" class="text-green-700 hover:underline">Browse rewards</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Rewards | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-8">
+
+    <h1 class="text-3xl font-bold text-green-900 mb-6">
+        Rewards Catalog
+    </h1>
+
+    {% if rewards %}
+        <div class="space-y-4">
+            {% for reward in rewards %}
+                <div class="border rounded-lg p-5 flex justify-between items-center">
+
+                    <div>
+                        <h2 class="text-xl font-bold text-green-900">{{ reward.name }}</h2>
+                        <p class="text-gray-700">{{ reward.description }}</p>
+                        <p class="text-gray-500">Cost: <strong>{{ reward.points_cost }} pts</strong></p>
+                        <p class="text-gray-500">Available: <strong>{{ reward.quantity_available }}</strong></p>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-2">
+                        <a href="{% url 'reward_detail_page' reward.id %}"
+                           class="inline-block rounded bg-green-700 px-4 py-2 text-white hover:bg-green-800 transition-colors">
+                            View details
+                        </a>
+                        <p class="text-sm text-gray-600 mt-1">Required Tier: <strong>{{ reward.get_minimum_tier_display }}</strong></p>
+                        {% if not reward.is_eligible_for_user %}
+                            <p class="text-sm text-red-600">You must reach {{ reward.get_minimum_tier_display }} tier to redeem this reward.</p>
+                        {% endif %}
+                        <span class="px-4 py-2 rounded bg-yellow-100 text-yellow-700">Points: {{ reward.points_cost }}</span>
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-600">No rewards available at this time.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

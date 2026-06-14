@@ -11,6 +11,7 @@ from .models import PointsAccount, PointsTransaction
 from . import tiers as tier_helpers
 from .rules import POINT_RULES
 from promotions.models import Promotion
+from rewards.models import RewardRedemption
 
 
 @login_required
@@ -28,6 +29,17 @@ def points_dashboard(request):
     current_tier = tier_helpers.get_tier_from_points(user_points)
     next_tier = tier_helpers.get_next_tier(user_points)
     points_until_next = tier_helpers.points_until_next_tier(user_points)
+    # progress percentage between current tier and next
+    progress_percent = 0
+    current_threshold = tier_helpers.TIER_THRESHOLDS.get(current_tier, 0)
+    next_threshold = None
+    next_tier_key = tier_helpers.get_next_tier(user_points)
+    if next_tier_key:
+        next_threshold = tier_helpers.TIER_THRESHOLDS.get(next_tier_key)
+    if next_threshold and next_threshold > current_threshold:
+        span = next_threshold - current_threshold
+        gained = (user_points or 0) - current_threshold
+        progress_percent = int(round(max(0, min(1.0, gained / float(span))) * 100))
 
     now = timezone.now()
     promotions = Promotion.objects.filter(
@@ -54,6 +66,8 @@ def points_dashboard(request):
         'current_points': user_points,
         'next_tier': next_tier,
         'points_until_next': points_until_next,
+        'progress_percent': progress_percent,
+        'rewards_redeemed_count': RewardRedemption.objects.filter(user=request.user, status__in=[RewardRedemption.Status.APPROVED, RewardRedemption.Status.FULFILLED]).count(),
         'promotions': promotions,
         'earning_guide': earning_guide,
     })

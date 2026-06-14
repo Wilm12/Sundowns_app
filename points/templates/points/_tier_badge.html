@@ -1,0 +1,15 @@
+{% comment %}Reusable tier badge. Expects `tier` (key) and optional `show_text` boolean.{% endcomment %}
+{% load i18n %}
+{% if tier %}
+    {% if tier == 'bronze' %}
+        <span class="badge bg-secondary">{% if show_text|default:True %}Bronze{% endif %}</span>
+    {% elif tier == 'silver' %}
+        <span class="badge bg-info text-dark">{% if show_text|default:True %}Silver{% endif %}</span>
+    {% elif tier == 'gold' %}
+        <span class="badge bg-warning text-dark">{% if show_text|default:True %}Gold{% endif %}</span>
+    {% elif tier == 'platinum' %}
+        <span class="badge bg-primary">{% if show_text|default:True %}Platinum{% endif %}</span>
+    {% else %}
+        <span class="badge bg-light text-dark">{{ tier|capfirst }}</span>
+    {% endif %}
+{% endif %}

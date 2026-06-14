@@ -11,16 +11,21 @@
         <p class="text-sm uppercase tracking-wide text-green-900 font-semibold">Current Points</p>
         <p class="text-5xl font-bold text-green-900 mt-3">{{ current_points|default:0 }}</p>
     </div>
-
-    <div class="mb-6 p-6 rounded-lg bg-white border">
-        <p class="text-sm uppercase tracking-wide text-green-900 font-semibold">Current Tier</p>
-        <p class="text-2xl font-bold text-green-900 mt-2">{{ current_tier|capfirst }}</p>
-        <p class="text-sm text-gray-600 mt-1">Next tier: {{ next_tier|default:'—'|capfirst }}</p>
-        {% if points_until_next and points_until_next > 0 %}
+    <div class="mb-6 p-6 rounded-lg bg-white border grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+        <div>
+            <p class="text-sm uppercase tracking-wide text-green-900 font-semibold">Current Tier</p>
+            <p class="text-2xl font-bold text-green-900 mt-2">{% include 'points/_tier_badge.html' with tier=current_tier show_text=True %}</p>
+            <p class="text-sm text-gray-600 mt-1">Next tier: {{ next_tier|default:'—'|capfirst }}</p>
+        </div>
+        <div class="col-span-1 md:col-span-2">
             <p class="text-sm text-gray-700">{{ points_until_next }} points until {{ next_tier|capfirst }}</p>
-        {% endif %}
-        <div class="mt-4">
-            <a href="{% url 'tiers_page' %}" class="text-green-700 hover:underline">View full tier thresholds</a>
+            <div class="w-full bg-gray-200 rounded-full h-4 mt-2">
+                <div class="bg-green-700 h-4 rounded-full" style="width: {{ progress_percent }}%"></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">Progress: {{ progress_percent }}%</p>
+            <div class="mt-3">
+                <a href="{% url 'tiers_page' %}" class="text-green-700 hover:underline">View full tier thresholds</a>
+            </div>
         </div>
     </div>
 
@@ -55,7 +60,13 @@
     </div>
 
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-green-900 mb-3">Recent Activity</h2>
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-2xl font-bold text-green-900">Recent Activity</h2>
+            <div class="text-right">
+                <p class="text-sm text-gray-500">Rewards redeemed</p>
+                <p class="text-lg font-semibold text-gray-900">{{ rewards_redeemed_count }}</p>
+            </div>
+        </div>
         {% if transactions %}
             <div class="space-y-4">
                 {% for tx in transactions %}

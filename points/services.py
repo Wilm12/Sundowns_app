@@ -81,3 +81,22 @@ def award_points(user, *, event, description, reference_id=None):
         description=description,
         reference_id=reference_id,
     )
+
+
+def get_tier_distribution():
+    """Return counts of users per tier key for admin analytics.
+
+    Keeps the implementation simple and database-driven. Returns a dict with
+    keys matching `TIER_ORDER` from `points.tiers`.
+    """
+    from collections import Counter
+    from .models import PointsAccount
+    from . import tiers as tier_helpers
+
+    accounts = PointsAccount.objects.select_related('user').all()
+    counters = Counter()
+    for acct in accounts:
+        tier = tier_helpers.get_tier_from_points(acct.balance)
+        counters[tier] += 1
+
+    return {k: counters.get(k, 0) for k in tier_helpers.TIER_ORDER}

@@ -30,7 +30,20 @@ def reward_detail_page(request, reward_id):
     user_rank = tier_helpers.get_tier_rank(user_tier)
     required = getattr(reward, 'minimum_tier', 'bronze')
     is_eligible = user_rank >= tier_helpers.get_tier_rank(required)
-    return render(request, 'rewards/reward_detail.html', {'reward': reward, 'user_tier': user_tier, 'is_eligible': is_eligible})
+    # provide points context for UX when not eligible
+    account = getattr(request.user, 'points_account', None)
+    current_points = account.balance if account is not None else 0
+    points_until_next = tier_helpers.points_until_next_tier(current_points)
+    next_tier = tier_helpers.get_next_tier(current_points)
+
+    return render(request, 'rewards/reward_detail.html', {
+        'reward': reward,
+        'user_tier': user_tier,
+        'is_eligible': is_eligible,
+        'current_points': current_points,
+        'points_until_next': points_until_next,
+        'next_tier': next_tier,
+    })
 
 
 @login_required

@@ -28,8 +28,17 @@
 
     <div class="mb-4">
         <p class="text-sm text-gray-600">Required Tier: <strong>{{ reward.get_minimum_tier_display }}</strong></p>
+        <p class="mt-2">Current Tier: {% include 'points/_tier_badge.html' with tier=user_tier show_text=True %}</p>
         {% if not is_eligible %}
-            <p class="text-sm text-red-600">Requires {{ reward.get_minimum_tier_display }} tier. You are currently {{ user_tier|capfirst }}.</p>
+            <div class="mt-2 text-red-600 flex items-center gap-2">
+                <span class="text-xl">🔒</span>
+                <div>
+                    <p class="text-sm">Requires {{ reward.get_minimum_tier_display }} tier. You are currently {{ user_tier|capfirst }}.</p>
+                    {% if points_until_next and points_until_next > 0 %}
+                        <p class="text-sm text-gray-700">You need {{ points_until_next }} more points to reach {{ next_tier|capfirst }}.</p>
+                    {% endif %}
+                </div>
+            </div>
         {% endif %}
     </div>
 

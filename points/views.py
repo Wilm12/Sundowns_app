@@ -67,7 +67,7 @@ def points_dashboard(request):
         'next_tier': next_tier,
         'points_until_next': points_until_next,
         'progress_percent': progress_percent,
-        'rewards_redeemed_count': RewardRedemption.objects.filter(user=request.user, status__in=[RewardRedemption.Status.APPROVED, RewardRedemption.Status.FULFILLED]).count(),
+        'rewards_redeemed_count': RewardRedemption.objects.filter(user=request.user, status__in=[RewardRedemption.Status.APPROVED, RewardRedemption.Status.COMPLETED, RewardRedemption.Status.COLLECTED]).count(),
         'promotions': promotions,
         'earning_guide': earning_guide,
     })

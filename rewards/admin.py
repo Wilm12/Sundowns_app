@@ -50,6 +50,50 @@ class RewardRedemptionAdmin(admin.ModelAdmin):
         }),
     )
 
+    actions = [
+        'approve_redemptions',
+        'reject_redemptions',
+        'mark_ready_for_collection',
+        'mark_collected',
+        'mark_completed',
+    ]
+
+    def _change_status(self, request, queryset, new_status):
+        from django.db import transaction
+        from notifications.services import create_notification
+
+        updated = 0
+        with transaction.atomic():
+            for obj in queryset.select_for_update():
+                old = obj.status
+                obj.status = new_status
+                obj.save(update_fields=['status'])
+                updated += 1
+                # generate notification for user
+                title = f"Your redemption status changed to {obj.get_status_display()}"
+                message = f"Your redemption of '{obj.reward.name}' is now {obj.get_status_display()}."
+                try:
+                    create_notification(obj.user, title, message, 'reward_redeemed')
+                except Exception:
+                    # don't block admin action on notification failure
+                    pass
+        self.message_user(request, f"Updated {updated} redemptions to {new_status}.")
+
+    def approve_redemptions(self, request, queryset):
+        return self._change_status(request, queryset, 'approved')
+
+    def reject_redemptions(self, request, queryset):
+        return self._change_status(request, queryset, 'rejected')
+
+    def mark_ready_for_collection(self, request, queryset):
+        return self._change_status(request, queryset, 'ready_for_collection')
+
+    def mark_collected(self, request, queryset):
+        return self._change_status(request, queryset, 'collected')
+
+    def mark_completed(self, request, queryset):
+        return self._change_status(request, queryset, 'completed')
+
 
 admin.site.register(PointsLedger, PointsLedgerAdmin)
 admin.site.register(Reward, RewardAdmin)

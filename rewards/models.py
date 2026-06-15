@@ -59,14 +59,17 @@ class RewardRedemption(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
         APPROVED = 'approved', 'Approved'
-        FULFILLED = 'fulfilled', 'Fulfilled'
+        READY_FOR_COLLECTION = 'ready_for_collection', 'Ready for Collection'
+        COLLECTED = 'collected', 'Collected'
+        COMPLETED = 'completed', 'Completed'
+        REJECTED = 'rejected', 'Rejected'
         CANCELLED = 'cancelled', 'Cancelled'
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reward_redemptions')
     reward = models.ForeignKey(Reward, on_delete=models.CASCADE, related_name='redemptions')
     points_spent = models.PositiveIntegerField()
     status = models.CharField(
-        max_length=10,
+        max_length=30,
         choices=Status.choices,
         default=Status.PENDING,
     )

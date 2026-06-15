@@ -80,7 +80,7 @@ class AnalyticsServiceTests(TestCase):
             user=self.user2,
             reward=self.reward1,
             points_spent=200,
-            status=RewardRedemption.Status.FULFILLED
+            status=RewardRedemption.Status.COMPLETED
         )
         RewardRedemption.objects.create(
             user=self.user3,

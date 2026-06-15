@@ -47,6 +47,10 @@ class RewardRedemptionServiceTestCase(TestCase):
         self.assertEqual(transaction.transaction_type, 'reward_redemption')
         self.assertEqual(transaction.description, 'reward redemption')
         self.assertEqual(self.user.points_account.balance, 30)
+        # ensure notification was created for redemption
+        from notifications.models import Notification
+        notif = Notification.objects.filter(user=self.user, notification_type=Notification.NotificationType.REWARD_REDEEMED)
+        self.assertTrue(notif.exists())
 
     def test_insufficient_balance_raises_error(self):
         reward = Reward.objects.create(

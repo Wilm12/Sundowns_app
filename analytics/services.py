@@ -69,6 +69,16 @@ def get_analytics_reward_metrics(limit=5):
         'total_reward_redemptions': total_reward_redemptions,
         'most_redeemed_rewards': most_redeemed,
         'least_redeemed_rewards': least_redeemed,
+        # workflow counts
+        'redemptions_by_status': {
+            'pending': RewardRedemption.objects.filter(status=RewardRedemption.Status.PENDING).count(),
+            'approved': RewardRedemption.objects.filter(status=RewardRedemption.Status.APPROVED).count(),
+            'ready_for_collection': RewardRedemption.objects.filter(status=RewardRedemption.Status.READY_FOR_COLLECTION).count(),
+            'collected': RewardRedemption.objects.filter(status=RewardRedemption.Status.COLLECTED).count(),
+            'completed': RewardRedemption.objects.filter(status=RewardRedemption.Status.COMPLETED).count(),
+            'rejected': RewardRedemption.objects.filter(status=RewardRedemption.Status.REJECTED).count(),
+            'cancelled': RewardRedemption.objects.filter(status=RewardRedemption.Status.CANCELLED).count(),
+        },
     }
 
 

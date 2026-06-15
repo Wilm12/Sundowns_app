@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'promotions',
     'communications',
     'rewards',
+    'analytics',
     'common',
     'users',
     'branches',

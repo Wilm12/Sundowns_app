@@ -40,11 +40,17 @@ def dashboard_view(request):
 
     upcoming_matches_count = Match.objects.count()
 
+    from notifications.models import Notification
+    latest_notifications = Notification.objects.filter(
+        user=request.user
+    ).order_by('-created_at')[:5]
+
     return render(request, "dashboard.html", {
         "membership": membership,
         "tickets_count": tickets_count,
         "transport_bookings_count": transport_bookings_count,
         "upcoming_matches_count": upcoming_matches_count,
+        "latest_notifications": latest_notifications,
     })
 
 

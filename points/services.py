@@ -50,6 +50,10 @@ def award_points(user, *, event, description, reference_id=None):
     multiplier = get_points_multiplier(event)
     points = base_points * multiplier
 
+    from . import tiers as tier_helpers
+    old_balance = account.balance
+    old_tier = tier_helpers.get_tier_from_points(old_balance)
+
     if reference_id is not None:
         with transaction.atomic():
             transaction_obj, created = PointsTransaction.objects.get_or_create(
@@ -72,15 +76,38 @@ def award_points(user, *, event, description, reference_id=None):
                     'Existing points transaction conflicts with requested award details.'
                 )
 
-        return transaction_obj
+            return transaction_obj
 
-    return PointsTransaction.objects.create(
-        account=account,
-        transaction_type=event.value,
-        points=points,
-        description=description,
-        reference_id=reference_id,
+        transaction_obj = transaction_obj
+    else:
+        transaction_obj = PointsTransaction.objects.create(
+            account=account,
+            transaction_type=event.value,
+            points=points,
+            description=description,
+            reference_id=reference_id,
+        )
+
+    new_balance = old_balance + points
+    new_tier = tier_helpers.get_tier_from_points(new_balance)
+
+    from notifications.services import create_notification
+    create_notification(
+        user,
+        title='Points earned',
+        message=f'You earned {points} points for {description}.',
+        notification_type='points_earned',
     )
+
+    if tier_helpers.get_tier_rank(new_tier) > tier_helpers.get_tier_rank(old_tier):
+        create_notification(
+            user,
+            title='Tier upgrade',
+            message=f'Congratulations! You have been upgraded to {new_tier.title()} tier.',
+            notification_type='tier_upgrade',
+        )
+
+    return transaction_obj
 
 
 def get_tier_distribution():

@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'transport',
     'promotions',
     'communications',
+    'notifications',
     'rewards',
     'analytics',
     'common',

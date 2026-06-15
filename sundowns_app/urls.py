@@ -34,6 +34,7 @@ urlpatterns = [
     path('membership/', include('membership.frontend_urls')),
     path('branches/', include('branches.frontend_urls')),
     path('rewards/', include('rewards.urls')),
+    path('notifications/', include('notifications.urls')),
     path('analytics/', include('analytics.urls')),
     path('', include('points.urls')),
     path("settings/", user_settings_view, name="user_settings"),

@@ -69,4 +69,12 @@ def redeem_reward(user, reward):
         reward_locked.quantity_available = F('quantity_available') - 1
         reward_locked.save(update_fields=['quantity_available'])
 
+    from notifications.services import create_notification
+    create_notification(
+        user,
+        title='Reward redeemed',
+        message=f'You redeemed {reward_locked.name} for {reward_locked.points_cost} points.',
+        notification_type='reward_redeemed',
+    )
+
     return redemption

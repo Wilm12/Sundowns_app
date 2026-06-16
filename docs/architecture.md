@@ -2,287 +2,759 @@
 
 ## Overview
 
-Sundowns WPA is a Django-based membership platform for supporters. The system manages users, branches, memberships, payments, match tickets, QR verification, and transport bookings.
+Sundowns WPA is a Django-based supporter membership and engagement platform designed for football supporter communities.
 
-The project follows a modular monolith architecture with clear separation between frontend template routes and DRF API routes.
+The platform manages:
+
+* Users
+* Branches
+* Memberships
+* Payments
+* Matches
+* Tickets
+* Transport
+* Loyalty Points
+* Rewards
+* Promotions
+* Notifications
+* Analytics
+
+The system follows a modular monolith architecture with clear separation between frontend template routes and DRF API routes.
 
 ---
 
-## Core Stack
+# Core Technology Stack
 
-- Django
-- Django REST Framework
-- PostgreSQL
-- Docker
-- Docker Compose
-- Redis
-- Celery foundations
-- Tailwind CSS
-- JWT authentication
-- Django template frontend
+* Django
+* Django REST Framework
+* PostgreSQL
+* Docker
+* Docker Compose
+* Redis
+* Celery Foundations
+* Tailwind CSS
+* JWT Authentication
+* Django Template Frontend
 
 ---
 
-## High-Level Architecture
+# High-Level Architecture
 
 ```text
 Browser
-  |
-  | HTTP requests
-  v
+   |
+   v
 Django Application
-  |
-  |----------------------------
-  | Frontend Template Routes
-  | DRF API Routes
-  | Business Logic
-  |----------------------------
-  |
-  v
+   |
+   |----------------------------
+   | Frontend Template Routes
+   | DRF API Routes
+   | Business Logic
+   | Services Layer
+   |----------------------------
+   |
+   v
 PostgreSQL Database
 
-Redis + Celery
-  |
-  v
-Future background tasks
-Routing Architecture
+Redis
+   |
+   v
+Future Celery Workers
+```
 
-The project separates frontend routes from API routes.
+---
 
-frontend_urls.py  -> Django template pages
-urls.py           -> DRF/API endpoints
+# Routing Architecture
 
-Example:
+Frontend and API routes are intentionally separated.
 
-matches/frontend_urls.py  -> /matches/
-matches/urls.py           -> /api/matches/
+```text
+frontend_urls.py
+    ↓
+Template Pages
 
-ticketing/frontend_urls.py -> /tickets/
-ticketing/urls.py          -> /api/tickets/
+urls.py
+    ↓
+API Endpoints
+```
 
-This prevents route conflicts and makes testing clearer.
+Examples:
 
-Main Modules
-Authentication
+```text
+matches/frontend_urls.py
+    /matches/
 
-Handles:
+matches/urls.py
+    /api/matches/
+```
 
-user registration
-login
-JWT authentication
-role-based access
-admin/member permissions
-Users
+```text
+ticketing/frontend_urls.py
+    /tickets/
 
-Contains the custom user model.
+ticketing/urls.py
+    /api/tickets/
+```
 
-Important user fields:
+This separation improves:
 
-username
-email
-role
-branch
-branch change tracking
+* Maintainability
+* Testing
+* Route clarity
+* Future frontend flexibility
+
+---
+
+# Domain Architecture
+
+## Authentication
+
+Responsibilities:
+
+* Registration
+* Login
+* JWT Authentication
+* Role-Based Access
+* Permissions
+
+Roles:
+
+```text
+Admin
+Member
+```
+
+---
+
+## Users
+
+Custom user model.
+
+Important fields:
+
+* username
+* email
+* role
+* branch
 
 Business rule:
 
-Every user must belong to a branch.
-Branches
+```text
+Every supporter belongs to a branch.
+```
 
-Branches represent supporter groups.
+---
 
-Branches connect to:
+## Branches
 
-users
-memberships indirectly
-transport
-dashboard identity
-Membership
+Represents supporter communities.
 
-Membership controls access to ticket booking.
+Relationships:
 
-Membership Architecture
+```text
+Branch
+    ↓
+Users
+Membership Activity
+Transport Activity
+Future Campaign Targeting
+```
 
-Basic
-- R50
-- Giveaway promotions
-- 30% merchandise discount
+---
 
-Premium
-- R100
-- Branch transport eligibility
-- 60% merchandise discount
+## Membership
 
-Golden
-- R150
-- Expanded transport eligibility
-- 70% merchandise discount
-- VIP benefits
+Controls supporter eligibility.
 
-Flow:
+### Membership Types
 
+#### Basic
+
+```text
+R50
+Promotional Giveaways
+30% Merchandise Discount
+```
+
+#### Premium
+
+```text
+R100
+Transport Eligibility
+60% Merchandise Discount
+```
+
+#### Golden
+
+```text
+R150
+Expanded Transport Eligibility
+70% Merchandise Discount
+VIP Benefits
+```
+
+### Membership Flow
+
+```text
 Register
-→ Membership created inactive
-→ Payment completed
-→ Membership activated
+    ↓
+Inactive Membership
+    ↓
+Payment Successful
+    ↓
+Membership Activated
+```
 
 Ticket booking requires:
 
+```text
 membership.status == active
-Payments
+```
 
-Payments activate memberships.
+---
+
+## Payments
+
+Responsible for membership activation.
 
 Flow:
 
-User pays membership fee
-→ Payment status becomes successful
-→ Membership status becomes active
-Matches
+```text
+Membership Payment
+    ↓
+Payment Successful
+    ↓
+Membership Activated
+```
 
-Matches represent upcoming fixtures.
+Future:
 
-Users can:
+```text
+Reward Payments
+Merchandise Payments
+Campaign Payments
+```
 
-view matches
-view match details
-book tickets for matches
-Ticketing
+---
 
-Ticketing handles:
+## Matches
 
-ticket booking
-points awarding on booked tickets
-duplicate prevention
-QR code generation
-QR verification
-transport prompt after booking
+Stores fixture information.
 
-Ticket booking flow:
+Supporters can:
 
+* View Fixtures
+* View Match Details
+* Book Tickets
+
+---
+
+## Ticketing
+
+Handles:
+
+* Ticket Booking
+* Duplicate Prevention
+* QR Generation
+* QR Verification
+* Loyalty Point Awards
+* Transport Prompt
+
+### Ticket Booking Flow
+
+```text
 Book Ticket
-→ Ticket created
-→ Transport prompt
-→ Yes: transport page
-→ No: my tickets page
-Transport
+    ↓
+Membership Validation
+    ↓
+Duplicate Check
+    ↓
+Ticket Created
+    ↓
+Transport Prompt
+```
 
-Transport is linked to:
+---
 
-branches
-matches
-tickets
+## Transport
+
+Transport booking linked to:
+
+* Branches
+* Matches
+* Tickets
 
 Rules:
 
-transport capacity cannot be exceeded
-ticket match must match transport match
-one ticket cannot book invalid transport
-User Journey
-User registers
-→ selects branch
-→ membership created inactive
-→ user pays membership fee
-→ membership becomes active
-→ user books match ticket
-→ QR ticket generated
-→ user chooses whether transport is needed
-→ user books transport
-→ admin verifies QR ticket
-Admin Journey
-Admin logs in
-→ opens admin dashboard
-→ views platform statistics
-→ verifies QR ticket
-→ ticket status changes from booked to used
-Data Flow: Ticket Booking
-User clicks Book Ticket
-  |
-  v
-Django checks active membership
-  |
-  v
-Django checks duplicate ticket
-  |
-  v
-Ticket is created
-  |
-  v
-User is redirected to transport prompt
-Data Flow: Payment Activation
-User clicks Pay Membership
-  |
-  v
-Payment record is created
-  |
-  v
-Payment status = successful
-  |
-  v
-Membership status becomes active
-Data Flow: QR Verification
-Admin submits QR code
-  |
-  v
-System finds ticket by QR
-  |
-  v
-System checks ticket status
-  |
-  v
-Ticket status changes from booked to used
-Testing Architecture
+```text
+Capacity Cannot Be Exceeded
 
-Tests run inside Docker:
+Ticket Match
+    =
+Transport Match
 
+Invalid Transport Booking
+    Prevented
+```
+
+---
+
+# Loyalty Domain
+
+## Points
+
+Points are awarded for supporter activities.
+
+Examples:
+
+```text
+Membership Payments
+Ticket Purchases
+Future Campaign Activities
+Future Attendance Verification
+```
+
+Points are stored as:
+
+```text
+PointsTransaction
+```
+
+The ledger is the source of truth.
+
+---
+
+## Tiers
+
+Supporters progress through loyalty tiers.
+
+### Tier Thresholds
+
+```text
+Bronze
+0+
+
+Silver
+100+
+
+Gold
+500+
+
+Platinum
+1000+
+```
+
+### Tier Benefits
+
+Used for:
+
+* Reward Eligibility
+* Future Campaign Eligibility
+* Future VIP Experiences
+
+---
+
+## Rewards
+
+Supporters redeem rewards using points.
+
+Reward fields include:
+
+```text
+Points Cost
+Minimum Tier
+Available Quantity
+Active Status
+```
+
+---
+
+## Reward Redemption Workflow
+
+```text
+Pending
+    ↓
+Approved
+    ↓
+Ready For Collection
+    ↓
+Collected
+    ↓
+Completed
+```
+
+Alternative outcomes:
+
+```text
+Rejected
+Cancelled
+```
+
+---
+
+## Promotions
+
+Promotions modify loyalty earning behavior.
+
+Examples:
+
+```text
+Double Points Weekend
+Membership Bonus
+Match Attendance Multiplier
+```
+
+Promotions support:
+
+```text
+Event Type
+Multiplier
+Start Date
+End Date
+```
+
+---
+
+# Notifications Domain
+
+Notifications provide supporter engagement feedback.
+
+Current notification types:
+
+```text
+points_earned
+tier_upgrade
+reward_redeemed
+```
+
+Future notification types:
+
+```text
+campaign_invitation
+competition_entry
+winner_announced
+branch_drive
+membership_expiry
+```
+
+Architecture:
+
+```text
+Business Event
+    ↓
+Notification Service
+    ↓
+Notification Record
+    ↓
+Notification Centre
+```
+
+---
+
+# Analytics Domain
+
+Provides operational and loyalty insights.
+
+Current metrics:
+
+```text
+Top Supporters
+Tier Distribution
+Reward Statistics
+Supporter Activity
+```
+
+Future metrics:
+
+```text
+Campaign Analytics
+Branch Performance
+Attendance Analytics
+Sponsor Analytics
+```
+
+Architecture:
+
+```text
+Platform Activity
+    ↓
+Analytics Services
+    ↓
+Aggregated Metrics
+    ↓
+Admin Dashboard
+```
+
+---
+
+# User Journey
+
+```text
+Register
+    ↓
+Select Branch
+    ↓
+Membership Created
+    ↓
+Membership Payment
+    ↓
+Membership Activated
+    ↓
+Book Ticket
+    ↓
+Earn Points
+    ↓
+Progress Through Tiers
+    ↓
+Redeem Rewards
+    ↓
+Receive Notifications
+```
+
+---
+
+# Admin Journey
+
+```text
+Admin Login
+    ↓
+Admin Dashboard
+    ↓
+View Analytics
+    ↓
+Manage Memberships
+    ↓
+Manage Rewards
+    ↓
+Approve Redemptions
+    ↓
+Verify QR Tickets
+```
+
+---
+
+# Data Flow: Membership Activation
+
+```text
+Payment
+    ↓
+Successful
+    ↓
+Membership Activated
+```
+
+---
+
+# Data Flow: Ticket Booking
+
+```text
+Book Ticket
+    ↓
+Membership Validation
+    ↓
+Duplicate Check
+    ↓
+Ticket Created
+```
+
+---
+
+# Data Flow: Reward Redemption
+
+```text
+Redeem Reward
+    ↓
+Tier Validation
+    ↓
+Points Validation
+    ↓
+Stock Validation
+    ↓
+Points Deducted
+    ↓
+Redemption Created
+    ↓
+Notification Created
+```
+
+---
+
+# Data Flow: Tier Upgrade
+
+```text
+Points Earned
+    ↓
+Tier Recalculated
+    ↓
+Tier Upgrade Detected
+    ↓
+Notification Created
+```
+
+---
+
+# Testing Architecture
+
+Tests execute inside Docker.
+
+```text
 docker compose exec web python manage.py test --settings=sundowns_app.settings.test
+```
 
-Current tested areas:
+Coverage includes:
 
-registration with branch
-JWT login
-payment activation
-inactive membership ticket restriction
-duplicate ticket prevention
-ticket booking redirect
-transport prompt
-QR verification
-QR permission protection
-transport capacity
-transport match consistency
-Deployment Architecture Target
+* Registration
+* Branch Assignment
+* JWT Authentication
+* Membership Activation
+* Ticket Booking
+* Duplicate Prevention
+* Transport Validation
+* QR Verification
+* Loyalty Points
+* Tier Calculation
+* Reward Redemption
+* Notifications
+* Analytics
 
-Planned production path:
+---
 
+# Current Navigation Structure
+
+```text
+Dashboard
+
+Supporter
+    Membership
+    Branches
+
+Match Day
+    Matches
+    Tickets
+    Transport
+
+Loyalty
+    Points
+    Rewards
+
+Engagement
+    Notifications
+
+Account
+    Settings
+```
+
+---
+
+# Future Domains
+
+Planned but not yet implemented.
+
+## Campaigns & Supporter Engagement
+
+Purpose:
+
+```text
+Competitions
+Sponsor Activations
+Branch Recruitment Drives
+Attendance Challenges
+Membership Drives
+```
+
+Campaigns will use audience targeting.
+
+Examples:
+
+```text
+All Supporters
+
+Specific Branches
+
+Specific Tiers
+
+Specific Membership Types
+```
+
+Competitions are considered a type of Campaign.
+
+---
+
+# Deployment Architecture Target
+
+```text
 Browser
-  |
-  v
+   |
+   v
 Nginx
-  |
-  v
+   |
+   v
 Gunicorn
-  |
-  v
-Django App
-  |
-  |---- PostgreSQL
-  |---- Redis
-  |---- Celery Worker
+   |
+   v
+Django
+   |
+   |---- PostgreSQL
+   |
+   |---- Redis
+   |
+   |---- Celery Worker
+```
 
 Future AWS path:
 
-EC2 + Docker Compose initially
-→ ECS/Fargate later if needed
-Current Architecture Status
+```text
+EC2 + Docker Compose
+        ↓
+ECS / Fargate (if required)
+```
 
-The project currently has:
+---
 
-modular Django apps
-frontend/API route separation
-Docker-based development
-Docker-based testing
-PostgreSQL database
-Redis/Celery foundations
-working frontend flows
-tested business rules
-deployment preparation in progress
+# Operational Roadmap
+
+Future production maturity work:
+
+```text
+Monitoring
+Logging
+Alerting
+Backups
+Disaster Recovery
+Incident Response
+Runbooks
+Performance Monitoring
+```
+
+---
+
+# Current Architecture Status
+
+Implemented:
+
+```text
+Authentication
+Users
+Branches
+Memberships
+Payments
+Matches
+Ticketing
+Transport
+Points
+Rewards
+Promotions
+Notifications
+Analytics
+```
+
+Planned:
+
+```text
+Campaigns
+Competitions
+Sponsor Activations
+Branch Challenges
+Merchandise
+Advanced Loyalty Features
+```

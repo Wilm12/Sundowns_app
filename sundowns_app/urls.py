@@ -24,6 +24,7 @@ urlpatterns = [
     path('health/', health_check),
     path("common/", include("common.urls")),
     path('admin/', admin.site.urls),
+    path("", include("django_prometheus.urls")),
 
     # Frontend/template routes
     path('dashboard/', dashboard_view, name='dashboard'),

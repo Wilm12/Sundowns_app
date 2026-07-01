@@ -3,6 +3,7 @@ from django.urls import path, include
 from common.views import user_settings_view
 from django.http import JsonResponse
 from matches.views import match_list_page, match_detail_page
+from django.urls import include, path
 
 from common.views import (
     home_view,
@@ -20,6 +21,7 @@ def health_check(request):
 
 
 urlpatterns = [
+    path("", include("django_prometheus.urls")),
     path('', home_view, name='home'),
     path('health/', health_check),
     path("common/", include("common.urls")),

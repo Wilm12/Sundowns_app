@@ -39,6 +39,8 @@ services:
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
     restart: unless-stopped
+    env_file:
+      - .env.prod
     environment:
       DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}?sslmode=disable"
     ports:

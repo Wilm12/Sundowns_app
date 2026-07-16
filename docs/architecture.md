@@ -21,6 +21,10 @@ The platform manages:
 
 The system follows a modular monolith architecture with clear separation between frontend template routes and DRF API routes.
 
+## Architecture Decision Records
+
+- [ADR-005 — Platform Engagement Engine](architecture/adr-005-platform-engagement-engine.md)
+
 ---
 
 # Core Technology Stack

@@ -40,7 +40,7 @@ def membership_activated_handler(envelope):
     # Award welcome points
     award_points(
         user=envelope.user,
-        event=PointEvent.MEMBERSHIP_ACTIVATION,
+        event=PointEvent.MEMBERSHIP_PAYMENT,
         description="Welcome to Sundowns WPA",
         reference_id=f"membership:{envelope.payload['membership_id']}",
     )

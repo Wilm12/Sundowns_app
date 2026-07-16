@@ -1,8 +1,22 @@
-"""Placeholder handler functions for engagement events.
+"""Handler functions for engagement events.
 
-This module currently provides the function names referenced by the event
-registry. No business logic is implemented yet.
+This module contains business logic for reacting to platform engagement events.
+Each handler processes an engagement event envelope and coordinates side effects.
 """
+
+import logging
+
+from engagement.services.badge_service import award_welcome_badge
+from engagement.services.timeline_service import record_timeline_event
+from engagement.services.promotion_service import unlock_welcome_promotions
+from engagement.services.analytics_service import (
+    record_membership_activation,
+)
+
+from points.rules import PointEvent
+from points.services import award_points
+
+logger = logging.getLogger(__name__)
 
 
 def member_registered_handler(*args, **kwargs):
@@ -10,9 +24,52 @@ def member_registered_handler(*args, **kwargs):
     return None
 
 
-def membership_activated_handler(*args, **kwargs):
-    """Placeholder handler for membership activation events."""
-    return None
+def membership_activated_handler(envelope):
+    """Handle membership activation events.
+
+    Orchestrates the Supporter Welcome Journey.
+    """
+
+    logger.info(
+        "Processing MEMBERSHIP_ACTIVATED event | "
+        "user=%s | correlation_id=%s",
+        envelope.user.id,
+        envelope.correlation_id,
+    )
+
+    # Award welcome points
+    award_points(
+        user=envelope.user,
+        event=PointEvent.MEMBERSHIP_ACTIVATION,
+        description="Welcome to Sundowns WPA",
+        reference_id=f"membership:{envelope.payload['membership_id']}",
+    )
+
+    # Award badge
+    award_welcome_badge(envelope.user)
+
+    # Unlock welcome promotions
+    unlock_welcome_promotions(envelope.user)
+
+    # Record supporter timeline
+    record_timeline_event(
+        user=envelope.user,
+        event="membership_activated",
+        metadata=envelope.payload,
+    )
+
+    # Record analytics
+    record_membership_activation(
+        user=envelope.user,
+        payload=envelope.payload,
+    )
+
+    logger.info(
+        "Completed MEMBERSHIP_ACTIVATED event | "
+        "user=%s | correlation_id=%s",
+        envelope.user.id,
+        envelope.correlation_id,
+    )
 
 
 def payment_successful_handler(*args, **kwargs):
@@ -45,9 +102,15 @@ def match_cancelled_handler(*args, **kwargs):
     return None
 
 
-def ticket_booked_handler(*args, **kwargs):
-    """Placeholder handler for booked ticket events."""
-    return None
+def ticket_booked_handler(envelope, *args, **kwargs):
+    """Handle ticket booking events by logging the booking details."""
+    logger.info(
+        "Ticket booked: user_id=%s, ticket_id=%s, match=%s, correlation_id=%s",
+        envelope.user.id,
+        envelope.payload.get("ticket_id"),
+        envelope.payload.get("match"),
+        envelope.correlation_id,
+    )
 
 
 def ticket_cancelled_handler(*args, **kwargs):
@@ -65,9 +128,15 @@ def ticket_expired_handler(*args, **kwargs):
     return None
 
 
-def transport_booked_handler(*args, **kwargs):
-    """Placeholder handler for booked transport events."""
-    return None
+def transport_booked_handler(envelope, *args, **kwargs):
+    """Handle transport booking events by logging the booking details."""
+    logger.info(
+        "Transport booked: user_id=%s, booking_id=%s, branch=%s, correlation_id=%s",
+        envelope.user.id,
+        envelope.payload.get("booking_id"),
+        envelope.payload.get("branch"),
+        envelope.correlation_id,
+    )
 
 
 def transport_cancelled_handler(*args, **kwargs):

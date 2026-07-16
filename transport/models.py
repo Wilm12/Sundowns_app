@@ -1,9 +1,15 @@
 """Transport domain models for vehicle options, bookings, and settlements."""
 
+import logging
 from django.db import models
 
 from points.rules import PointEvent
 from points.services import award_points
+from engagement.events import EngagementEvent
+from engagement.envelope import EngagementEventEnvelope
+from engagement.dispatcher import publish
+
+logger = logging.getLogger(__name__)
 
 
 class Transport(models.Model):
@@ -80,6 +86,27 @@ class TransportBooking(models.Model):
                 description=f"Transport booking for ticket {self.ticket.id}",
                 reference_id=f"transport_booking:{self.pk}"
             )
+
+            try:
+                envelope = EngagementEventEnvelope(
+                    event=EngagementEvent.TRANSPORT_BOOKED,
+                    user=self.ticket.user,
+                    payload={
+                        "booking_id": self.id,
+                        "transport_id": self.transport.id,
+                        "match_id": self.transport.match.id if self.transport.match else None,
+                        "branch": self.transport.branch.name,
+                    },
+                )
+
+                publish(envelope)
+
+            except Exception:
+                logger.exception(
+                    "Failed to publish TRANSPORT_BOOKED event "
+                    "for booking %s",
+                    self.id,
+                )
 
     def __str__(self):
         return f"Booking {self.id}"

@@ -1,11 +1,17 @@
 """Payment models representing membership payments and validation rules."""
 
+import logging
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from points.services import award_points
 from points.rules import PointEvent
+from engagement.events import EngagementEvent
+from engagement.envelope import EngagementEventEnvelope
+from engagement.dispatcher import publish
+
+logger = logging.getLogger(__name__)
 
 
 class Payment(models.Model):
@@ -70,6 +76,26 @@ class Payment(models.Model):
         if self.status == 'successful':
             self.membership.status = 'active'
             self.membership.save()
+
+            try:
+                envelope = EngagementEventEnvelope(
+                    event=EngagementEvent.MEMBERSHIP_ACTIVATED,
+                    user=self.membership.user,
+                    payload={
+                        "membership_id": self.membership.id,
+                        "payment_id": self.id,
+                        "tier": self.membership.tier,
+                    },
+                )
+
+                publish(envelope)
+
+            except Exception:
+                logger.exception(
+                    "Failed to publish MEMBERSHIP_ACTIVATED event "
+                    "for membership %s",
+                    self.membership.id,
+                )
         
         # Award points only on status transition: anything → successful
         if old_status != 'successful' and self.status == 'successful':

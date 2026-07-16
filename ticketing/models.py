@@ -2,9 +2,15 @@
 from django.db import models
 from django.conf import settings
 import uuid
+import logging
 
 from points.rules import PointEvent
 from points.services import award_points
+from engagement.events import EngagementEvent
+from engagement.envelope import EngagementEventEnvelope
+from engagement.dispatcher import publish
+
+logger = logging.getLogger(__name__)
 
 User = settings.AUTH_USER_MODEL
 
@@ -40,6 +46,27 @@ class Ticket(models.Model):
                 description=f"Ticket booked for {self.match}",
                 reference_id=f"ticket_booking:{self.pk}"
             )
+
+            try:
+                envelope = EngagementEventEnvelope(
+                    event=EngagementEvent.TICKET_BOOKED,
+                    user=self.user,
+                    payload={
+                        "ticket_id": self.id,
+                        "match_id": self.match.id,
+                        "match": self.match.opponent,
+                        "qr_code": str(self.qr_code),
+                    },
+                )
+
+                publish(envelope)
+
+            except Exception:
+                logger.exception(
+                    "Failed to publish TICKET_BOOKED event "
+                    "for ticket %s",
+                    self.id,
+                )
 
     def __str__(self):
         return f"Ticket {self.id}"

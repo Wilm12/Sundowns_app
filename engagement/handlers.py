@@ -13,9 +13,6 @@ from engagement.services.analytics_service import (
     record_membership_activation,
 )
 
-from points.rules import PointEvent
-from points.services import award_points
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,14 +32,6 @@ def membership_activated_handler(envelope):
         "user=%s | correlation_id=%s",
         envelope.user.id,
         envelope.correlation_id,
-    )
-
-    # Award welcome points
-    award_points(
-        user=envelope.user,
-        event=PointEvent.MEMBERSHIP_PAYMENT,
-        description="Welcome to Sundowns WPA",
-        reference_id=f"membership:{envelope.payload['membership_id']}",
     )
 
     # Award badge

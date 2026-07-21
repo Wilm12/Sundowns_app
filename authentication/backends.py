@@ -12,14 +12,24 @@ class EmailBackend(ModelBackend):
         password=None,
         **kwargs,
     ):
-        email = username or kwargs.get("email")
+        email = kwargs.get("email")
+        username_value = username or kwargs.get("username")
 
-        if email is None:
+        if not email and not username_value:
             return None
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+        user = None
+
+        if email:
+            user = User.objects.filter(email__iexact=email).first()
+
+        if user is None and username_value:
+            if "@" in str(username_value):
+                user = User.objects.filter(email__iexact=username_value).first()
+            else:
+                user = User.objects.filter(username=username_value).first()
+
+        if user is None:
             return None
 
         if user.check_password(password):

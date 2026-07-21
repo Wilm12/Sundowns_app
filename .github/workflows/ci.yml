@@ -71,7 +71,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python manage.py test --settings=sundowns_app.settings.test
+          python manage.py test --settings=sundowns_app.settings.test --noinput
 
   docker-build:
     runs-on: ubuntu-latest

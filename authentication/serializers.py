@@ -21,10 +21,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True, min_length=8)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'branch', 'password', 'password_confirm']
+        fields = ['first_name', 'last_name', 'email', 'branch', 'password', 'password_confirm']
 
     def validate_email(self, value):
         """Validate that the submitted email address is unique."""
@@ -46,6 +48,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         """Create a new user instance after removing confirmation data."""
 
         validated_data.pop('password_confirm')
+        email = validated_data.get('email')
+        validated_data['username'] = email.lower()
         return User.objects.create_user(**validated_data)
 
 

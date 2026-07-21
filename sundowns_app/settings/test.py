@@ -22,14 +22,14 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME", default="sundowns_db"),
-        "USER": config("DB_USER", default="sundowns_user"),
-        "PASSWORD": config("DB_PASSWORD", default="sundowns_password"),
-        "HOST": config("DB_HOST", default="db"),
-        "PORT": config("DB_PORT", default="5432"),
+        "ENGINE": config("TEST_DB_ENGINE", default="django.db.backends.sqlite3"),
+        "NAME": config("TEST_DB_NAME", default=str(BASE_DIR / "test_db.sqlite3")),
+        "USER": config("DB_USER", default=""),
+        "PASSWORD": config("DB_PASSWORD", default=""),
+        "HOST": config("DB_HOST", default=""),
+        "PORT": config("DB_PORT", default=""),
         "TEST": {
-            "NAME": config("TEST_DB_NAME", default="test_sundowns_db"),
+            "NAME": config("TEST_DB_NAME", default=str(BASE_DIR / "test_db.sqlite3")),
         },
     }
 }

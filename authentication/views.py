@@ -69,20 +69,20 @@ class MemberOnlyView(APIView):
 def login_page(request):
     """Render and process the authentication login page."""
     if request.method == "POST":
-        username = request.POST.get("username")
+        email = request.POST.get("email")
         password = request.POST.get("password")
 
         user = authenticate(
             request,
-            username=username,
+            email=email,
             password=password
         )
 
         if user is not None:
             login(request, user)
-            return redirect("home")
+            return redirect("membership_page")
 
-        messages.error(request, "Invalid username or password.")
+        messages.error(request, "Invalid email or password.")
 
     return render(request, "authentication/login.html")
 
@@ -103,13 +103,21 @@ def register_page(request):
         serializer = RegisterSerializer(data=request.POST)
 
         if serializer.is_valid():
-            serializer.save()
+            user = serializer.save()
+            authenticated_user = authenticate(
+                request,
+                email=user.email,
+                password=request.POST.get("password"),
+            )
+
+            if authenticated_user is not None:
+                login(request, authenticated_user)
+                return redirect("membership_page")
 
             messages.success(
                 request,
                 "Account created successfully. You can now log in."
             )
-
             return redirect("login_page")
 
         for field, errors in serializer.errors.items():

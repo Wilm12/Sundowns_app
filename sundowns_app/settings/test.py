@@ -34,6 +34,10 @@ DATABASES = {
     }
 }
 
+if DATABASES["default"]["ENGINE"].endswith("sqlite3"):
+    DATABASES["default"]["TEST"]["NAME"] = str(BASE_DIR / "test_db_ci.sqlite3")
+    DATABASES["default"]["NAME"] = str(BASE_DIR / "test_db_ci.sqlite3")
+
 MEDIA_ROOT = BASE_DIR / "test_media"
 
 STATIC_ROOT = BASE_DIR / "test_staticfiles"

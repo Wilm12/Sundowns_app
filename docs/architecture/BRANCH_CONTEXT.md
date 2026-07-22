@@ -1,218 +1,413 @@
-# Branch Context
+# Sprint B — Branch Context
 
-## 1. Purpose
+**Status:** Architecture & Domain Design
 
-The Branch Context is the operational home for branch-level administration, configuration, and policy. Its purpose is to define how a branch operates as a first-class business unit within the platform, while remaining independent from ticketing, transport, payments, and other downstream workflows.
-
-In this architecture, a branch is not just a label attached to a user or a transport option. It is an operational domain with its own identity, rules, administrators, and business policies.
+**Objective:** Establish the Branch bounded context as the operational owner of branch administration and configuration within the Branch Operations platform.
 
 ---
 
-## 2. Responsibilities
+# Purpose
 
-The Branch Context is responsible for:
+The Branch Context is responsible for managing how a supporters' branch operates.
 
-- defining the identity of a branch
-- maintaining branch-level operational policies
-- managing branch administrators and contact information
-- representing the branch’s operational status
-- publishing branch lifecycle events for the wider platform
-- providing branch-level configuration needed by other contexts
+It does not manage supporter journeys, transport, tickets, attendance, or payments.
 
-The context should not own:
-
-- ticketing logic
-- transport booking rules
-- payment processing
-- match-specific journey execution
-
-Those concerns belong to other contexts and should consume branch policies rather than depend on branch internals in a tightly coupled way.
+Instead, it defines the operational environment in which those workflows occur.
 
 ---
 
-## 3. Aggregate Root
+# Vision
 
-The aggregate root of this context is:
+A Branch represents an organised supporters' community.
 
-- Branch
+It owns:
 
-The Branch aggregate is the authoritative boundary for branch-level rules and configuration. It protects the consistency of branch identity, policies, and administration.
+- its identity
+- its administrators
+- its operational policies
+- its communication preferences
+- its configuration
 
-The Branch aggregate should remain intentionally simple in Sprint B. It should own the core concerns that matter now:
-
-- identity
-- policies
-- administrators
-- contact information
-- operational status
-- branch-related events
+Every other operational workflow occurs within a Branch.
 
 ---
 
-## 4. Entities
+# Aggregate Root
 
-The initial entity model should be lightweight and pragmatic.
+## Branch
 
-### Branch
-The primary aggregate root.
+The Branch Aggregate Root protects all branch-level business rules.
 
-Responsibilities:
-- represent a branch as an operational unit
-- hold its core identity and configuration
-- enforce branch-level policy consistency
-- publish branch lifecycle events
-
-### BranchAdministrator
-A supporting entity that represents a user who is authorized to operate the branch.
-
-Responsibilities:
-- link a user to a branch in an administrative capacity
-- reflect branch-level operational authority
-- support future role-based administration without overcomplicating the initial model
-
-### BranchPolicy
-A supporting entity that captures the configurable rules that make a branch behave differently from others.
-
-Responsibilities:
-- hold branch-specific operating rules
-- define verification requirements, booking windows, capacity rules, and other policy decisions
-- allow policies to evolve independently from the branch identity itself
+Other bounded contexts may reference a Branch but may not modify its internal state directly.
 
 ---
 
-## 5. Value Objects
+# Responsibilities
 
-Value objects should be introduced where they add clarity without unnecessary complexity.
+The Branch Context owns:
 
-### ContactDetails
-A value object representing the branch’s contact information.
+- Branch Identity
+- Branch Administration
+- Branch Roles
+- Branch Policies
+- Branch Contact Information
+- Branch Operational Status
+- Branch Configuration
 
-Example fields:
+It does NOT own:
+
+- Supporters
+- Journeys
+- Ticket Allocation
+- Transport
+- Attendance
+- Payments
+- Rewards
+
+Those belong to their own bounded contexts.
+
+---
+
+# Branch Entity
+
+Current
+
+```text
+Branch
+-------
+id
+name
+location
+created_at
+```
+
+Future
+
+```text
+Branch
+-------
+id
+name
+code
+location
+contact_email
+contact_phone
+status
+created_at
+updated_at
+```
+
+---
+
+# Branch Status
+
+Initially, a simple enum is sufficient.
+
+```text
+ACTIVE
+
+INACTIVE
+
+SUSPENDED
+```
+
+No historical snapshots will be implemented during Sprint B.
+
+---
+
+# Branch Policies
+
+Branch Policies are business configuration owned by the Branch.
+
+Examples:
+
+- Student verification required
+- Journey booking deadline
+- Maximum transport capacity
+- Complimentary ticket allocation strategy
+- Announcement approval required
+- Attendance requirement
+- Supported university
+
+These policies should eventually be configurable without code changes.
+
+Initially they may simply exist as fields or a configuration object.
+
+---
+
+# Branch Roles
+
+Branch Roles are operational responsibilities.
+
+They are NOT Django permissions.
+
+Initial roles:
+
+- Branch President
+- Secretary
+- Transport Coordinator
+- Ticket Distributor
+- Student Verifier
+- Event Coordinator
+
+These roles describe business responsibilities.
+
+Permission enforcement can be layered later.
+
+---
+
+# Value Objects
+
+## ContactDetails
+
+Represents official branch contact information.
+
+Contains:
+
 - email
 - phone
-- address
+- meeting location
 
-Purpose:
-- keep contact information structured and consistent
-- avoid scattering contact fields across the aggregate
-
-### BranchCode
-A value object representing a stable, business-facing identifier for the branch.
-
-Purpose:
-- support internal references and external integrations
-- keep branch identity distinct from database identity
-
-### BranchStatus
-A value object representing the operational state of the branch.
-
-Possible values:
-- Active
-- Inactive
-- Suspended
-
-Purpose:
-- make branch state explicit and constrained
-- avoid raw string state management in the aggregate
+This value object has no identity.
 
 ---
 
-## 6. Domain Events
+# Application Services
 
-Domain events should be used to inform the wider platform when branch state changes.
+Sprint B defines—not implements—the following services.
 
-### BranchCreated
-Published when a new branch is created.
+## CreateBranchService
 
-Purpose:
-- notify downstream contexts that a branch now exists
-
-### BranchPoliciesUpdated
-Published when branch policies change.
-
-Purpose:
-- allow communications, journeys, verification, and reporting to react to policy change
-
-### SupporterJoinedBranch
-Published when a supporter is linked to a branch.
-
-Purpose:
-- signal branch participation and enable branch-level workflows
-
-### BranchSeasonOpened
-Published when the branch becomes operational for a season.
-
-Purpose:
-- notify downstream contexts that branch operations are active for a given season
-
-### BranchSeasonClosed
-Published when a branch is no longer operational for a season.
-
-Purpose:
-- signal the end of seasonal participation for the branch
+Creates a new branch.
 
 ---
 
-## 7. Application Services
+## UpdateBranchPolicyService
 
-Application services should orchestrate use cases and keep the presentation layer thin.
-
-### CreateBranchService
-Responsibilities:
-- create a new Branch aggregate
-- validate incoming branch data
-- publish BranchCreated
-
-### UpdateBranchPoliciesService
-Responsibilities:
-- update branch policies in a coordinated way
-- enforce policy consistency rules
-- publish BranchPoliciesUpdated
-
-### RegisterBranchAdministratorService
-Responsibilities:
-- assign administrative responsibility to a user
-- ensure the branch can be operated safely
-- preserve branch-level authorization rules
-
-### OpenBranchSeasonService
-Responsibilities:
-- activate branch operation for a season
-- validate readiness
-- publish BranchSeasonOpened
-
-### CloseBranchSeasonService
-Responsibilities:
-- close branch operation for a season
-- publish BranchSeasonClosed
+Updates operational policies.
 
 ---
 
-## 8. Invariants
+## AssignBranchAdministratorService
 
-The Branch aggregate should protect the following invariants:
-
-- a branch must have a unique identity
-- a branch must have valid operational status
-- branch policies must remain coherent with the branch’s operational purpose
-- administrators must be associated with a valid branch
-- a branch cannot be in contradictory states such as active and suspended at the same time
-- branch-level rules should be applied consistently across the platform
-
-These invariants should be enforced inside the aggregate or through domain services, not through controllers or serializers.
+Assigns branch administrators.
 
 ---
 
-## 9. Future Expansion
+## UpdateBranchContactService
 
-This context should remain simple now and grow only when the business actually needs it.
+Maintains branch contact information.
 
-Future expansion may include:
+---
 
-- Season as a first-class aggregate when seasonal administration becomes a real operational concern
-- branch participation history when transfers, alumni, and historical reporting become important
-- richer policy modeling such as attendance thresholds, capacity rules, and verification requirements
-- branch-specific dashboards and reporting read models
-- more sophisticated administrative roles and delegation models
+## ChangeBranchStatusService
 
-The guiding principle for the future is: introduce complexity only when the business requires it.
+Activates, suspends or deactivates a branch.
+
+---
+
+# Domain Events
+
+The Branch Context publishes events.
+
+## BranchCreated
+
+Publisher:
+
+Branch Context
+
+Consumers:
+
+Communications
+
+Reporting
+
+Analytics
+
+---
+
+## BranchAdministratorAssigned
+
+Publisher:
+
+Branch Context
+
+Consumers:
+
+Communications
+
+Audit
+
+---
+
+## BranchPolicyUpdated
+
+Publisher:
+
+Branch Context
+
+Consumers:
+
+Journey Context
+
+Transport Context
+
+Ticketing Context
+
+---
+
+## BranchActivated
+
+Publisher:
+
+Branch Context
+
+Consumers:
+
+Communications
+
+Reporting
+
+---
+
+## BranchSuspended
+
+Publisher:
+
+Branch Context
+
+Consumers:
+
+Journey Context
+
+Communications
+
+Reporting
+
+---
+
+# Invariants
+
+The Branch Aggregate protects the following rules.
+
+## Identity
+
+Every branch has a unique name.
+
+---
+
+## Administration
+
+Every active branch must have at least one administrator.
+
+---
+
+## Status
+
+A branch cannot be simultaneously Active and Suspended.
+
+---
+
+## Policies
+
+Operational policies may only be modified through Branch application services.
+
+---
+
+## Ownership
+
+Only the Branch Context may modify Branch state.
+
+Other bounded contexts may reference Branch but never update it directly.
+
+---
+
+# Integration with Other Contexts
+
+## Supporter Context
+
+Supporters belong to a Branch.
+
+Supporter Context references Branch.
+
+Branch does not manage Supporters.
+
+---
+
+## Journey Context
+
+Journeys occur within a Branch.
+
+Journey references Branch.
+
+Branch does not orchestrate Journeys.
+
+---
+
+## Communications Context
+
+Announcements belong to Branch.
+
+Communication consumes Branch events.
+
+---
+
+## Reporting Context
+
+Reports aggregate Branch operational data.
+
+Reporting consumes Branch events.
+
+---
+
+# Folder Structure (Target)
+
+```text
+branches/
+
+    models.py
+
+    services/
+
+        create_branch.py
+
+        update_policy.py
+
+        assign_admin.py
+
+        change_status.py
+
+    events.py
+
+    handlers.py
+
+    repositories.py
+
+    policies.py
+
+    tests/
+```
+
+Not all files will be created during Sprint B.
+
+This is the architectural target.
+
+---
+
+# Definition of Done
+
+Sprint B is complete when:
+
+✓ Branch is clearly established as an Aggregate Root.
+
+✓ Branch responsibilities are documented.
+
+✓ Operational ownership boundaries are defined.
+
+✓ Domain events are identified.
+
+✓ Application services are defined.
+
+✓ Branch policies are identified.
+
+✓ Future implementation can proceed without ambiguity.

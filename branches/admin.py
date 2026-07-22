@@ -3,17 +3,20 @@ from .models import Branch
 
 
 class BranchAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('name', 'location')
+    list_display = ('name', 'branch_code', 'status', 'location', 'contact_email', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('name', 'branch_code', 'location', 'contact_email')
     date_hierarchy = 'created_at'
-    readonly_fields = ('created_at', 'id')
+    readonly_fields = ('created_at', 'updated_at', 'id')
     fieldsets = (
         ('Branch Information', {
-            'fields': ('id', 'name', 'location')
+            'fields': ('id', 'name', 'branch_code', 'location', 'status')
+        }),
+        ('Contact Information', {
+            'fields': ('contact_email', 'contact_phone')
         }),
         ('Timestamp', {
-            'fields': ('created_at',),
+            'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )

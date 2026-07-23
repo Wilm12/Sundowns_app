@@ -16,3 +16,6 @@ class BranchesConfig(AppConfig):
 
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'branches'
+
+    def ready(self):
+        import branches.signals  # noqa: F401

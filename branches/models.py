@@ -23,3 +23,26 @@ class Branch(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class BranchPolicy(models.Model):
+    branch = models.OneToOneField(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name="branch_policy",
+    )
+    student_verification_required = models.BooleanField(default=True)
+    booking_deadline_hours = models.PositiveIntegerField(default=24)
+    maximum_bus_capacity = models.PositiveIntegerField(default=100)
+    attendance_threshold = models.PositiveIntegerField(default=70)
+    allow_guest_supporters = models.BooleanField(default=False)
+    announcement_requires_approval = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['branch'], name='unique_branch_policy_per_branch')
+        ]
+
+    def __str__(self):
+        return f"Policy for {self.branch.name}"

@@ -1,7 +1,7 @@
 """Branch serializers for API representation of branch data."""
 
 from rest_framework import serializers
-from .models import Branch
+from .models import Branch, BranchPolicy
 
 
 class BranchSerializer(serializers.ModelSerializer):
@@ -21,4 +21,22 @@ class BranchSerializer(serializers.ModelSerializer):
             'updated_at',
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class BranchPolicySerializer(serializers.ModelSerializer):
+    """Serializer for branch policy data used by branch-related API endpoints."""
+
+    class Meta:
+        model = BranchPolicy
+        fields = [
+            'branch',
+            'student_verification_required',
+            'booking_deadline_hours',
+            'maximum_bus_capacity',
+            'attendance_threshold',
+            'allow_guest_supporters',
+            'announcement_requires_approval',
+            'updated_at',
+        ]
+        read_only_fields = ['branch', 'updated_at']
 

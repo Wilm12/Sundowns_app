@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -46,3 +47,47 @@ class BranchPolicy(models.Model):
 
     def __str__(self):
         return f"Policy for {self.branch.name}"
+
+
+class BranchRole(models.Model):
+    class Role(models.TextChoices):
+        PRESIDENT = "PRESIDENT", "President"
+        SECRETARY = "SECRETARY", "Secretary"
+        JOURNEY_COORDINATOR = "JOURNEY_COORDINATOR", "Journey Coordinator"
+        TRANSPORT_COORDINATOR = "TRANSPORT_COORDINATOR", "Transport Coordinator"
+        TICKET_DISTRIBUTOR = "TICKET_DISTRIBUTOR", "Ticket Distributor"
+        STUDENT_VERIFIER = "STUDENT_VERIFIER", "Student Verifier"
+        COMMUNICATIONS_OFFICER = "COMMUNICATIONS_OFFICER", "Communications Officer"
+
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name="branch_roles",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="branch_roles",
+    )
+    role = models.CharField(max_length=30, choices=Role.choices)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    assigned_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_branch_roles",
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['branch', 'user', 'role'],
+                condition=models.Q(is_active=True),
+                name='unique_active_branch_role_per_user_per_branch',
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} - {self.role} ({self.branch})"

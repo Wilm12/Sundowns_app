@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Branch, BranchPolicy
+from .models import Branch, BranchPolicy, BranchRole
 
 
 class BranchAdmin(admin.ModelAdmin):

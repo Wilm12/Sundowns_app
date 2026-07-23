@@ -1,8 +1,9 @@
+from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.test import TestCase
 
-from .models import Branch, BranchPolicy, BranchStatus
-from .serializers import BranchPolicySerializer, BranchSerializer
+from .models import Branch, BranchPolicy, BranchRole, BranchStatus
+from .serializers import BranchPolicySerializer, BranchRoleSerializer, BranchSerializer
 
 
 class BranchModelTests(TestCase):
@@ -60,3 +61,54 @@ class BranchModelTests(TestCase):
         self.assertEqual(serializer.data["booking_deadline_hours"], 24)
         self.assertEqual(serializer.data["maximum_bus_capacity"], 100)
         self.assertEqual(serializer.data["attendance_threshold"], 70)
+
+    def test_duplicate_active_roles_cannot_exist_for_same_user_and_branch(self):
+        branch = Branch.objects.create(name="Role Branch")
+        user = self._create_user(username="role-user")
+
+        BranchRole.objects.create(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+
+        with self.assertRaises(IntegrityError):
+            BranchRole.objects.create(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+
+    def test_user_can_have_multiple_different_roles_in_same_branch(self):
+        branch = Branch.objects.create(name="Multi Role Branch")
+        user = self._create_user(username="multi-role-user")
+
+        BranchRole.objects.create(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+        BranchRole.objects.create(branch=branch, user=user, role=BranchRole.Role.STUDENT_VERIFIER)
+
+        roles = BranchRole.objects.filter(branch=branch, user=user)
+        self.assertEqual(roles.count(), 2)
+
+    def test_inactive_role_is_not_treated_as_active_duplicate(self):
+        branch = Branch.objects.create(name="Inactive Role Branch")
+        user = self._create_user(username="inactive-role-user")
+
+        BranchRole.objects.create(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+        BranchRole.objects.create(branch=branch, user=user, role=BranchRole.Role.PRESIDENT, is_active=False)
+
+        roles = BranchRole.objects.filter(branch=branch, user=user)
+        self.assertEqual(roles.count(), 2)
+
+    def test_role_serializer_exposes_role_fields(self):
+        branch = Branch.objects.create(name="Role Serializer Branch")
+        user = self._create_user(username="role-serializer-user")
+        role = BranchRole.objects.create(
+            branch=branch,
+            user=user,
+            role=BranchRole.Role.TRANSPORT_COORDINATOR,
+            assigned_by=user,
+        )
+
+        serializer = BranchRoleSerializer(role)
+
+        self.assertEqual(serializer.data["role"], BranchRole.Role.TRANSPORT_COORDINATOR)
+        self.assertEqual(serializer.data["is_active"], True)
+
+    def _create_user(self, username):
+        return get_user_model().objects.create_user(
+            username=username,
+            email=f"{username}@example.com",
+            password="test-pass-123",
+        )

@@ -32,3 +32,21 @@ class StudentVerificationRejected:
     acted_by: Optional[int] = None
     timestamp: Optional[datetime] = None
     correlation_id: Optional[UUID] = None
+
+
+@dataclass(frozen=True)
+class EligibilityGranted:
+    supporter_id: int
+    eligibility_id: int
+    reason: str
+    evaluated_at: Optional[datetime] = None
+    correlation_id: Optional[UUID] = None
+
+
+@dataclass(frozen=True)
+class EligibilityRevoked:
+    supporter_id: int
+    eligibility_id: int
+    reason: str
+    evaluated_at: Optional[datetime] = None
+    correlation_id: Optional[UUID] = None

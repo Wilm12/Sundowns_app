@@ -9,6 +9,7 @@ from engagement.events import EngagementEvent
 
 from ..events import StudentVerificationRequested
 from ..models import StudentVerification, StudentVerificationStatus
+from .evaluate_eligibility import EvaluateEligibilityService
 
 
 class DuplicatePendingVerification(Exception):
@@ -55,4 +56,5 @@ class RequestStudentVerificationService:
             correlation_id=event.correlation_id,
         )
         publish(envelope)
+        EvaluateEligibilityService.evaluate(user)
         return verification

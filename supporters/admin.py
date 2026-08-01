@@ -1,6 +1,14 @@
 from django.contrib import admin
 
-from .models import StudentVerification
+from .models import StudentVerification, SupporterEligibility
+
+
+@admin.register(SupporterEligibility)
+class SupporterEligibilityAdmin(admin.ModelAdmin):
+    list_display = ("supporter", "is_eligible", "reason", "evaluated_at", "expires_at")
+    list_filter = ("is_eligible", "reason")
+    search_fields = ("supporter__username", "supporter__email")
+    ordering = ("-evaluated_at",)
 
 
 @admin.register(StudentVerification)

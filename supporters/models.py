@@ -9,6 +9,44 @@ class StudentVerificationStatus(models.TextChoices):
     EXPIRED = "EXPIRED", "Expired"
 
 
+class EligibilityReason(models.TextChoices):
+    VERIFIED = "VERIFIED", "Verified"
+    VERIFICATION_EXPIRED = "VERIFICATION_EXPIRED", "Verification Expired"
+    VERIFICATION_REJECTED = "VERIFICATION_REJECTED", "Verification Rejected"
+    VERIFICATION_PENDING = "VERIFICATION_PENDING", "Verification Pending"
+    SUPPORTER_SUSPENDED = "SUPPORTER_SUSPENDED", "Supporter Suspended"
+    BRANCH_INACTIVE = "BRANCH_INACTIVE", "Branch Inactive"
+    MANUAL_OVERRIDE = "MANUAL_OVERRIDE", "Manual Override"
+    UNKNOWN = "UNKNOWN", "Unknown"
+
+
+class SupporterEligibility(models.Model):
+    """Authoritative eligibility decision for a supporter."""
+
+    supporter = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="supporter_eligibility",
+    )
+    is_eligible = models.BooleanField(default=False)
+    reason = models.CharField(
+        max_length=30,
+        choices=EligibilityReason.choices,
+        default=EligibilityReason.UNKNOWN,
+    )
+    evaluated_at = models.DateTimeField(auto_now=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Supporter Eligibility"
+        verbose_name_plural = "Supporter Eligibility"
+
+    def __str__(self):
+        return f"{self.supporter} - eligible={self.is_eligible}"
+
+
 class StudentVerification(models.Model):
     """Persistent verification record for a supporter identity."""
 

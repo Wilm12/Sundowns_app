@@ -8,6 +8,7 @@ from engagement.events import EngagementEvent
 
 from ..events import StudentVerified
 from ..models import StudentVerification, StudentVerificationStatus
+from .evaluate_eligibility import EvaluateEligibilityService
 
 
 class ActiveVerificationExists(Exception):
@@ -57,4 +58,5 @@ class VerifyStudentService:
             },
         )
         publish(envelope)
+        EvaluateEligibilityService.evaluate(verification.user)
         return verification

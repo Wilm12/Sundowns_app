@@ -9,6 +9,7 @@ from engagement.events import EngagementEvent
 
 from ..events import StudentVerificationRejected
 from ..models import StudentVerification, StudentVerificationStatus
+from .evaluate_eligibility import EvaluateEligibilityService
 
 
 class VerificationAlreadyProcessed(Exception):
@@ -49,4 +50,5 @@ class RejectStudentVerificationService:
             correlation_id=event.correlation_id,
         )
         publish(envelope)
+        EvaluateEligibilityService.evaluate(verification.user)
         return verification

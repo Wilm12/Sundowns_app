@@ -7,7 +7,8 @@ from django.utils import timezone
 
 from engagement.events import EngagementEvent
 
-from .models import StudentVerification, StudentVerificationStatus
+from .models import StudentVerification, StudentVerificationStatus, SupporterEligibility, EligibilityReason
+from .services.evaluate_eligibility import EvaluateEligibilityService
 from .services.reject_student_verification import RejectStudentVerificationService, VerificationAlreadyProcessed
 from .services.request_student_verification import DuplicatePendingVerification, RequestStudentVerificationService
 from .services.list_pending_verifications import ListPendingVerificationsService
@@ -251,6 +252,109 @@ class StudentVerificationServiceTests(TestCase):
 
         self.assertEqual(new_verification.status, StudentVerificationStatus.PENDING)
         self.assertNotEqual(new_verification.pk, expired_verification.pk)
+
+    def test_verified_supporter_becomes_eligible(self):
+        user = self._create_user(username="eligible-user")
+        verification = StudentVerification.objects.create(
+            user=user,
+            student_number="10010",
+            university="UCT",
+            status=StudentVerificationStatus.VERIFIED,
+            verified_at=timezone.now(),
+            expires_at=timezone.now() + timedelta(days=30),
+        )
+
+        eligibility = EvaluateEligibilityService.evaluate(user)
+
+        self.assertTrue(eligibility.is_eligible)
+        self.assertEqual(eligibility.reason, EligibilityReason.VERIFIED)
+        self.assertEqual(eligibility.supporter, user)
+        self.assertEqual(eligibility.evaluated_at.date(), timezone.now().date())
+
+    def test_pending_supporter_is_not_eligible(self):
+        user = self._create_user(username="pending-eligibility-user")
+        StudentVerification.objects.create(
+            user=user,
+            student_number="10011",
+            university="Wits",
+            status=StudentVerificationStatus.PENDING,
+        )
+
+        eligibility = EvaluateEligibilityService.evaluate(user)
+
+        self.assertFalse(eligibility.is_eligible)
+        self.assertEqual(eligibility.reason, EligibilityReason.VERIFICATION_PENDING)
+
+    def test_rejected_supporter_is_not_eligible(self):
+        user = self._create_user(username="rejected-eligibility-user")
+        StudentVerification.objects.create(
+            user=user,
+            student_number="10012",
+            university="UJ",
+            status=StudentVerificationStatus.REJECTED,
+            verified_at=timezone.now(),
+        )
+
+        eligibility = EvaluateEligibilityService.evaluate(user)
+
+        self.assertFalse(eligibility.is_eligible)
+        self.assertEqual(eligibility.reason, EligibilityReason.VERIFICATION_REJECTED)
+
+    def test_expired_verification_revokes_eligibility(self):
+        user = self._create_user(username="expired-eligibility-user")
+        StudentVerification.objects.create(
+            user=user,
+            student_number="10013",
+            university="UP",
+            status=StudentVerificationStatus.VERIFIED,
+            verified_at=timezone.now() - timedelta(days=400),
+            expires_at=timezone.now() - timedelta(days=1),
+        )
+
+        eligibility = EvaluateEligibilityService.evaluate(user)
+
+        self.assertFalse(eligibility.is_eligible)
+        self.assertEqual(eligibility.reason, EligibilityReason.VERIFICATION_EXPIRED)
+
+    def test_eligibility_updates_in_place_instead_of_creating_duplicates(self):
+        user = self._create_user(username="update-eligibility-user")
+        SupporterEligibility.objects.create(
+            supporter=user,
+            is_eligible=True,
+            reason=EligibilityReason.VERIFIED,
+            evaluated_at=timezone.now(),
+        )
+        StudentVerification.objects.create(
+            user=user,
+            student_number="10014",
+            university="UWC",
+            status=StudentVerificationStatus.PENDING,
+        )
+
+        eligibility = EvaluateEligibilityService.evaluate(user)
+
+        self.assertEqual(SupporterEligibility.objects.filter(supporter=user).count(), 1)
+        self.assertFalse(eligibility.is_eligible)
+        self.assertEqual(eligibility.reason, EligibilityReason.VERIFICATION_PENDING)
+
+    @patch("supporters.services.evaluate_eligibility.publish")
+    def test_eligibility_events_are_published(self, mock_publish):
+        user = self._create_user(username="event-eligibility-user")
+        StudentVerification.objects.create(
+            user=user,
+            student_number="10015",
+            university="UCT",
+            status=StudentVerificationStatus.VERIFIED,
+            verified_at=timezone.now(),
+            expires_at=timezone.now() + timedelta(days=30),
+        )
+
+        EvaluateEligibilityService.evaluate(user)
+
+        self.assertEqual(mock_publish.call_count, 1)
+        envelope = mock_publish.call_args.args[0]
+        self.assertEqual(envelope.event, EngagementEvent.ELIGIBILITY_GRANTED)
+        self.assertEqual(envelope.payload["supporter_id"], user.pk)
 
     def _create_user(self, username):
         return get_user_model().objects.create_user(

@@ -55,3 +55,5 @@ class EngagementEvent(Enum):
     STUDENT_VERIFICATION_REQUESTED = "student_verification_requested"
     STUDENT_VERIFIED = "student_verified"
     STUDENT_VERIFICATION_REJECTED = "student_verification_rejected"
+    ELIGIBILITY_GRANTED = "eligibility_granted"
+    ELIGIBILITY_REVOKED = "eligibility_revoked"

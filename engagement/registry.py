@@ -34,6 +34,8 @@ from branches.handlers import (
     branch_role_removed_handler,
 )
 from supporters.handlers import (
+    eligibility_granted_handler,
+    eligibility_revoked_handler,
     student_verification_rejected_handler,
     student_verification_requested_handler,
     student_verified_handler,
@@ -67,4 +69,6 @@ EVENT_HANDLERS = {
     EngagementEvent.STUDENT_VERIFICATION_REQUESTED: student_verification_requested_handler,
     EngagementEvent.STUDENT_VERIFIED: student_verified_handler,
     EngagementEvent.STUDENT_VERIFICATION_REJECTED: student_verification_rejected_handler,
+    EngagementEvent.ELIGIBILITY_GRANTED: eligibility_granted_handler,
+    EngagementEvent.ELIGIBILITY_REVOKED: eligibility_revoked_handler,
 }

@@ -40,6 +40,7 @@ from supporters.handlers import (
     student_verification_requested_handler,
     student_verified_handler,
 )
+from journeys.handlers import journey_booked_handler, journey_opened_handler
 
 
 EVENT_HANDLERS = {
@@ -71,4 +72,6 @@ EVENT_HANDLERS = {
     EngagementEvent.STUDENT_VERIFICATION_REJECTED: student_verification_rejected_handler,
     EngagementEvent.ELIGIBILITY_GRANTED: eligibility_granted_handler,
     EngagementEvent.ELIGIBILITY_REVOKED: eligibility_revoked_handler,
+    EngagementEvent.JOURNEY_OPENED: journey_opened_handler,
+    EngagementEvent.JOURNEY_BOOKED: journey_booked_handler,
 }

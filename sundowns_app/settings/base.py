@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'users',
     'branches',
     'supporters',
+    'journeys',
     'authentication',
     'matches',
     'rest_framework',

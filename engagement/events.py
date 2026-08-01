@@ -57,3 +57,7 @@ class EngagementEvent(Enum):
     STUDENT_VERIFICATION_REJECTED = "student_verification_rejected"
     ELIGIBILITY_GRANTED = "eligibility_granted"
     ELIGIBILITY_REVOKED = "eligibility_revoked"
+
+    # Journey events
+    JOURNEY_OPENED = "journey_opened"
+    JOURNEY_BOOKED = "journey_booked"

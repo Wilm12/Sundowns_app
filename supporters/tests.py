@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
+from branches.models import Branch, BranchRole
 from engagement.events import EngagementEvent
 
 from .models import StudentVerification, StudentVerificationStatus, SupporterEligibility, EligibilityReason
@@ -13,6 +14,7 @@ from .services.reject_student_verification import RejectStudentVerificationServi
 from .services.request_student_verification import DuplicatePendingVerification, RequestStudentVerificationService
 from .services.list_pending_verifications import ListPendingVerificationsService
 from .services.verify_student import ActiveVerificationExists, VerifyStudentService
+from branches.services.authorization import BranchAdminRequired
 
 
 class StudentVerificationServiceTests(TestCase):
@@ -37,6 +39,12 @@ class StudentVerificationServiceTests(TestCase):
             university="Wits",
         )
         verifier = self._create_user(username="verifier-user")
+        branch = Branch.objects.create(name="Verification Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        verification.user.branch = branch
+        verification.user.save(update_fields=["branch"])
 
         updated_verification = VerifyStudentService.verify(verification, verifier)
 
@@ -53,6 +61,12 @@ class StudentVerificationServiceTests(TestCase):
             university="UJ",
         )
         verifier = self._create_user(username="verifier-at-user")
+        branch = Branch.objects.create(name="Verification At Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        verification.user.branch = branch
+        verification.user.save(update_fields=["branch"])
 
         VerifyStudentService.verify(verification, verifier)
 
@@ -66,6 +80,12 @@ class StudentVerificationServiceTests(TestCase):
             university="NWU",
         )
         verifier = self._create_user(username="expiry-verifier")
+        branch = Branch.objects.create(name="Expiry Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        verification.user.branch = branch
+        verification.user.save(update_fields=["branch"])
 
         VerifyStudentService.verify(verification, verifier)
 
@@ -84,6 +104,12 @@ class StudentVerificationServiceTests(TestCase):
             university="UFS",
         )
         verifier = self._create_user(username="record-verifier")
+        branch = Branch.objects.create(name="Record Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        verification.user.branch = branch
+        verification.user.save(update_fields=["branch"])
 
         VerifyStudentService.verify(verification, verifier)
 
@@ -93,6 +119,12 @@ class StudentVerificationServiceTests(TestCase):
     def test_duplicate_active_verification_raises(self):
         user = self._create_user(username="duplicate-user")
         verifier = self._create_user(username="duplicate-verifier")
+        branch = Branch.objects.create(name="Duplicate Verification Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        user.branch = branch
+        user.save(update_fields=["branch"])
 
         first_verification = StudentVerification.objects.create(
             user=user,
@@ -116,6 +148,12 @@ class StudentVerificationServiceTests(TestCase):
     def test_expired_verification_allows_new_verification(self):
         user = self._create_user(username="expired-user")
         verifier = self._create_user(username="expired-verifier")
+        branch = Branch.objects.create(name="Expired Verification Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        user.branch = branch
+        user.save(update_fields=["branch"])
 
         expired_verification = StudentVerification.objects.create(
             user=user,
@@ -174,6 +212,12 @@ class StudentVerificationServiceTests(TestCase):
             university="UWC",
         )
         verifier = self._create_user(username="approve-publisher")
+        branch = Branch.objects.create(name="Approve Publish Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        verification.user.branch = branch
+        verification.user.save(update_fields=["branch"])
 
         VerifyStudentService.verify(verification, verifier)
 
@@ -192,6 +236,12 @@ class StudentVerificationServiceTests(TestCase):
             university="UFS",
         )
         rejector = self._create_user(username="reject-publisher")
+        branch = Branch.objects.create(name="Reject Branch")
+        rejector.branch = branch
+        rejector.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=rejector, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        verification.user.branch = branch
+        verification.user.save(update_fields=["branch"])
 
         RejectStudentVerificationService.reject(verification, rejected_by=rejector)
 
@@ -204,6 +254,12 @@ class StudentVerificationServiceTests(TestCase):
     def test_approved_verification_removed_from_pending_queue(self):
         user = self._create_user(username="approved-queue-user")
         verifier = self._create_user(username="approved-queue-verifier")
+        branch = Branch.objects.create(name="Approved Queue Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        user.branch = branch
+        user.save(update_fields=["branch"])
         verification = StudentVerification.objects.create(
             user=user,
             student_number="10006",
@@ -218,6 +274,12 @@ class StudentVerificationServiceTests(TestCase):
     def test_rejected_verification_removed_from_pending_queue(self):
         user = self._create_user(username="rejected-queue-user")
         rejector = self._create_user(username="rejected-queue-rejector")
+        branch = Branch.objects.create(name="Rejected Queue Branch")
+        rejector.branch = branch
+        rejector.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=rejector, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        user.branch = branch
+        user.save(update_fields=["branch"])
         verification = StudentVerification.objects.create(
             user=user,
             student_number="10007",
@@ -232,6 +294,12 @@ class StudentVerificationServiceTests(TestCase):
     def test_expired_verification_allows_new_request(self):
         user = self._create_user(username="expired-request-user")
         verifier = self._create_user(username="expired-request-verifier")
+        branch = Branch.objects.create(name="Expired Request Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        user.branch = branch
+        user.save(update_fields=["branch"])
 
         expired_verification = StudentVerification.objects.create(
             user=user,

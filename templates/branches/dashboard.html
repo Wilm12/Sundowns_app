@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Branch Dashboard</title>
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <section class="bg-white rounded-2xl shadow p-4 sm:p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">Branch Overview</p>
+                    <h1 class="text-2xl font-bold">{{ dashboard.branch.name }}</h1>
+                </div>
+                <div class="text-right text-sm text-slate-500">
+                    <div>Status: {{ dashboard.branch.status }}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Supporters</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.supporters }}</div>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Verified</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.verified }}</div>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Eligible</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.eligible }}</div>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Open Journeys</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.journeys_open }}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow p-4 sm:p-6">
+            <h2 class="text-lg font-semibold mb-3">Match Operations Summary</h2>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Booked</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.journeys_booked }}</div>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Allocated</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.tickets_allocated }}</div>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Collected</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.tickets_collected }}</div>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Attended</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.attendance_recorded }}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow p-4 sm:p-6">
+            <h2 class="text-lg font-semibold mb-3">Operational Funnel</h2>
+            <div class="flex flex-col sm:flex-row items-stretch gap-2 text-sm">
+                <div class="flex-1 bg-slate-100 rounded-xl p-3 text-center">Registered<br><span class="font-semibold">{{ dashboard.supporters }}</span></div>
+                <div class="text-center py-2">↓</div>
+                <div class="flex-1 bg-slate-100 rounded-xl p-3 text-center">Verified<br><span class="font-semibold">{{ dashboard.verified }}</span></div>
+                <div class="text-center py-2">↓</div>
+                <div class="flex-1 bg-slate-100 rounded-xl p-3 text-center">Eligible<br><span class="font-semibold">{{ dashboard.eligible }}</span></div>
+                <div class="text-center py-2">↓</div>
+                <div class="flex-1 bg-slate-100 rounded-xl p-3 text-center">Booked<br><span class="font-semibold">{{ dashboard.journeys_booked }}</span></div>
+                <div class="text-center py-2">↓</div>
+                <div class="flex-1 bg-slate-100 rounded-xl p-3 text-center">Collected<br><span class="font-semibold">{{ dashboard.tickets_collected }}</span></div>
+                <div class="text-center py-2">↓</div>
+                <div class="flex-1 bg-slate-100 rounded-xl p-3 text-center">Attended<br><span class="font-semibold">{{ dashboard.attendance_recorded }}</span></div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow p-4 sm:p-6">
+            <h2 class="text-lg font-semibold mb-3">Attendance Metrics</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Attendance Rate</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.attendance_rate }}%</div>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">Collection Rate</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.collection_rate }}%</div>
+                </div>
+                <div class="bg-slate-100 rounded-xl p-3">
+                    <div class="text-xs uppercase text-slate-500">No-show Rate</div>
+                    <div class="text-2xl font-semibold">{{ dashboard.no_show_rate }}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl shadow p-4 sm:p-6">
+            <h2 class="text-lg font-semibold mb-3">Recent Activity</h2>
+            <ul class="space-y-2">
+                {% for item in dashboard.recent_activity %}
+                    <li class="border border-slate-200 rounded-lg p-3 text-sm">
+                        <div class="font-medium">{{ item.title }}</div>
+                        <div class="text-slate-500">{{ item.type }}</div>
+                    </li>
+                {% empty %}
+                    <li class="text-sm text-slate-500">No recent activity yet.</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

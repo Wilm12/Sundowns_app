@@ -7,7 +7,7 @@ from engagement.dispatcher import publish
 from engagement.envelope import EngagementEventEnvelope
 from engagement.events import EngagementEvent
 
-from branches.models import BranchRole
+from branches.services.authorization import BranchAdminRequired, is_branch_admin
 
 from ..events import AttendanceRecorded
 from ..models import Journey, JourneyStatus
@@ -15,10 +15,6 @@ from ..models import Journey, JourneyStatus
 
 class AttendanceAlreadyRecorded(Exception):
     """Raised when attendance has already been recorded for a journey."""
-
-
-class RecorderNotAuthorized(Exception):
-    """Raised when the recorder does not have an authorized role for the branch."""
 
 
 class InvalidJourneyState(Exception):
@@ -39,14 +35,8 @@ class RecordAttendanceService:
         if journey.status != JourneyStatus.TICKET_COLLECTED:
             raise InvalidJourneyState("Only TICKET_COLLECTED journeys may record attendance.")
 
-        has_authorized_role = BranchRole.objects.filter(
-            branch=journey.branch,
-            user=recorder,
-            role__in=[BranchRole.Role.BRANCH_ADMIN, BranchRole.Role.TICKET_DISTRIBUTOR],
-            is_active=True,
-        ).exists()
-        if not has_authorized_role:
-            raise RecorderNotAuthorized("Recorder is not authorized to record attendance for this branch.")
+        if not is_branch_admin(recorder, journey.branch):
+            raise BranchAdminRequired("Only branch admins can record attendance for this branch.")
 
         journey.attended_at = timezone.now()
         journey.attended_by = recorder

@@ -12,9 +12,9 @@ from engagement.events import EngagementEvent
 
 from .models import Journey, JourneyStatus
 from .services.allocate_ticket import AllocateTicketService, InvalidJourneyState, JourneyAlreadyHasTicket
+from branches.services.authorization import BranchAdminRequired
 from .services.book_journey import BookJourneyService, InvalidJourneyTransition
 from .services.collect_ticket import (
-    CollectorNotAuthorized,
     CollectTicketService,
     InvalidCollectionCode,
     InvalidJourneyState as CollectionInvalidJourneyState,
@@ -24,7 +24,6 @@ from .services.open_journey import IneligibleSupporter, InvalidBranch, JourneyAl
 from .services.record_attendance import (
     AttendanceAlreadyRecorded,
     InvalidJourneyState as AttendanceInvalidJourneyState,
-    RecorderNotAuthorized,
     RecordAttendanceService,
 )
 
@@ -192,12 +191,12 @@ class JourneyServiceTests(TestCase):
         self.assertEqual(envelope.payload["supporter_id"], supporter.pk)
 
     @patch("journeys.services.collect_ticket.publish")
-    def test_ticket_collection_succeeds_for_authorized_distributor(self, mock_publish):
+    def test_ticket_collection_succeeds_for_authorized_branch_admin(self, mock_publish):
         supporter = self._create_user(username="collector-supporter")
-        collector = self._create_user(username="ticket-distributor")
+        collector = self._create_user(username="ticket-branch-admin")
         branch = Branch.objects.create(name="Collection Branch", status=BranchStatus.ACTIVE)
         BranchPolicy.objects.get(branch=branch)
-        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.TICKET_DISTRIBUTOR, is_active=True)
+        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
         match = Match.objects.create(date=timezone.now(), location="Durban", opponent="AmaZulu")
         SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
         journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
@@ -219,7 +218,7 @@ class JourneyServiceTests(TestCase):
         collector = self._create_user(username="duplicate-collector")
         branch = Branch.objects.create(name="Duplicate Collection Branch", status=BranchStatus.ACTIVE)
         BranchPolicy.objects.get(branch=branch)
-        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.TICKET_DISTRIBUTOR, is_active=True)
+        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
         match = Match.objects.create(date=timezone.now(), location="Cape Town", opponent="Cape Town City")
         SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
         journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
@@ -234,12 +233,12 @@ class JourneyServiceTests(TestCase):
         collector = self._create_user(username="invalid-code-collector")
         branch = Branch.objects.create(name="Invalid Code Branch", status=BranchStatus.ACTIVE)
         BranchPolicy.objects.get(branch=branch)
-        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.TICKET_DISTRIBUTOR, is_active=True)
+        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
 
         with self.assertRaises(InvalidCollectionCode):
             CollectTicketService.collect("not-a-real-code", collector)
 
-    def test_non_distributor_cannot_collect_ticket(self):
+    def test_non_branch_admin_cannot_collect_ticket(self):
         supporter = self._create_user(username="unauthorized-supporter")
         collector = self._create_user(username="unauthorized-collector")
         branch = Branch.objects.create(name="Unauthorized Branch", status=BranchStatus.ACTIVE)
@@ -250,7 +249,7 @@ class JourneyServiceTests(TestCase):
         BookJourneyService.book_journey(journey)
         AllocateTicketService.allocate(journey)
 
-        with self.assertRaises(CollectorNotAuthorized):
+        with self.assertRaises(BranchAdminRequired):
             CollectTicketService.collect(str(journey.collection_code), collector)
 
     @patch("journeys.services.record_attendance.publish")
@@ -321,7 +320,7 @@ class JourneyServiceTests(TestCase):
         journey.status = JourneyStatus.TICKET_COLLECTED
         journey.save(update_fields=["status", "updated_at"])
 
-        with self.assertRaises(RecorderNotAuthorized):
+        with self.assertRaises(BranchAdminRequired):
             RecordAttendanceService.record(journey, recorder)
 
     def _create_user(self, username):

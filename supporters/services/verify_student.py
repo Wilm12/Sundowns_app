@@ -6,6 +6,8 @@ from engagement.dispatcher import publish
 from engagement.envelope import EngagementEventEnvelope
 from engagement.events import EngagementEvent
 
+from branches.services.authorization import BranchAdminRequired, is_branch_admin
+
 from ..events import StudentVerified
 from ..models import StudentVerification, StudentVerificationStatus
 from .evaluate_eligibility import EvaluateEligibilityService
@@ -20,6 +22,10 @@ class VerifyStudentService:
 
     @staticmethod
     def verify(verification, verifier):
+        branch = getattr(verification.user, "branch", None)
+        if not is_branch_admin(verifier, branch):
+            raise BranchAdminRequired("Only branch admins can approve student verifications.")
+
         active_verification_exists = (
             StudentVerification.objects.filter(
                 user=verification.user,

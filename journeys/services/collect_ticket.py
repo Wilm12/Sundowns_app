@@ -7,7 +7,7 @@ from engagement.dispatcher import publish
 from engagement.envelope import EngagementEventEnvelope
 from engagement.events import EngagementEvent
 
-from branches.models import BranchRole
+from branches.services.authorization import BranchAdminRequired, is_branch_admin
 
 from ..events import TicketCollected
 from ..models import Journey, JourneyStatus
@@ -19,10 +19,6 @@ class InvalidCollectionCode(Exception):
 
 class TicketAlreadyCollected(Exception):
     """Raised when a ticket has already been collected."""
-
-
-class CollectorNotAuthorized(Exception):
-    """Raised when a collector does not have distributor privileges for the branch."""
 
 
 class InvalidJourneyState(Exception):
@@ -45,14 +41,8 @@ class CollectTicketService:
         if journey.status != JourneyStatus.TICKET_READY:
             raise InvalidJourneyState("Only TICKET_READY journeys may be collected.")
 
-        has_distributor_role = BranchRole.objects.filter(
-            branch=journey.branch,
-            user=collector,
-            role=BranchRole.Role.TICKET_DISTRIBUTOR,
-            is_active=True,
-        ).exists()
-        if not has_distributor_role:
-            raise CollectorNotAuthorized("Collector is not authorized to distribute tickets for this branch.")
+        if not is_branch_admin(collector, journey.branch):
+            raise BranchAdminRequired("Only branch admins can collect tickets for this branch.")
 
         journey.ticket_collected_at = timezone.now()
         journey.ticket_collected_by = collector

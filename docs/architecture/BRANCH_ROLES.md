@@ -42,8 +42,8 @@ UP Tuks
 
 ↓
 
-- Branch President
-- Student Verifier
+- Member
+- Branch Admin
 
 ---
 
@@ -53,7 +53,7 @@ Roles are contextual.
 
 A supporter could be:
 
-Transport Coordinator
+Branch Admin
 
 at
 
@@ -78,119 +78,33 @@ Examples:
 
 # Role Catalogue
 
-## Branch President
+## Member
 
 Purpose
 
-Leads the branch.
+Represents an ordinary branch supporter.
 
 Responsibilities
 
-- Overall branch management
-- Assign operational roles
-- Approve policies
-- View branch reports
-
-Future capabilities
-
-- Open season
-- Close season
-- Suspend branch operations
+- Participate in branch journeys and events
+- Access branch communications
+- Receive branch updates
 
 ---
 
-## Secretary
+## Branch Admin
 
 Purpose
 
-Administrative management.
+Represents the operational branch lead for day-to-day administration.
 
 Responsibilities
 
-- Manage supporter records
-- Maintain communications
-- Publish announcements
-- Organise meetings
-
----
-
-## Student Verifier
-
-Purpose
-
-Validate student eligibility.
-
-Responsibilities
-
-- Review verification requests
-- Approve student verification
-- Reject invalid submissions
-
-Future
-
-Publishes:
-
-StudentVerified
-
-StudentVerificationRejected
-
----
-
-## Journey Coordinator
-
-Purpose
-
-Own supporter journeys.
-
-Responsibilities
-
-- Open journeys
-- Close journeys
-- Manage bookings
-- Monitor participation
-
----
-
-## Transport Coordinator
-
-Purpose
-
-Manage supporter transport.
-
-Responsibilities
-
-- Allocate buses
-- Assign supporters
-- Monitor boarding
-- Confirm departures
-
----
-
-## Ticket Distributor
-
-Purpose
-
-Manage complimentary tickets.
-
-Responsibilities
-
-- Allocate tickets
-- Record ticket collection
-- Handle uncollected tickets
-
----
-
-## Communications Officer
-
-Purpose
-
-Manage branch communications.
-
-Responsibilities
-
-- Publish announcements
-- Notify supporters
-- Schedule reminders
+- Approve supporter verification
+- Collect tickets for branch journeys
+- Record attendance for collected tickets
+- Access the branch operations dashboard
+- Manage branch role assignments within the branch
 
 ---
 
@@ -209,44 +123,14 @@ These are intentionally excluded from Sprint B3.
 
 # Operational Ownership
 
-## Branch President owns
+## Branch Admin owns
 
 - Branch administration
 - Policies
 - Role assignment
-
----
-
-## Journey Coordinator owns
-
-- Journey lifecycle
-
----
-
-## Transport Coordinator owns
-
-- Bus allocation
-- Boarding operations
-
----
-
-## Ticket Distributor owns
-
-- Ticket allocation
+- Verification approval
 - Ticket collection
-
----
-
-## Student Verifier owns
-
-- Student verification
-
----
-
-## Communications Officer owns
-
-- Announcements
-- Notifications
+- Attendance recording
 
 ---
 
@@ -358,37 +242,19 @@ rather than
 
 Supporter Context
 
-Consumes role assignments.
+Consumes branch admin assignments.
 
 ---
 
 Journey Context
 
-Uses Journey Coordinator.
-
----
-
-Transport Context
-
-Uses Transport Coordinator.
-
----
-
-Ticketing Context
-
-Uses Ticket Distributor.
-
----
-
-Communications Context
-
-Uses Communications Officer.
+Uses branch admin authorization for ticket collection and attendance recording.
 
 ---
 
 Reporting Context
 
-Aggregates role activity.
+Aggregates branch admin activity.
 
 ---
 

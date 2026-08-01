@@ -3,6 +3,8 @@ from uuid import uuid4
 from django.utils import timezone
 from engagement.events import EngagementEvent
 
+from branches.services.authorization import BranchAdminRequired
+
 from ..models import BranchRole
 from ..events import dispatch_event
 
@@ -12,10 +14,12 @@ class BranchRoleAlreadyAssigned(Exception):
 
 
 class AssignBranchRoleService:
-    """Thin service for assigning operational roles within a branch."""
+    """Thin service for assigning branch roles within a branch."""
 
     @staticmethod
     def assign(branch, user, role, assigned_by=None):
+        if role not in [BranchRole.Role.MEMBER, BranchRole.Role.BRANCH_ADMIN]:
+            raise BranchAdminRequired(f"Unsupported role {role}.")
         if BranchRole.objects.filter(
             branch=branch,
             user=user,

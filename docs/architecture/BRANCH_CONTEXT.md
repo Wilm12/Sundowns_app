@@ -143,12 +143,8 @@ They are NOT Django permissions.
 
 Initial roles:
 
-- Branch President
-- Secretary
-- Transport Coordinator
-- Ticket Distributor
-- Student Verifier
-- Event Coordinator
+- Member
+- Branch Admin
 
 These roles describe business responsibilities.
 

@@ -51,14 +51,8 @@ class BranchPolicy(models.Model):
 
 class BranchRole(models.Model):
     class Role(models.TextChoices):
-        PRESIDENT = "PRESIDENT", "President"
-        SECRETARY = "SECRETARY", "Secretary"
+        MEMBER = "MEMBER", "Member"
         BRANCH_ADMIN = "BRANCH_ADMIN", "Branch Admin"
-        JOURNEY_COORDINATOR = "JOURNEY_COORDINATOR", "Journey Coordinator"
-        TRANSPORT_COORDINATOR = "TRANSPORT_COORDINATOR", "Transport Coordinator"
-        TICKET_DISTRIBUTOR = "TICKET_DISTRIBUTOR", "Ticket Distributor"
-        STUDENT_VERIFIER = "STUDENT_VERIFIER", "Student Verifier"
-        COMMUNICATIONS_OFFICER = "COMMUNICATIONS_OFFICER", "Communications Officer"
 
     branch = models.ForeignKey(
         Branch,

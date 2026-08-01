@@ -1,34 +1,29 @@
+from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404, render
-
-from .models import Branch
-from .services.branch_admin_dashboard import BranchAdminDashboardService
-
+from branches.models import BranchRole
 
 @login_required
-def branch_admin_dashboard_view(request, branch_id=None):
-    branch = None
-    if branch_id is not None:
-        branch = get_object_or_404(Branch, pk=branch_id)
+def branch_admin_dashboard_view(request):
+    branch = request.user.branch
 
-    if not branch:
-        branch = Branch.objects.filter(
-            branch_roles__user=request.user,
-            branch_roles__role='BRANCH_ADMIN',
-            branch_roles__is_active=True,
-        ).order_by('name').first()
-
-    if not branch:
-        raise PermissionDenied
-
-    has_admin_access = branch.branch_roles.filter(
+    is_admin = BranchRole.objects.filter(
+        branch=branch,
         user=request.user,
-        role='BRANCH_ADMIN',
+        role=BranchRole.Role.BRANCH_ADMIN,
         is_active=True,
     ).exists()
-    if not has_admin_access:
-        raise PermissionDenied
 
-    dashboard = BranchAdminDashboardService.get_dashboard(request.user, branch=branch)
-    return render(request, 'branches/admin_dashboard.html', {'dashboard': dashboard})
+    if not is_admin:
+        return HttpResponseForbidden()
+
+    dashboard = BranchAdminDashboardService.get_dashboard(request.user, branch)
+
+    return render(
+        request,
+        "branches/admin_dashboard.html",
+        {
+            "dashboard": dashboard,
+            "branch": branch,
+        },
+    )
+

@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from journeys.models import Journey, JourneyStatus
 from matches.models import Match
-from supporters.models import StudentVerification, StudentVerificationStatus, SupporterEligibility
+from supporters.models import StudentVerification, StudentVerificationStatus
 from users.models import User
 
 from ..models import Branch, BranchRole, CommitteeAction, CommitteeActivity
@@ -29,33 +29,69 @@ class BranchAdminDashboardService:
 
         branch = Branch.objects.get(pk=branch.pk)
 
-        supporters = User.objects.filter(branch=branch)
-        total_supporters = supporters.count()
-        verified_supporters = User.objects.filter(
+        # ------------------------------------------------------------
+        # Supporter metrics
+        # ------------------------------------------------------------
+        total_supporters = BranchRole.objects.filter(
             branch=branch,
-            student_verifications__status=StudentVerificationStatus.VERIFIED,
-        ).distinct().count()
-        eligible_supporters = User.objects.filter(
+            role=BranchRole.Role.MEMBER,
+            is_active=True,
+        ).count()
+
+        verified_supporters = BranchRole.objects.filter(
             branch=branch,
-            supporter_eligibility__is_eligible=True,
-        ).distinct().count()
+            role=BranchRole.Role.MEMBER,
+            is_active=True,
+            user__student_verifications__status=StudentVerificationStatus.VERIFIED,
+        ).values("user").distinct().count()
+
+        eligible_supporters = BranchRole.objects.filter(
+            branch=branch,
+            role=BranchRole.Role.MEMBER,
+            is_active=True,
+            user__supporter_eligibility__is_eligible=True,
+        ).values("user").distinct().count()
+
         branch_admin_count = BranchRole.objects.filter(
             branch=branch,
             role=BranchRole.Role.BRANCH_ADMIN,
             is_active=True,
         ).count()
 
-        upcoming_match = Match.objects.filter(date__gte=timezone.now()).order_by("date").first()
+        # ------------------------------------------------------------
+        # Upcoming match
+        # ------------------------------------------------------------
+        upcoming_match = Match.objects.filter(
+            date__gte=timezone.now()
+        ).order_by("date").first()
+
         if upcoming_match is None:
             upcoming_match = Match.objects.order_by("date").first()
 
-        journey_metrics = {}
+        # ------------------------------------------------------------
+        # Journey metrics
+        # ------------------------------------------------------------
         if upcoming_match:
             journeys = Journey.objects.filter(branch=branch, match=upcoming_match)
+
             booked_count = journeys.filter(status=JourneyStatus.BOOKED).count()
-            allocated_count = journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.TICKET_COLLECTED, JourneyStatus.MATCH_ATTENDED]).count()
-            collected_count = journeys.filter(status__in=[JourneyStatus.TICKET_COLLECTED, JourneyStatus.MATCH_ATTENDED]).count()
-            attended_count = journeys.filter(status=JourneyStatus.MATCH_ATTENDED).count()
+            allocated_count = journeys.filter(
+                status__in=[
+                    JourneyStatus.TICKET_READY,
+                    JourneyStatus.TICKET_COLLECTED,
+                    JourneyStatus.MATCH_ATTENDED,
+                ]
+            ).count()
+            collected_count = journeys.filter(
+                status__in=[
+                    JourneyStatus.TICKET_COLLECTED,
+                    JourneyStatus.MATCH_ATTENDED,
+                ]
+            ).count()
+            attended_count = journeys.filter(
+                status=JourneyStatus.MATCH_ATTENDED
+            ).count()
+
             pending_collection = max(allocated_count - collected_count, 0)
             no_shows = max(booked_count - attended_count, 0)
 
@@ -66,10 +102,18 @@ class BranchAdminDashboardService:
                 "attended_count": attended_count,
                 "pending_collection": pending_collection,
                 "no_shows": no_shows,
-                "booked_progress": round((booked_count / max(booked_count, 1)) * 100, 1) if booked_count else 0,
-                "allocated_progress": round((allocated_count / max(booked_count, 1)) * 100, 1) if booked_count else 0,
-                "collected_progress": round((collected_count / max(booked_count, 1)) * 100, 1) if booked_count else 0,
-                "attended_progress": round((attended_count / max(booked_count, 1)) * 100, 1) if booked_count else 0,
+                "booked_progress": round(
+                    (booked_count / max(booked_count, 1)) * 100, 1
+                ) if booked_count else 0,
+                "allocated_progress": round(
+                    (allocated_count / max(booked_count, 1)) * 100, 1
+                ) if booked_count else 0,
+                "collected_progress": round(
+                    (collected_count / max(booked_count, 1)) * 100, 1
+                ) if booked_count else 0,
+                "attended_progress": round(
+                    (attended_count / max(booked_count, 1)) * 100, 1
+                ) if booked_count else 0,
             }
         else:
             journey_metrics = {
@@ -85,6 +129,9 @@ class BranchAdminDashboardService:
                 "attended_progress": 0,
             }
 
+        # ------------------------------------------------------------
+        # Committee members
+        # ------------------------------------------------------------
         committee_members = []
         for role in BranchRole.objects.filter(
             branch=branch,
@@ -96,25 +143,51 @@ class BranchAdminDashboardService:
                 "name": role.user.get_full_name() or role.user.username,
                 "email": role.user.email,
                 "assigned_at": role.assigned_at,
-                "assigned_by": role.assigned_by.get_full_name() or role.assigned_by.username if role.assigned_by else "System",
+                "assigned_by": (
+                    role.assigned_by.get_full_name()
+                    or role.assigned_by.username
+                ) if role.assigned_by else "System",
             })
 
+        # ------------------------------------------------------------
+        # Recent activity
+        # ------------------------------------------------------------
         recent_activity = []
-        for activity in CommitteeActivity.objects.filter(branch=branch).select_related("actor", "target_user").order_by("-created_at")[:10]:
+        for activity in CommitteeActivity.objects.filter(
+            branch=branch
+        ).select_related("actor", "target_user").order_by("-created_at")[:10]:
             title = BranchAdminDashboardService._activity_label(activity)
             recent_activity.append({
                 "title": title,
                 "action": activity.action,
-                "actor": activity.actor.get_full_name() or activity.actor.username if activity.actor else "System",
+                "actor": (
+                    activity.actor.get_full_name()
+                    or activity.actor.username
+                ) if activity.actor else "System",
                 "created_at": activity.created_at,
             })
 
+        # ------------------------------------------------------------
+        # Quick actions
+        # ------------------------------------------------------------
         quick_action_urls = {
             "verify_supporter": reverse("branch_committee", args=[branch.pk]),
-            "allocate_ticket": reverse("match_operations_console", args=[branch.pk, upcoming_match.pk]) if upcoming_match else "#",
-            "collect_ticket": reverse("match_operations_console", args=[branch.pk, upcoming_match.pk]) if upcoming_match else "#",
-            "record_attendance": reverse("match_operations_console", args=[branch.pk, upcoming_match.pk]) if upcoming_match else "#",
-            "view_match_console": reverse("match_operations_console", args=[branch.pk, upcoming_match.pk]) if upcoming_match else "#",
+            "allocate_ticket": (
+                reverse("match_operations_console", args=[branch.pk, upcoming_match.pk])
+                if upcoming_match else "#"
+            ),
+            "collect_ticket": (
+                reverse("match_operations_console", args=[branch.pk, upcoming_match.pk])
+                if upcoming_match else "#"
+            ),
+            "record_attendance": (
+                reverse("match_operations_console", args=[branch.pk, upcoming_match.pk])
+                if upcoming_match else "#"
+            ),
+            "view_match_console": (
+                reverse("match_operations_console", args=[branch.pk, upcoming_match.pk])
+                if upcoming_match else "#"
+            ),
             "view_supporters": reverse("branch_detail_page", args=[branch.pk]),
         }
 
@@ -125,12 +198,18 @@ class BranchAdminDashboardService:
                 "total_supporters": total_supporters,
                 "verified_supporters": verified_supporters,
                 "eligible_supporters": eligible_supporters,
-                "branch_admins": branch_admin_count,
+                "committee_members": branch_admin_count,
             },
             "verification_metrics": {
                 "verified_supporters": verified_supporters,
-                "pending_verifications": StudentVerification.objects.filter(user__branch=branch, status=StudentVerificationStatus.PENDING).count(),
-                "rejected_verifications": StudentVerification.objects.filter(user__branch=branch, status=StudentVerificationStatus.REJECTED).count(),
+                "pending_verifications": StudentVerification.objects.filter(
+                    user__branch=branch,
+                    status=StudentVerificationStatus.PENDING,
+                ).count(),
+                "rejected_verifications": StudentVerification.objects.filter(
+                    user__branch=branch,
+                    status=StudentVerificationStatus.REJECTED,
+                ).count(),
             },
             "eligibility_metrics": {
                 "eligible_supporters": eligible_supporters,
@@ -158,3 +237,4 @@ class BranchAdminDashboardService:
         if activity.action == CommitteeAction.ATTENDANCE_RECORDED:
             return "Attendance recorded"
         return activity.action.replace("_", " ").title()
+

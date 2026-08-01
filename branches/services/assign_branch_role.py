@@ -1,4 +1,10 @@
+from uuid import uuid4
+
+from django.utils import timezone
+from engagement.events import EngagementEvent
+
 from ..models import BranchRole
+from ..events import dispatch_event
 
 
 class BranchRoleAlreadyAssigned(Exception):
@@ -20,10 +26,27 @@ class AssignBranchRoleService:
                 f"{user} already has the active role {role} in {branch}."
             )
 
-        return BranchRole.objects.create(
+        assignment = BranchRole.objects.create(
             branch=branch,
             user=user,
             role=role,
             assigned_by=assigned_by,
             is_active=True,
         )
+
+        correlation_id = uuid4()
+        dispatch_event(
+            EngagementEvent.BRANCH_ROLE_ASSIGNED,
+            user=user,
+            payload={
+                "branch_id": branch.pk,
+                "supporter_id": user.pk,
+                "role": role,
+                "assigned_by": assigned_by.pk if assigned_by else None,
+                "assigned_at": timezone.now(),
+                "correlation_id": str(correlation_id),
+            },
+            correlation_id=correlation_id,
+        )
+
+        return assignment

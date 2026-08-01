@@ -29,6 +29,10 @@ from engagement.handlers import (
     branch_changed_handler,
     branch_milestone_reached_handler,
 )
+from branches.handlers import (
+    branch_role_assigned_handler,
+    branch_role_removed_handler,
+)
 
 
 EVENT_HANDLERS = {
@@ -53,4 +57,6 @@ EVENT_HANDLERS = {
     EngagementEvent.BRANCH_JOINED: branch_joined_handler,
     EngagementEvent.BRANCH_CHANGED: branch_changed_handler,
     EngagementEvent.BRANCH_MILESTONE_REACHED: branch_milestone_reached_handler,
+    EngagementEvent.BRANCH_ROLE_ASSIGNED: branch_role_assigned_handler,
+    EngagementEvent.BRANCH_ROLE_REMOVED: branch_role_removed_handler,
 }

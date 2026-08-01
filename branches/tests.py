@@ -1,6 +1,10 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.test import TestCase
+
+from engagement.events import EngagementEvent
 
 from .models import Branch, BranchPolicy, BranchRole, BranchStatus
 from .serializers import BranchPolicySerializer, BranchRoleSerializer, BranchSerializer
@@ -208,6 +212,66 @@ class BranchModelTests(TestCase):
 
         self.assertTrue(reassigned_role.is_active)
         self.assertEqual(BranchRole.objects.filter(branch=branch, user=user, role=BranchRole.Role.PRESIDENT).count(), 2)
+
+    @patch("branches.services.assign_branch_role.dispatch_event")
+    def test_assign_branch_role_service_publishes_assigned_event(self, mock_dispatch):
+        branch = Branch.objects.create(name="Event Assign Branch")
+        user = self._create_user(username="event-assign-user")
+        assigner = self._create_user(username="event-assigner")
+
+        AssignBranchRoleService.assign(
+            branch=branch,
+            user=user,
+            role=BranchRole.Role.PRESIDENT,
+            assigned_by=assigner,
+        )
+
+        self.assertEqual(mock_dispatch.call_count, 1)
+        self.assertEqual(mock_dispatch.call_args.args[0], EngagementEvent.BRANCH_ROLE_ASSIGNED)
+        self.assertEqual(mock_dispatch.call_args.kwargs["user"], user)
+        self.assertEqual(mock_dispatch.call_args.kwargs["payload"]["branch_id"], branch.pk)
+        self.assertEqual(mock_dispatch.call_args.kwargs["payload"]["supporter_id"], user.pk)
+        self.assertEqual(mock_dispatch.call_args.kwargs["payload"]["role"], BranchRole.Role.PRESIDENT)
+        self.assertEqual(mock_dispatch.call_args.kwargs["payload"]["assigned_by"], assigner.pk)
+
+    @patch("branches.services.assign_branch_role.dispatch_event")
+    def test_duplicate_assignment_does_not_publish_duplicate_events(self, mock_dispatch):
+        branch = Branch.objects.create(name="Duplicate Event Branch")
+        user = self._create_user(username="duplicate-event-user")
+
+        AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.SECRETARY)
+
+        with self.assertRaises(BranchRoleAlreadyAssigned):
+            AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.SECRETARY)
+
+        self.assertEqual(mock_dispatch.call_count, 1)
+
+    @patch("branches.services.remove_branch_role.dispatch_event")
+    def test_remove_branch_role_service_publishes_removed_event(self, mock_dispatch):
+        branch = Branch.objects.create(name="Event Remove Branch")
+        user = self._create_user(username="event-remove-user")
+        remover = self._create_user(username="event-remover")
+
+        assigned_role = AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.SECRETARY)
+        RemoveBranchRoleService.remove(branch=branch, user=user, role=BranchRole.Role.SECRETARY, removed_by=remover)
+
+        self.assertEqual(mock_dispatch.call_count, 1)
+        self.assertEqual(mock_dispatch.call_args.args[0], EngagementEvent.BRANCH_ROLE_REMOVED)
+        self.assertEqual(mock_dispatch.call_args.kwargs["user"], user)
+        self.assertEqual(mock_dispatch.call_args.kwargs["payload"]["branch_id"], branch.pk)
+        self.assertEqual(mock_dispatch.call_args.kwargs["payload"]["supporter_id"], user.pk)
+        self.assertEqual(mock_dispatch.call_args.kwargs["payload"]["role"], BranchRole.Role.SECRETARY)
+        self.assertEqual(mock_dispatch.call_args.kwargs["payload"]["removed_by"], remover.pk)
+
+    @patch("branches.services.remove_branch_role.dispatch_event")
+    def test_failed_removal_does_not_publish_event(self, mock_dispatch):
+        branch = Branch.objects.create(name="Failed Remove Event Branch")
+        user = self._create_user(username="failed-remove-event-user")
+
+        with self.assertRaises(BranchRoleNotAssigned):
+            RemoveBranchRoleService.remove(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+
+        self.assertEqual(mock_dispatch.call_count, 0)
 
     def _create_user(self, username):
         return get_user_model().objects.create_user(

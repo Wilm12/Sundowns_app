@@ -1,4 +1,10 @@
+from uuid import uuid4
+
+from django.utils import timezone
+from engagement.events import EngagementEvent
+
 from ..models import BranchRole
+from ..events import dispatch_event
 
 
 class BranchRoleNotAssigned(Exception):
@@ -24,4 +30,20 @@ class RemoveBranchRoleService:
 
         assignment.is_active = False
         assignment.save(update_fields=["is_active"])
+
+        correlation_id = uuid4()
+        dispatch_event(
+            EngagementEvent.BRANCH_ROLE_REMOVED,
+            user=user,
+            payload={
+                "branch_id": branch.pk,
+                "supporter_id": user.pk,
+                "role": role,
+                "removed_by": removed_by.pk if removed_by else None,
+                "removed_at": timezone.now(),
+                "correlation_id": str(correlation_id),
+            },
+            correlation_id=correlation_id,
+        )
+
         return assignment

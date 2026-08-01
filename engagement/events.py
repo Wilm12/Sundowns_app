@@ -48,3 +48,5 @@ class EngagementEvent(Enum):
     BRANCH_JOINED = "branch_joined"
     BRANCH_CHANGED = "branch_changed"
     BRANCH_MILESTONE_REACHED = "branch_milestone_reached"
+    BRANCH_ROLE_ASSIGNED = "branch_role_assigned"
+    BRANCH_ROLE_REMOVED = "branch_role_removed"

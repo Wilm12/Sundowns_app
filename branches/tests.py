@@ -5,6 +5,7 @@ from django.test import TestCase
 from .models import Branch, BranchPolicy, BranchRole, BranchStatus
 from .serializers import BranchPolicySerializer, BranchRoleSerializer, BranchSerializer
 from .services.assign_branch_role import AssignBranchRoleService, BranchRoleAlreadyAssigned
+from .services.remove_branch_role import BranchRoleNotAssigned, RemoveBranchRoleService
 
 
 class BranchModelTests(TestCase):
@@ -161,6 +162,52 @@ class BranchModelTests(TestCase):
 
         self.assertEqual(assigned_role.user, user_two)
         self.assertEqual(BranchRole.objects.filter(branch=branch, role=BranchRole.Role.PRESIDENT).count(), 2)
+
+    def test_remove_branch_role_service_soft_deactivates_role_when_removed(self):
+        branch = Branch.objects.create(name="Remove Role Service Branch")
+        user = self._create_user(username="remove-service-user")
+        assigned_role = AssignBranchRoleService.assign(
+            branch=branch,
+            user=user,
+            role=BranchRole.Role.SECRETARY,
+        )
+
+        removed_role = RemoveBranchRoleService.remove(branch=branch, user=user, role=BranchRole.Role.SECRETARY)
+
+        self.assertEqual(removed_role.id, assigned_role.id)
+        self.assertFalse(removed_role.is_active)
+        self.assertFalse(BranchRole.objects.get(pk=assigned_role.pk).is_active)
+        self.assertEqual(BranchRole.objects.filter(pk=assigned_role.pk).count(), 1)
+
+    def test_remove_branch_role_service_raises_when_trying_to_remove_unassigned_role(self):
+        branch = Branch.objects.create(name="Missing Remove Role Service Branch")
+        user = self._create_user(username="missing-remove-service-user")
+
+        with self.assertRaises(BranchRoleNotAssigned):
+            RemoveBranchRoleService.remove(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+
+    def test_remove_branch_role_service_leaves_other_roles_active(self):
+        branch = Branch.objects.create(name="Leave Other Roles Active Branch")
+        user = self._create_user(username="leave-other-user")
+        president = AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+        secretary = AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.SECRETARY)
+
+        RemoveBranchRoleService.remove(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+
+        self.assertFalse(BranchRole.objects.get(pk=president.pk).is_active)
+        self.assertTrue(BranchRole.objects.get(pk=secretary.pk).is_active)
+
+    def test_inactive_role_can_be_reassigned_through_assign_service(self):
+        branch = Branch.objects.create(name="Reassign Inactive Role Branch")
+        user = self._create_user(username="reassign-user")
+
+        AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+        RemoveBranchRoleService.remove(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+
+        reassigned_role = AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+
+        self.assertTrue(reassigned_role.is_active)
+        self.assertEqual(BranchRole.objects.filter(branch=branch, user=user, role=BranchRole.Role.PRESIDENT).count(), 2)
 
     def _create_user(self, username):
         return get_user_model().objects.create_user(

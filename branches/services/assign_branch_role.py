@@ -6,7 +6,7 @@ class BranchRoleAlreadyAssigned(Exception):
 
 
 class AssignBranchRoleService:
-    """Thin service for assigning operational roles to supporters within a branch."""
+    """Thin service for assigning operational roles within a branch."""
 
     @staticmethod
     def assign(branch, user, role, assigned_by=None):

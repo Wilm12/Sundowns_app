@@ -31,3 +31,13 @@ def ticket_allocated_handler(envelope):
         payload.get("supporter_id"),
         payload.get("ticket_id"),
     )
+
+
+def ticket_collected_handler(envelope):
+    payload = envelope.payload or {}
+    logger.info(
+        "TicketCollected | journey=%s | supporter=%s | collector=%s",
+        payload.get("journey_id"),
+        payload.get("supporter_id"),
+        payload.get("collected_by"),
+    )

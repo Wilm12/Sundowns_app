@@ -46,6 +46,14 @@ class Journey(models.Model):
     )
     ticket_allocated_at = models.DateTimeField(null=True, blank=True)
     collection_code = models.UUIDField(null=True, blank=True, unique=True)
+    ticket_collected_at = models.DateTimeField(null=True, blank=True)
+    ticket_collected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="collected_journeys",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

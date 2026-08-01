@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
 
-from branches.models import Branch, BranchPolicy, BranchStatus
+from branches.models import Branch, BranchPolicy, BranchRole, BranchStatus
 from matches.models import Match
 from supporters.models import EligibilityReason, StudentVerification, StudentVerificationStatus, SupporterEligibility
 
@@ -13,6 +13,13 @@ from engagement.events import EngagementEvent
 from .models import Journey, JourneyStatus
 from .services.allocate_ticket import AllocateTicketService, InvalidJourneyState, JourneyAlreadyHasTicket
 from .services.book_journey import BookJourneyService, InvalidJourneyTransition
+from .services.collect_ticket import (
+    CollectorNotAuthorized,
+    CollectTicketService,
+    InvalidCollectionCode,
+    InvalidJourneyState as CollectionInvalidJourneyState,
+    TicketAlreadyCollected,
+)
 from .services.open_journey import IneligibleSupporter, InvalidBranch, JourneyAlreadyExists, OpenJourneyService
 
 
@@ -177,6 +184,68 @@ class JourneyServiceTests(TestCase):
         envelope = mock_publish.call_args.args[0]
         self.assertEqual(envelope.event, EngagementEvent.TICKET_ALLOCATED)
         self.assertEqual(envelope.payload["supporter_id"], supporter.pk)
+
+    @patch("journeys.services.collect_ticket.publish")
+    def test_ticket_collection_succeeds_for_authorized_distributor(self, mock_publish):
+        supporter = self._create_user(username="collector-supporter")
+        collector = self._create_user(username="ticket-distributor")
+        branch = Branch.objects.create(name="Collection Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.TICKET_DISTRIBUTOR, is_active=True)
+        match = Match.objects.create(date=timezone.now(), location="Durban", opponent="AmaZulu")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+
+        collected_journey = CollectTicketService.collect(str(journey.collection_code), collector)
+
+        self.assertEqual(collected_journey.status, JourneyStatus.TICKET_COLLECTED)
+        self.assertIsNotNone(collected_journey.ticket_collected_at)
+        self.assertEqual(collected_journey.ticket_collected_by, collector)
+        self.assertEqual(mock_publish.call_count, 1)
+        envelope = mock_publish.call_args.args[0]
+        self.assertEqual(envelope.event, EngagementEvent.TICKET_COLLECTED)
+        self.assertEqual(envelope.payload["collected_by"], collector.pk)
+
+    def test_duplicate_ticket_collection_is_rejected(self):
+        supporter = self._create_user(username="duplicate-collector-supporter")
+        collector = self._create_user(username="duplicate-collector")
+        branch = Branch.objects.create(name="Duplicate Collection Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.TICKET_DISTRIBUTOR, is_active=True)
+        match = Match.objects.create(date=timezone.now(), location="Cape Town", opponent="Cape Town City")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+        CollectTicketService.collect(str(journey.collection_code), collector)
+
+        with self.assertRaises(TicketAlreadyCollected):
+            CollectTicketService.collect(str(journey.collection_code), collector)
+
+    def test_invalid_collection_code_is_rejected(self):
+        collector = self._create_user(username="invalid-code-collector")
+        branch = Branch.objects.create(name="Invalid Code Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.TICKET_DISTRIBUTOR, is_active=True)
+
+        with self.assertRaises(InvalidCollectionCode):
+            CollectTicketService.collect("not-a-real-code", collector)
+
+    def test_non_distributor_cannot_collect_ticket(self):
+        supporter = self._create_user(username="unauthorized-supporter")
+        collector = self._create_user(username="unauthorized-collector")
+        branch = Branch.objects.create(name="Unauthorized Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        match = Match.objects.create(date=timezone.now(), location="Mafikeng", opponent="Platinum Stars")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+
+        with self.assertRaises(CollectorNotAuthorized):
+            CollectTicketService.collect(str(journey.collection_code), collector)
 
     def _create_user(self, username):
         return get_user_model().objects.create_user(

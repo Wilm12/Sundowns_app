@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'common',
     'users',
     'branches',
+    'supporters',
     'authentication',
     'matches',
     'rest_framework',

@@ -13,6 +13,8 @@ from transport.models import Transport
 from .models import Branch
 from authentication.permissions import IsAdminOrReadOnly
 from .serializers import BranchSerializer
+from .services.committee import CommitteeService
+from .services.authorization import is_branch_admin
 from django.contrib import messages
 
 @login_required
@@ -64,5 +66,25 @@ def branch_detail_page(request, branch_id):
         "branch": branch,
         "members": members,
         "transport": transport,
+    })
+
+
+@login_required
+def committee_management_view(request, branch_id):
+    """Render a lightweight committee management dashboard for branch admins."""
+
+    branch = get_object_or_404(Branch, id=branch_id)
+    if not is_branch_admin(request.user, branch):
+        return render(request, "403.html", status=403)
+
+    committee_members = CommitteeService.list_committee_members(branch)
+    stats = CommitteeService.get_committee_stats(branch)
+    activities = branch.committee_activities.select_related("actor", "target_user")[:10]
+
+    return render(request, "branches/committee.html", {
+        "branch": branch,
+        "committee_members": committee_members,
+        "stats": stats,
+        "activities": activities,
     })
 

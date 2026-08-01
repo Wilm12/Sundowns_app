@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ branch.name }} Committee</title>
+</head>
+<body>
+  <h1>{{ branch.name }} Committee</h1>
+  <p>Branch Admins: {{ committee_members|length }}</p>
+  <p>Total supporters: {{ stats.total_supporters }}</p>
+  <p>Verified supporters: {{ stats.verified_supporters }}</p>
+  <p>Active journeys: {{ stats.active_journeys }}</p>
+
+  <h2>Committee Members</h2>
+  <ul>
+    {% for member in committee_members %}
+      <li>{{ member.username }}</li>
+    {% empty %}
+      <li>No committee members yet.</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Recent Activity</h2>
+  <ul>
+    {% for activity in activities %}
+      <li>{{ activity.created_at }} - {{ activity.action }} by {{ activity.actor.username|default:"system" }}</li>
+    {% empty %}
+      <li>No activity yet.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

@@ -2,8 +2,10 @@
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from . import views
 from .views import BranchViewSet
 from .views_dashboard import branch_dashboard_view
+from .views_operations import match_operations_console
 
 router = DefaultRouter()
 router.register('', BranchViewSet, basename='branch')
@@ -11,5 +13,7 @@ router.register('', BranchViewSet, basename='branch')
 urlpatterns = [
     path('', include(router.urls)),
     path('<int:branch_id>/dashboard/', branch_dashboard_view, name='branch_dashboard'),
+    path('<int:branch_id>/committee/', views.committee_management_view, name='branch_committee'),
+    path('<int:branch_id>/matches/<int:match_id>/operations/', match_operations_console, name='match_operations_console'),
 ]
 

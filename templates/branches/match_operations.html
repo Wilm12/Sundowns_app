@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>{{ match.opponent }} Operations</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #14213d; }
+    .page { padding: 12px; max-width: 1100px; margin: 0 auto; }
+    .card { background: white; border-radius: 12px; padding: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .sticky { position: sticky; top: 0; z-index: 5; background: #fff; padding: 10px 0; }
+    .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .stat { background: #eef2ff; padding: 10px; border-radius: 10px; }
+    .pill { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; font-weight: bold; }
+    .pill.booked { background: #e0f2fe; color: #075985; }
+    .pill.ready { background: #dcfce7; color: #166534; }
+    .pill.collected { background: #fef3c7; color: #92400e; }
+    .pill.attended { background: #dcfce7; color: #166534; }
+    .funnel { display: flex; gap: 6px; overflow-x: auto; }
+    .funnel-step { flex: 1; min-width: 80px; background: #111827; color: white; padding: 8px; border-radius: 8px; text-align: center; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+    .btn { display: inline-block; padding: 10px 12px; border: none; border-radius: 8px; background: #2563eb; color: white; font-weight: bold; cursor: pointer; }
+    .btn.secondary { background: #6b7280; }
+    .btn.success { background: #16a34a; }
+    input[type="search"] { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 16px; }
+    @media (min-width: 768px) { .stats { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="sticky">
+      <h1>Match Operations</h1>
+      <p><strong>{{ match.opponent }}</strong> • {{ branch.name }} • {{ match.date|date:"d M Y" }} • {{ match.location }}</p>
+    </div>
+
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><strong>{{ console.booked_count }}</strong><br>Booked</div>
+        <div class="stat"><strong>{{ console.allocated_count }}</strong><br>Allocated</div>
+        <div class="stat"><strong>{{ console.collected_count }}</strong><br>Collected</div>
+        <div class="stat"><strong>{{ console.attended_count }}</strong><br>Attended</div>
+        <div class="stat"><strong>{{ console.pending_collections }}</strong><br>Pending</div>
+        <div class="stat"><strong>{{ console.no_shows }}</strong><br>No-Shows</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="funnel">
+        <div class="funnel-step">Booked<br>{{ console.booked_count }}</div>
+        <div class="funnel-step">Allocated<br>{{ console.allocated_count }}</div>
+        <div class="funnel-step">Collected<br>{{ console.collected_count }}</div>
+        <div class="funnel-step">Attended<br>{{ console.attended_count }}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <form method="get">
+        <input type="search" name="q" value="{{ console.search_query }}" placeholder="Search supporter, student number, or email">
+      </form>
+    </div>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Supporter</th>
+            <th>Student</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for journey in console.journeys %}
+            <tr>
+              <td>{{ journey.supporter.get_full_name|default:journey.supporter.username }}</td>
+              <td>
+                {% with verification=journey.supporter.student_verifications.first %}
+                  {{ verification.student_number|default:"—" }}
+                {% endwith %}
+              </td>
+              <td>
+                {% if journey.status == 'BOOKED' %}
+                  <span class="pill booked">BOOKED</span>
+                {% elif journey.status == 'TICKET_READY' %}
+                  <span class="pill ready">READY</span>
+                {% elif journey.status == 'TICKET_COLLECTED' %}
+                  <span class="pill collected">COLLECTED</span>
+                {% elif journey.status == 'MATCH_ATTENDED' %}
+                  <span class="pill attended">ATTENDED</span>
+                {% else %}
+                  <span class="pill">{{ journey.status }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if journey.status == 'BOOKED' %}
+                  <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="journey_id" value="{{ journey.pk }}">
+                    <button class="btn" name="action" value="allocate">Allocate</button>
+                  </form>
+                {% elif journey.status == 'TICKET_READY' %}
+                  <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="journey_id" value="{{ journey.pk }}">
+                    <button class="btn secondary" name="action" value="collect">Collect</button>
+                  </form>
+                {% elif journey.status == 'TICKET_COLLECTED' %}
+                  <form method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="journey_id" value="{{ journey.pk }}">
+                    <button class="btn success" name="action" value="attend">Attend</button>
+                  </form>
+                {% else %}
+                  <span class="pill attended">Completed</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="4">No supporters found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

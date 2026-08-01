@@ -9,14 +9,259 @@ from django.utils import timezone
 from engagement.events import EngagementEvent
 
 from journeys.models import Journey, JourneyStatus
-from supporters.models import EligibilityReason, SupporterEligibility
+from matches.models import Match
+from supporters.models import EligibilityReason, SupporterEligibility, StudentVerification
 from ticketing.models import Ticket
 from users.models import User
 
-from .models import Branch, BranchPolicy, BranchRole, BranchStatus
+from .models import Branch, BranchPolicy, BranchRole, BranchStatus, CommitteeActivity, CommitteeAction
 from .serializers import BranchPolicySerializer, BranchRoleSerializer, BranchSerializer
 from .services.assign_branch_role import AssignBranchRoleService, BranchRoleAlreadyAssigned
+from .services.committee import CommitteeService
+from .services.promote_branch_admin import BranchAdminAlreadyAssigned, PromoteBranchAdminService, UserNotInBranch
+from .services.remove_branch_admin import LastBranchAdminRemovalError, RemoveBranchAdminService
 from .services.remove_branch_role import BranchRoleNotAssigned, RemoveBranchRoleService
+from branches.services.authorization import BranchAdminRequired
+
+
+class CommitteeManagementTests(TestCase):
+    def test_admin_can_promote_another_member(self):
+        branch = Branch.objects.create(name="Committee Branch")
+        acting_admin = self._create_user(username="committee-admin")
+        member = self._create_user(username="committee-member")
+        acting_admin.branch = branch
+        acting_admin.save(update_fields=["branch"])
+        member.branch = branch
+        member.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=acting_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        promoted = PromoteBranchAdminService.promote(branch=branch, target_user=member, acting_admin=acting_admin)
+
+        self.assertEqual(promoted.role, BranchRole.Role.BRANCH_ADMIN)
+        self.assertTrue(BranchRole.objects.filter(branch=branch, user=member, role=BranchRole.Role.BRANCH_ADMIN, is_active=True).exists())
+
+    def test_non_admin_cannot_promote(self):
+        branch = Branch.objects.create(name="Non Admin Branch")
+        member = self._create_user(username="non-admin-member")
+        actor = self._create_user(username="non-admin-actor")
+        member.branch = branch
+        member.save(update_fields=["branch"])
+        actor.branch = branch
+        actor.save(update_fields=["branch"])
+
+        with self.assertRaises(BranchAdminRequired):
+            PromoteBranchAdminService.promote(branch=branch, target_user=member, acting_admin=actor)
+
+    def test_duplicate_promotion_is_prevented(self):
+        branch = Branch.objects.create(name="Duplicate Branch")
+        acting_admin = self._create_user(username="duplicate-admin")
+        member = self._create_user(username="duplicate-member")
+        acting_admin.branch = branch
+        acting_admin.save(update_fields=["branch"])
+        member.branch = branch
+        member.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=acting_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        BranchRole.objects.create(branch=branch, user=member, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        with self.assertRaises(BranchAdminAlreadyAssigned):
+            PromoteBranchAdminService.promote(branch=branch, target_user=member, acting_admin=acting_admin)
+
+    def test_admin_can_remove_another_admin(self):
+        branch = Branch.objects.create(name="Remove Branch")
+        acting_admin = self._create_user(username="remove-admin")
+        target_admin = self._create_user(username="target-admin")
+        acting_admin.branch = branch
+        acting_admin.save(update_fields=["branch"])
+        target_admin.branch = branch
+        target_admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=acting_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        BranchRole.objects.create(branch=branch, user=target_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        removed = RemoveBranchAdminService.remove(branch=branch, target_user=target_admin, acting_admin=acting_admin)
+
+        self.assertFalse(removed.is_active)
+        self.assertFalse(BranchRole.objects.filter(branch=branch, user=target_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True).exists())
+
+    def test_last_admin_cannot_be_removed(self):
+        branch = Branch.objects.create(name="Last Admin Branch")
+        acting_admin = self._create_user(username="last-admin")
+        acting_admin.branch = branch
+        acting_admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=acting_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        with self.assertRaises(LastBranchAdminRemovalError):
+            RemoveBranchAdminService.remove(branch=branch, target_user=acting_admin, acting_admin=acting_admin)
+
+    def test_committee_list_returns_only_admins(self):
+        branch = Branch.objects.create(name="Committee List Branch")
+        admin = self._create_user(username="list-admin")
+        member = self._create_user(username="list-member")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        member.branch = branch
+        member.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        BranchRole.objects.create(branch=branch, user=member, role=BranchRole.Role.MEMBER, is_active=True)
+
+        committee = CommitteeService.list_committee_members(branch)
+
+        self.assertEqual(list(committee), [admin])
+
+    def test_activity_log_records_actions(self):
+        branch = Branch.objects.create(name="Activity Branch")
+        actor = self._create_user(username="activity-actor")
+        target = self._create_user(username="activity-target")
+        actor.branch = branch
+        actor.save(update_fields=["branch"])
+        target.branch = branch
+        target.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=actor, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        PromoteBranchAdminService.promote(branch=branch, target_user=target, acting_admin=actor)
+
+        activity = CommitteeActivity.objects.filter(branch=branch, action=CommitteeAction.ADMIN_PROMOTED).latest("created_at")
+        self.assertEqual(activity.actor, actor)
+        self.assertEqual(activity.target_user, target)
+
+    def test_promote_publishes_event(self):
+        branch = Branch.objects.create(name="Event Branch")
+        acting_admin = self._create_user(username="event-admin")
+        member = self._create_user(username="event-member")
+        acting_admin.branch = branch
+        acting_admin.save(update_fields=["branch"])
+        member.branch = branch
+        member.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=acting_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        with patch("branches.services.promote_branch_admin.dispatch_event") as mock_dispatch:
+            PromoteBranchAdminService.promote(branch=branch, target_user=member, acting_admin=acting_admin)
+
+        self.assertEqual(mock_dispatch.call_count, 1)
+
+    def _create_user(self, username):
+        return get_user_model().objects.create_user(
+            username=username,
+            email=f"{username}@example.com",
+            password="test-pass-123",
+        )
+
+
+class MatchOperationsConsoleTests(TestCase):
+    def test_branch_admin_can_access_match_operations_console(self):
+        branch = Branch.objects.create(name="Match Ops Branch")
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Orlando Pirates")
+        admin = self._create_user(username="ops-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("match_operations_console", args=[branch.pk, match.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Match Operations")
+
+    def test_non_admin_cannot_access_match_operations_console(self):
+        branch = Branch.objects.create(name="No Access Branch")
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Kaizer Chiefs")
+        member = self._create_user(username="ops-member")
+        member.branch = branch
+        member.save(update_fields=["branch"])
+
+        self.client.force_login(member)
+        response = self.client.get(reverse("match_operations_console", args=[branch.pk, match.pk]))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_console_counts_match_progress(self):
+        branch = Branch.objects.create(name="Metrics Branch")
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Chippa United")
+        supporter = self._create_user(username="metrics-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+
+        Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
+        Journey.objects.create(supporter=self._create_user(username="metrics-allocated"), branch=branch, match=match, status=JourneyStatus.TICKET_READY)
+        Journey.objects.create(supporter=self._create_user(username="metrics-collected"), branch=branch, match=match, status=JourneyStatus.TICKET_COLLECTED)
+        Journey.objects.create(supporter=self._create_user(username="metrics-attended"), branch=branch, match=match, status=JourneyStatus.MATCH_ATTENDED)
+
+        from journeys.services.match_operations import MatchOperationsService
+        console = MatchOperationsService.get_console(branch, match)
+
+        self.assertEqual(console["booked_count"], 1)
+        self.assertEqual(console["allocated_count"], 1)
+        self.assertEqual(console["collected_count"], 1)
+        self.assertEqual(console["attended_count"], 1)
+        self.assertEqual(console["pending_collections"], 1)
+        self.assertEqual(console["no_shows"], 1)
+
+    def test_console_searches_by_supporter_name(self):
+        branch = Branch.objects.create(name="Search Branch")
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Mamelodi Sundowns")
+        matching_supporter = self._create_user(username="john_search")
+        matching_supporter.branch = branch
+        matching_supporter.save(update_fields=["branch"])
+        Journey.objects.create(supporter=matching_supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
+
+        other_supporter = self._create_user(username="sarah_search")
+        other_supporter.branch = branch
+        other_supporter.save(update_fields=["branch"])
+        Journey.objects.create(supporter=other_supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
+
+        from journeys.services.match_operations import MatchOperationsService
+        console = MatchOperationsService.get_console(branch, match, search_query="john")
+
+        self.assertEqual(console["journeys"].count(), 1)
+        self.assertEqual(console["journeys"].first().supporter, matching_supporter)
+
+    def test_console_searches_by_student_number(self):
+        branch = Branch.objects.create(name="Student Search Branch")
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Stellenbosch")
+        matching_supporter = self._create_user(username="student-match")
+        matching_supporter.branch = branch
+        matching_supporter.save(update_fields=["branch"])
+        StudentVerification.objects.create(user=matching_supporter, student_number="u12345678", university="TUKS")
+        Journey.objects.create(supporter=matching_supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
+
+        other_supporter = self._create_user(username="other-student")
+        other_supporter.branch = branch
+        other_supporter.save(update_fields=["branch"])
+        StudentVerification.objects.create(user=other_supporter, student_number="u99999999", university="TUKS")
+        Journey.objects.create(supporter=other_supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
+
+        from journeys.services.match_operations import MatchOperationsService
+        console = MatchOperationsService.get_console(branch, match, search_query="u12345678")
+
+        self.assertEqual(console["journeys"].count(), 1)
+        self.assertEqual(console["journeys"].first().supporter, matching_supporter)
+
+    def test_quick_action_updates_the_correct_journey(self):
+        branch = Branch.objects.create(name="Action Branch")
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Golden Arrows")
+        admin = self._create_user(username="action-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        supporter = self._create_user(username="action-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
+
+        self.client.force_login(admin)
+        response = self.client.post(
+            reverse("match_operations_console", args=[branch.pk, match.pk]),
+            {"action": "allocate", "journey_id": journey.pk},
+        )
+
+        journey.refresh_from_db()
+        self.assertEqual(journey.status, JourneyStatus.TICKET_READY)
+        self.assertEqual(response.status_code, 302)
+
+    def _create_user(self, username):
+        return get_user_model().objects.create_user(
+            username=username,
+            email=f"{username}@example.com",
+            password="test-pass-123",
+        )
 
 
 class BranchModelTests(TestCase):

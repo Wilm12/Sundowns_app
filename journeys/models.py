@@ -3,6 +3,7 @@ from django.db import models
 
 from branches.models import Branch
 from matches.models import Match
+from ticketing.models import Ticket
 
 
 class JourneyStatus(models.TextChoices):
@@ -10,6 +11,9 @@ class JourneyStatus(models.TextChoices):
     BOOKED = "BOOKED", "Booked"
     CANCELLED = "CANCELLED", "Cancelled"
     COMPLETED = "COMPLETED", "Completed"
+    TICKET_READY = "TICKET_READY", "Ticket Ready"
+    TICKET_COLLECTED = "TICKET_COLLECTED", "Ticket Collected"
+    MATCH_ATTENDED = "MATCH_ATTENDED", "Match Attended"
 
 
 class Journey(models.Model):
@@ -29,10 +33,19 @@ class Journey(models.Model):
         related_name="journeys",
     )
     status = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=JourneyStatus.choices,
         default=JourneyStatus.OPEN,
     )
+    ticket = models.OneToOneField(
+        Ticket,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="journey",
+    )
+    ticket_allocated_at = models.DateTimeField(null=True, blank=True)
+    collection_code = models.UUIDField(null=True, blank=True, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

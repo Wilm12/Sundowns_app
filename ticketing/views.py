@@ -11,10 +11,38 @@ from django.shortcuts import redirect, get_object_or_404, render
 
 from matches.models import Match
 from membership.models import Membership
+from branches.models import BranchPolicy
+from supporters.models import EligibilityReason, SupporterEligibility
+from journeys.services.allocate_ticket import AllocateTicketService
+from journeys.services.book_journey import BookJourneyService
+from journeys.services.open_journey import OpenJourneyService
 from .models import Ticket
 
 from authentication.permissions import IsAdminRole
 from .serializers import TicketSerializer, TicketVerifySerializer
+
+
+def _book_complimentary_ticket_for_user(user, match):
+    """Create a Journey and allocate a complimentary ticket through the Journey lifecycle."""
+    branch = user.branch
+    if branch is None:
+        raise ValueError("User must be assigned to a branch before booking a ticket.")
+
+    BranchPolicy.objects.get_or_create(branch=branch)
+    eligibility, _ = SupporterEligibility.objects.get_or_create(
+        supporter=user,
+        defaults={
+            "is_eligible": True,
+            "reason": EligibilityReason.MANUAL_OVERRIDE,
+        },
+    )
+    if not eligibility.is_eligible:
+        raise ValueError("Supporter is not currently eligible to start a journey.")
+
+    journey = OpenJourneyService.open_journey(supporter=user, branch=branch, match=match)
+    journey = BookJourneyService.book_journey(journey)
+    journey = AllocateTicketService.allocate(journey)
+    return journey.ticket
 
 
 @login_required
@@ -66,7 +94,9 @@ class TicketListCreateView(generics.ListCreateAPIView):
         ).order_by("-created_at")
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        match = serializer.validated_data["match"]
+        ticket = _book_complimentary_ticket_for_user(self.request.user, match)
+        serializer.instance = ticket
 
 
 class TicketDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -118,11 +148,7 @@ def book_ticket_page(request, match_id):
         messages.error(request, "You already have a ticket for this match.")
         return redirect("/matches/")
 
-    ticket = Ticket.objects.create(
-        user=request.user,
-        match=match,
-        status="booked",
-    )
+    ticket = _book_complimentary_ticket_for_user(request.user, match)
 
     messages.success(request, "Ticket booked successfully.")
     return redirect("transport_prompt_page", ticket_id=ticket.id)

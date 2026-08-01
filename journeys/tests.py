@@ -11,6 +11,7 @@ from supporters.models import EligibilityReason, StudentVerification, StudentVer
 from engagement.events import EngagementEvent
 
 from .models import Journey, JourneyStatus
+from .services.allocate_ticket import AllocateTicketService, InvalidJourneyState, JourneyAlreadyHasTicket
 from .services.book_journey import BookJourneyService, InvalidJourneyTransition
 from .services.open_journey import IneligibleSupporter, InvalidBranch, JourneyAlreadyExists, OpenJourneyService
 
@@ -105,6 +106,76 @@ class JourneyServiceTests(TestCase):
         self.assertEqual(mock_publish.call_count, 1)
         envelope = mock_publish.call_args.args[0]
         self.assertEqual(envelope.event, EngagementEvent.JOURNEY_BOOKED)
+        self.assertEqual(envelope.payload["supporter_id"], supporter.pk)
+
+    def test_booked_journey_can_receive_a_ticket(self):
+        supporter = self._create_user(username="ticketed-journey-user")
+        branch = Branch.objects.create(name="Ticket Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        match = Match.objects.create(date=timezone.now(), location="Gqeberha", opponent="Orlando Pirates")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+
+        updated_journey = AllocateTicketService.allocate(journey)
+
+        self.assertEqual(updated_journey.status, JourneyStatus.TICKET_READY)
+        self.assertIsNotNone(updated_journey.ticket)
+        self.assertIsNotNone(updated_journey.collection_code)
+        self.assertIsNotNone(updated_journey.ticket_allocated_at)
+
+    def test_open_journey_cannot_receive_a_ticket(self):
+        supporter = self._create_user(username="open-ticket-journey-user")
+        branch = Branch.objects.create(name="Open Ticket Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        match = Match.objects.create(date=timezone.now(), location="Kimberley", opponent="Golden Arrows")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+
+        with self.assertRaises(InvalidJourneyState):
+            AllocateTicketService.allocate(journey)
+
+    def test_duplicate_ticket_allocation_is_prevented(self):
+        supporter = self._create_user(username="duplicate-ticket-journey-user")
+        branch = Branch.objects.create(name="Duplicate Ticket Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        match = Match.objects.create(date=timezone.now(), location="Ladysmith", opponent="Maritzburg")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+
+        with self.assertRaises(InvalidJourneyState):
+            AllocateTicketService.allocate(journey)
+
+    def test_collection_code_is_generated(self):
+        supporter = self._create_user(username="collection-code-user")
+        branch = Branch.objects.create(name="Collection Code Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        match = Match.objects.create(date=timezone.now(), location="Polokwane", opponent="Sekhukhune")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+
+        updated_journey = AllocateTicketService.allocate(journey)
+
+        self.assertIsNotNone(updated_journey.collection_code)
+
+    @patch("journeys.services.allocate_ticket.publish")
+    def test_ticket_allocated_event_is_published(self, mock_publish):
+        supporter = self._create_user(username="ticket-event-user")
+        branch = Branch.objects.create(name="Ticket Event Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        match = Match.objects.create(date=timezone.now(), location="George", opponent="Stellenbosch")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+
+        AllocateTicketService.allocate(journey)
+
+        self.assertEqual(mock_publish.call_count, 1)
+        envelope = mock_publish.call_args.args[0]
+        self.assertEqual(envelope.event, EngagementEvent.TICKET_ALLOCATED)
         self.assertEqual(envelope.payload["supporter_id"], supporter.pk)
 
     def _create_user(self, username):

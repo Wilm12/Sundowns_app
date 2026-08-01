@@ -61,3 +61,4 @@ class EngagementEvent(Enum):
     # Journey events
     JOURNEY_OPENED = "journey_opened"
     JOURNEY_BOOKED = "journey_booked"
+    TICKET_ALLOCATED = "ticket_allocated"

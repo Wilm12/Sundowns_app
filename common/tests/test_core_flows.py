@@ -38,6 +38,16 @@ class CoreFlowTests(TestCase):
         self.assertIn("access", response.data)
         self.assertIn("refresh", response.data)
 
+    def test_dashboard_welcome_uses_first_name_when_available(self):
+        self.user.first_name = "William"
+        self.user.save(update_fields=["first_name"])
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Welcome, William!")
+
     def test_successful_payment_activates_membership(self):
         membership = Membership.objects.create(
             user=self.user,

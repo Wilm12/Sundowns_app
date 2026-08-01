@@ -47,3 +47,14 @@ class TicketCollected:
     collected_by: Optional[int] = None
     collected_at: Optional[datetime] = None
     correlation_id: Optional[UUID] = None
+
+
+@dataclass(frozen=True)
+class AttendanceRecorded:
+    journey_id: int
+    supporter_id: int
+    branch_id: int
+    match_id: int
+    attended_by: Optional[int] = None
+    attended_at: Optional[datetime] = None
+    correlation_id: Optional[UUID] = None

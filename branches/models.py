@@ -53,6 +53,7 @@ class BranchRole(models.Model):
     class Role(models.TextChoices):
         PRESIDENT = "PRESIDENT", "President"
         SECRETARY = "SECRETARY", "Secretary"
+        BRANCH_ADMIN = "BRANCH_ADMIN", "Branch Admin"
         JOURNEY_COORDINATOR = "JOURNEY_COORDINATOR", "Journey Coordinator"
         TRANSPORT_COORDINATOR = "TRANSPORT_COORDINATOR", "Transport Coordinator"
         TICKET_DISTRIBUTOR = "TICKET_DISTRIBUTOR", "Ticket Distributor"

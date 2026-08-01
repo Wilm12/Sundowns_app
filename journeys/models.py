@@ -54,6 +54,14 @@ class Journey(models.Model):
         blank=True,
         related_name="collected_journeys",
     )
+    attended_at = models.DateTimeField(null=True, blank=True)
+    attended_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="recorded_attendance",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

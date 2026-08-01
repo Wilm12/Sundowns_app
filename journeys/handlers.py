@@ -41,3 +41,13 @@ def ticket_collected_handler(envelope):
         payload.get("supporter_id"),
         payload.get("collected_by"),
     )
+
+
+def attendance_recorded_handler(envelope):
+    payload = envelope.payload or {}
+    logger.info(
+        "AttendanceRecorded | journey=%s | supporter=%s | recorder=%s",
+        payload.get("journey_id"),
+        payload.get("supporter_id"),
+        payload.get("attended_by"),
+    )

@@ -21,6 +21,12 @@ from .services.collect_ticket import (
     TicketAlreadyCollected,
 )
 from .services.open_journey import IneligibleSupporter, InvalidBranch, JourneyAlreadyExists, OpenJourneyService
+from .services.record_attendance import (
+    AttendanceAlreadyRecorded,
+    InvalidJourneyState as AttendanceInvalidJourneyState,
+    RecorderNotAuthorized,
+    RecordAttendanceService,
+)
 
 
 class JourneyServiceTests(TestCase):
@@ -246,6 +252,77 @@ class JourneyServiceTests(TestCase):
 
         with self.assertRaises(CollectorNotAuthorized):
             CollectTicketService.collect(str(journey.collection_code), collector)
+
+    @patch("journeys.services.record_attendance.publish")
+    def test_collected_journey_can_record_attendance(self, mock_publish):
+        supporter = self._create_user(username="attendance-supporter")
+        recorder = self._create_user(username="attendance-recorder")
+        branch = Branch.objects.create(name="Attendance Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        BranchRole.objects.create(branch=branch, user=recorder, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        match = Match.objects.create(date=timezone.now(), location="Pretoria", opponent="Mamelodi Sundowns")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+        journey.status = JourneyStatus.TICKET_COLLECTED
+        journey.save(update_fields=["status", "updated_at"])
+
+        updated_journey = RecordAttendanceService.record(journey, recorder)
+
+        self.assertEqual(updated_journey.status, JourneyStatus.MATCH_ATTENDED)
+        self.assertIsNotNone(updated_journey.attended_at)
+        self.assertEqual(updated_journey.attended_by, recorder)
+        self.assertEqual(mock_publish.call_count, 1)
+
+    def test_ticket_ready_journey_cannot_record_attendance(self):
+        supporter = self._create_user(username="attendance-ready-supporter")
+        recorder = self._create_user(username="attendance-ready-recorder")
+        branch = Branch.objects.create(name="Attendance Ready Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        BranchRole.objects.create(branch=branch, user=recorder, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        match = Match.objects.create(date=timezone.now(), location="Bloemfontein", opponent="Free State Stars")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+
+        with self.assertRaises(AttendanceInvalidJourneyState):
+            RecordAttendanceService.record(journey, recorder)
+
+    def test_duplicate_attendance_is_rejected(self):
+        supporter = self._create_user(username="duplicate-attendance-supporter")
+        recorder = self._create_user(username="duplicate-attendance-recorder")
+        branch = Branch.objects.create(name="Duplicate Attendance Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        BranchRole.objects.create(branch=branch, user=recorder, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        match = Match.objects.create(date=timezone.now(), location="Cape Town", opponent="Ajax Cape Town")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+        journey.status = JourneyStatus.TICKET_COLLECTED
+        journey.save(update_fields=["status", "updated_at"])
+        RecordAttendanceService.record(journey, recorder)
+
+        with self.assertRaises(AttendanceAlreadyRecorded):
+            RecordAttendanceService.record(journey, recorder)
+
+    def test_unauthorized_recorder_cannot_record_attendance(self):
+        supporter = self._create_user(username="unauthorized-attendance-supporter")
+        recorder = self._create_user(username="unauthorized-attendance-recorder")
+        branch = Branch.objects.create(name="Unauthorized Attendance Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        match = Match.objects.create(date=timezone.now(), location="Mthatha", opponent="Chippa United")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+        journey.status = JourneyStatus.TICKET_COLLECTED
+        journey.save(update_fields=["status", "updated_at"])
+
+        with self.assertRaises(RecorderNotAuthorized):
+            RecordAttendanceService.record(journey, recorder)
 
     def _create_user(self, username):
         return get_user_model().objects.create_user(

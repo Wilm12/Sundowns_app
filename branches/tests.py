@@ -17,6 +17,7 @@ from users.models import User
 from .models import Branch, BranchPolicy, BranchRole, BranchStatus, CommitteeActivity, CommitteeAction
 from .serializers import BranchPolicySerializer, BranchRoleSerializer, BranchSerializer
 from .services.assign_branch_role import AssignBranchRoleService, BranchRoleAlreadyAssigned
+from .services.branch_admin_dashboard import BranchAdminDashboardService
 from .services.committee import CommitteeService
 from .services.promote_branch_admin import BranchAdminAlreadyAssigned, PromoteBranchAdminService, UserNotInBranch
 from .services.remove_branch_admin import LastBranchAdminRemovalError, RemoveBranchAdminService

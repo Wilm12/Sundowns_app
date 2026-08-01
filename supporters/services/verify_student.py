@@ -1,28 +1,60 @@
+from datetime import timedelta
+
 from django.utils import timezone
 
-from ..models import StudentVerification, Supporter, SupporterStatus
+from engagement.dispatcher import publish
+from engagement.envelope import EngagementEventEnvelope
+from engagement.events import EngagementEvent
+
+from ..events import StudentVerified
+from ..models import StudentVerification, StudentVerificationStatus
+
+
+class ActiveVerificationExists(Exception):
+    """Raised when another active verified record already exists for the user."""
 
 
 class VerifyStudentService:
     """Application service for approving student verification."""
 
     @staticmethod
-    def verify(supporter, verified_by=None, evidence_reference=""):
-        verification = StudentVerification.objects.filter(supporter=supporter).order_by("-created_at").first()
-        if verification is None:
-            verification = StudentVerification.objects.create(
-                supporter=supporter,
-                verification_status=StudentVerification.VerificationStatus.APPROVED,
-                verified_by=verified_by,
-                evidence_reference=evidence_reference,
+    def verify(verification, verifier):
+        active_verification_exists = (
+            StudentVerification.objects.filter(
+                user=verification.user,
+                status=StudentVerificationStatus.VERIFIED,
+                expires_at__gt=timezone.now(),
             )
-        else:
-            verification.verification_status = StudentVerification.VerificationStatus.APPROVED
-            verification.verified_by = verified_by
-            verification.evidence_reference = evidence_reference
-            verification.verified_at = timezone.now()
-            verification.save()
+            .exclude(pk=verification.pk)
+            .exists()
+        )
 
-        supporter.status = SupporterStatus.VERIFIED
-        supporter.save(update_fields=["status"])
+        if active_verification_exists:
+            raise ActiveVerificationExists(
+                f"An active verified record already exists for {verification.user}."
+            )
+
+        verification.status = StudentVerificationStatus.VERIFIED
+        verification.verified_at = timezone.now()
+        verification.expires_at = timezone.now() + timedelta(days=365)
+        verification.verified_by = verifier
+        verification.save()
+
+        event = StudentVerified(
+            supporter_id=verification.user_id,
+            verification_id=verification.pk,
+            verified_by=verifier.pk if verifier else None,
+            expires_at=verification.expires_at,
+        )
+        envelope = EngagementEventEnvelope(
+            event=EngagementEvent.STUDENT_VERIFIED,
+            user=verification.user,
+            payload={
+                "verification_id": verification.pk,
+                "supporter_id": verification.user_id,
+                "acted_by": verifier.pk if verifier else None,
+                "expires_at": verification.expires_at,
+            },
+        )
+        publish(envelope)
         return verification

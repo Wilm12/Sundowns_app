@@ -5,43 +5,30 @@ from uuid import UUID
 
 
 @dataclass(frozen=True)
-class SupporterRegistered:
-    supporter_id: int
-    email: str
-    registered_at: datetime
-    correlation_id: Optional[UUID] = None
-
-
-@dataclass(frozen=True)
 class StudentVerificationRequested:
     supporter_id: int
-    requested_at: datetime
+    verification_id: int
+    branch_id: Optional[int] = None
+    acted_by: Optional[int] = None
+    timestamp: Optional[datetime] = None
     correlation_id: Optional[UUID] = None
 
 
 @dataclass(frozen=True)
 class StudentVerified:
     supporter_id: int
-    verified_at: datetime
+    verification_id: int
+    branch_id: Optional[int] = None
+    verified_by: Optional[int] = None
+    expires_at: Optional[datetime] = None
     correlation_id: Optional[UUID] = None
 
 
 @dataclass(frozen=True)
 class StudentVerificationRejected:
     supporter_id: int
-    rejected_at: datetime
-    correlation_id: Optional[UUID] = None
-
-
-@dataclass(frozen=True)
-class EligibilityGranted:
-    supporter_id: int
-    granted_at: datetime
-    correlation_id: Optional[UUID] = None
-
-
-@dataclass(frozen=True)
-class EligibilityRevoked:
-    supporter_id: int
-    revoked_at: datetime
+    verification_id: int
+    branch_id: Optional[int] = None
+    acted_by: Optional[int] = None
+    timestamp: Optional[datetime] = None
     correlation_id: Optional[UUID] = None

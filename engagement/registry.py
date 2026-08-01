@@ -33,6 +33,11 @@ from branches.handlers import (
     branch_role_assigned_handler,
     branch_role_removed_handler,
 )
+from supporters.handlers import (
+    student_verification_rejected_handler,
+    student_verification_requested_handler,
+    student_verified_handler,
+)
 
 
 EVENT_HANDLERS = {
@@ -59,4 +64,7 @@ EVENT_HANDLERS = {
     EngagementEvent.BRANCH_MILESTONE_REACHED: branch_milestone_reached_handler,
     EngagementEvent.BRANCH_ROLE_ASSIGNED: branch_role_assigned_handler,
     EngagementEvent.BRANCH_ROLE_REMOVED: branch_role_removed_handler,
+    EngagementEvent.STUDENT_VERIFICATION_REQUESTED: student_verification_requested_handler,
+    EngagementEvent.STUDENT_VERIFIED: student_verified_handler,
+    EngagementEvent.STUDENT_VERIFICATION_REJECTED: student_verification_rejected_handler,
 }

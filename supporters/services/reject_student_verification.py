@@ -1,28 +1,52 @@
+from datetime import datetime
+from uuid import uuid4
+
 from django.utils import timezone
 
-from ..models import StudentVerification, Supporter, SupporterStatus
+from engagement.dispatcher import publish
+from engagement.envelope import EngagementEventEnvelope
+from engagement.events import EngagementEvent
+
+from ..events import StudentVerificationRejected
+from ..models import StudentVerification, StudentVerificationStatus
+
+
+class VerificationAlreadyProcessed(Exception):
+    """Raised when the verification is no longer pending and cannot be rejected."""
 
 
 class RejectStudentVerificationService:
-    """Application service for rejecting student verification."""
+    """Reject a pending verification request."""
 
     @staticmethod
-    def reject(supporter, verified_by=None, evidence_reference=""):
-        verification = StudentVerification.objects.filter(supporter=supporter).order_by("-created_at").first()
-        if verification is None:
-            verification = StudentVerification.objects.create(
-                supporter=supporter,
-                verification_status=StudentVerification.VerificationStatus.REJECTED,
-                verified_by=verified_by,
-                evidence_reference=evidence_reference,
+    def reject(verification, rejected_by=None):
+        if verification.status != StudentVerificationStatus.PENDING:
+            raise VerificationAlreadyProcessed(
+                f"Verification {verification.pk} is already processed."
             )
-        else:
-            verification.verification_status = StudentVerification.VerificationStatus.REJECTED
-            verification.verified_by = verified_by
-            verification.evidence_reference = evidence_reference
-            verification.verified_at = timezone.now()
-            verification.save()
 
-        supporter.status = SupporterStatus.PENDING_VERIFICATION
-        supporter.save(update_fields=["status"])
+        verification.status = StudentVerificationStatus.REJECTED
+        verification.verified_by = rejected_by
+        verification.verified_at = timezone.now()
+        verification.save()
+
+        event = StudentVerificationRejected(
+            supporter_id=verification.user_id,
+            verification_id=verification.pk,
+            acted_by=rejected_by.pk if rejected_by else None,
+            timestamp=timezone.now(),
+            correlation_id=uuid4(),
+        )
+        envelope = EngagementEventEnvelope(
+            event=EngagementEvent.STUDENT_VERIFICATION_REJECTED,
+            user=verification.user,
+            payload={
+                "verification_id": verification.pk,
+                "supporter_id": verification.user_id,
+                "acted_by": rejected_by.pk if rejected_by else None,
+                "timestamp": datetime.now(),
+            },
+            correlation_id=event.correlation_id,
+        )
+        publish(envelope)
         return verification

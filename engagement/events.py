@@ -50,3 +50,8 @@ class EngagementEvent(Enum):
     BRANCH_MILESTONE_REACHED = "branch_milestone_reached"
     BRANCH_ROLE_ASSIGNED = "branch_role_assigned"
     BRANCH_ROLE_REMOVED = "branch_role_removed"
+
+    # Supporter events
+    STUDENT_VERIFICATION_REQUESTED = "student_verification_requested"
+    STUDENT_VERIFIED = "student_verified"
+    STUDENT_VERIFICATION_REJECTED = "student_verification_rejected"

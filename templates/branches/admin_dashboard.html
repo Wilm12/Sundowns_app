@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Branch Admin Dashboard | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="space-y-4 sm:space-y-6">
+    <section class="overflow-hidden rounded-[2rem] bg-gradient-to-r from-green-900 via-green-800 to-yellow-500 text-white shadow-2xl shadow-green-950/20">
+        <div class="px-4 py-5 sm:px-6 sm:py-8">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div class="space-y-2">
+                    <p class="text-sm font-semibold uppercase tracking-[0.24em] text-green-100">Branch Admin Dashboard</p>
+                    <h1 class="text-2xl font-bold sm:text-3xl">{{ dashboard.branch.name }}</h1>
+                    <p class="text-sm sm:text-base text-green-50/90">{{ dashboard.branch.university|default:"University not set" }}</p>
+                    <p class="text-sm sm:text-base text-green-50/90">2026/27 Season</p>
+                </div>
+                <div class="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">
+                    <p class="text-xs uppercase tracking-[0.2em] text-green-100">Next Match</p>
+                    <p class="mt-2 text-sm font-semibold">
+                        {% if dashboard.upcoming_match %}
+                            {{ dashboard.upcoming_match.opponent }}
+                        {% else %}
+                            No upcoming match
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% if dashboard.admin_branches|length > 1 %}
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Branch Selector</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+            {% for branch in dashboard.admin_branches %}
+                <a href="{% url 'branch_admin_dashboard_branch' branch.id %}" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-green-400 hover:bg-green-50">
+                    {{ branch.name }}
+                </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div class="rounded-[1.5rem] bg-white p-4 shadow-lg shadow-slate-200">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Supporters</p>
+            <p class="mt-2 text-3xl font-bold text-slate-950">{{ dashboard.supporter_metrics.total_supporters }}</p>
+        </div>
+        <div class="rounded-[1.5rem] bg-white p-4 shadow-lg shadow-slate-200">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Verified</p>
+            <p class="mt-2 text-3xl font-bold text-slate-950">{{ dashboard.supporter_metrics.verified_supporters }}</p>
+        </div>
+        <div class="rounded-[1.5rem] bg-white p-4 shadow-lg shadow-slate-200">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Eligible</p>
+            <p class="mt-2 text-3xl font-bold text-slate-950">{{ dashboard.supporter_metrics.eligible_supporters }}</p>
+        </div>
+        <div class="rounded-[1.5rem] bg-white p-4 shadow-lg shadow-slate-200">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Committee</p>
+            <p class="mt-2 text-3xl font-bold text-slate-950">{{ dashboard.supporter_metrics.branch_admins }}</p>
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Match Operations</p>
+                <h2 class="text-xl font-bold text-slate-950">{{ dashboard.upcoming_match.opponent|default:"No upcoming match" }}</h2>
+            </div>
+            <div class="rounded-2xl bg-green-50 px-3 py-2 text-sm font-semibold text-green-800">
+                {% if dashboard.upcoming_match %}
+                    {{ dashboard.upcoming_match.date|date:"M j, Y" }}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+            <div class="rounded-2xl bg-slate-50 p-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Journeys Booked</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.booked_count }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Allocated</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.allocated_count }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Collected</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.collected_count }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Attendance</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.attended_count }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Pending</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.pending_collection }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">No-Shows</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.no_shows }}</p>
+            </div>
+        </div>
+
+        <div class="mt-4 space-y-2">
+            <div class="h-2 rounded-full bg-slate-200">
+                <div class="h-2 rounded-full bg-green-600" style="width: {{ dashboard.journey_metrics.booked_progress }}%"></div>
+            </div>
+            <div class="h-2 rounded-full bg-slate-200">
+                <div class="h-2 rounded-full bg-yellow-500" style="width: {{ dashboard.journey_metrics.allocated_progress }}%"></div>
+            </div>
+            <div class="h-2 rounded-full bg-slate-200">
+                <div class="h-2 rounded-full bg-sky-500" style="width: {{ dashboard.journey_metrics.collected_progress }}%"></div>
+            </div>
+            <div class="h-2 rounded-full bg-slate-200">
+                <div class="h-2 rounded-full bg-purple-600" style="width: {{ dashboard.journey_metrics.attended_progress }}%"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Quick Actions</p>
+                    <h2 class="text-xl font-bold text-slate-950">Move fast during match operations</h2>
+                </div>
+            </div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <a href="{{ dashboard.quick_action_urls.verify_supporter }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-green-400 hover:bg-green-50">Verify Supporter</a>
+                <a href="{{ dashboard.quick_action_urls.allocate_ticket }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-yellow-400 hover:bg-yellow-50">Allocate Ticket</a>
+                <a href="{{ dashboard.quick_action_urls.collect_ticket }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-sky-400 hover:bg-sky-50">Collect Ticket</a>
+                <a href="{{ dashboard.quick_action_urls.record_attendance }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-purple-400 hover:bg-purple-50">Record Attendance</a>
+                <a href="{{ dashboard.quick_action_urls.view_match_console }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-emerald-400 hover:bg-emerald-50">View Match Console</a>
+                <a href="{{ dashboard.quick_action_urls.view_supporters }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-100">View Supporters</a>
+            </div>
+        </div>
+
+        <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Committee</p>
+                    <h2 class="text-xl font-bold text-slate-950">Current Branch Admins</h2>
+                </div>
+            </div>
+            <div class="mt-4 space-y-3">
+                {% for admin in dashboard.committee_members %}
+                    <div class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3">
+                        <p class="font-semibold text-slate-950">{{ admin.name }}</p>
+                        <p class="text-sm text-slate-600">{{ admin.email }}</p>
+                        <p class="mt-2 text-xs text-slate-500">Promoted {{ admin.assigned_at|date:"M j, Y" }} by {{ admin.assigned_by }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-slate-500">No committee members yet.</p>
+                {% endfor %}
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a href="{{ dashboard.quick_action_urls.verify_supporter }}" class="rounded-full bg-green-900 px-4 py-2 text-sm font-semibold text-white">Promote Member</a>
+                <a href="{{ dashboard.quick_action_urls.verify_supporter }}" class="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">Remove Admin</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Recent Activity</p>
+                    <h2 class="text-xl font-bold text-slate-950">Latest operational events</h2>
+                </div>
+            </div>
+            <div class="mt-4 space-y-3">
+                {% for activity in dashboard.recent_activity %}
+                    <div class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3">
+                        <p class="font-semibold text-slate-950">{{ activity.title }}</p>
+                        <p class="text-sm text-slate-600">By {{ activity.actor }} • {{ activity.created_at|date:"M j, Y H:i" }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-slate-500">No activity recorded yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Reports</p>
+                    <h2 class="text-xl font-bold text-slate-950">Quick access to branch reporting</h2>
+                </div>
+            </div>
+            <div class="mt-4 grid gap-3">
+                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Attendance Report</a>
+                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Participation Report</a>
+                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Verification Report</a>
+                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Match Operations Report</a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

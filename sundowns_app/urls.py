@@ -4,6 +4,7 @@ from common.views import user_settings_view
 from django.http import JsonResponse
 from matches.views import match_list_page, match_detail_page
 from django.urls import include, path
+from branches.views_admin_dashboard import branch_admin_dashboard_view
 
 from common.views import (
     home_view,
@@ -30,6 +31,8 @@ urlpatterns = [
 
     # Frontend/template routes
     path('dashboard/', dashboard_view, name='dashboard'),
+    path('branch-admin/', branch_admin_dashboard_view, name='branch_admin_dashboard'),
+    path('branch-admin/<int:branch_id>/', branch_admin_dashboard_view, name='branch_admin_dashboard_branch'),
     path('matches/', include('matches.frontend_urls')),
     path('tickets/', include('ticketing.frontend_urls')),
     path('payments/', include('payments.frontend_urls')),

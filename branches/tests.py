@@ -10,7 +10,7 @@ from engagement.events import EngagementEvent
 
 from journeys.models import Journey, JourneyStatus
 from matches.models import Match
-from supporters.models import EligibilityReason, SupporterEligibility, StudentVerification
+from supporters.models import EligibilityReason, SupporterEligibility, StudentVerification, StudentVerificationStatus
 from ticketing.models import Ticket
 from users.models import User
 
@@ -255,6 +255,101 @@ class MatchOperationsConsoleTests(TestCase):
         journey.refresh_from_db()
         self.assertEqual(journey.status, JourneyStatus.TICKET_READY)
         self.assertEqual(response.status_code, 302)
+
+    def _create_user(self, username):
+        return get_user_model().objects.create_user(
+            username=username,
+            email=f"{username}@example.com",
+            password="test-pass-123",
+        )
+
+
+class BranchAdminDashboardTests(TestCase):
+    def test_branch_admin_can_access_dashboard(self):
+        branch = Branch.objects.create(name="Ops Branch")
+        admin = self._create_user(username="dashboard-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Branch Admin Dashboard")
+
+    def test_non_admin_cannot_access_dashboard(self):
+        branch = Branch.objects.create(name="No Access Branch")
+        member = self._create_user(username="dashboard-member")
+        member.branch = branch
+        member.save(update_fields=["branch"])
+
+        self.client.force_login(member)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_dashboard_metrics_are_correct(self):
+        branch = Branch.objects.create(name="Metrics Branch")
+        admin = self._create_user(username="metrics-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter_one = self._create_user(username="metrics-supporter-one")
+        supporter_one.branch = branch
+        supporter_one.save(update_fields=["branch"])
+        supporter_two = self._create_user(username="metrics-supporter-two")
+        supporter_two.branch = branch
+        supporter_two.save(update_fields=["branch"])
+
+        StudentVerification.objects.create(user=supporter_one, student_number="u10001", university="TUKS", status=StudentVerificationStatus.VERIFIED)
+        StudentVerification.objects.create(user=supporter_two, student_number="u10002", university="TUKS", status=StudentVerificationStatus.PENDING)
+        SupporterEligibility.objects.create(supporter=supporter_one, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        SupporterEligibility.objects.create(supporter=supporter_two, is_eligible=False, reason=EligibilityReason.VERIFICATION_PENDING)
+
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Orlando Pirates")
+        Journey.objects.create(supporter=supporter_one, branch=branch, match=match, status=JourneyStatus.BOOKED)
+        Journey.objects.create(supporter=supporter_two, branch=branch, match=match, status=JourneyStatus.TICKET_COLLECTED)
+
+        dashboard = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+
+        self.assertEqual(dashboard["supporter_metrics"]["total_supporters"], 2)
+        self.assertEqual(dashboard["supporter_metrics"]["verified_supporters"], 1)
+        self.assertEqual(dashboard["supporter_metrics"]["eligible_supporters"], 1)
+        self.assertEqual(dashboard["journey_metrics"]["booked_count"], 1)
+        self.assertEqual(dashboard["journey_metrics"]["collected_count"], 1)
+
+    def test_dashboard_shows_committee_members_and_recent_activity(self):
+        branch = Branch.objects.create(name="Committee Activity Branch")
+        admin = self._create_user(username="committee-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        admin_role = BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        promoted_admin = self._create_user(username="promoted-admin")
+        promoted_admin.branch = branch
+        promoted_admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=promoted_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True, assigned_by=admin)
+        CommitteeActivity.objects.create(branch=branch, actor=admin, action=CommitteeAction.SUPPORTER_VERIFIED, target_user=promoted_admin)
+
+        dashboard = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+
+        self.assertEqual(len(dashboard["committee_members"]), 2)
+        self.assertTrue(any(item["title"] == "Supporter verified" for item in dashboard["recent_activity"]))
+
+    def test_dashboard_renders_quick_actions(self):
+        branch = Branch.objects.create(name="Quick Action Branch")
+        admin = self._create_user(username="quick-action-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertContains(response, "Verify Supporter")
+        self.assertContains(response, "Allocate Ticket")
+        self.assertContains(response, "View Match Console")
 
     def _create_user(self, username):
         return get_user_model().objects.create_user(

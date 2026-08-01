@@ -45,12 +45,20 @@ def dashboard_view(request):
         user=request.user
     ).order_by('-created_at')[:5]
 
+    display_name = (
+        request.user.first_name
+        or request.user.username
+        or request.user.email
+        or "there"
+    )
+
     return render(request, "dashboard.html", {
         "membership": membership,
         "tickets_count": tickets_count,
         "transport_bookings_count": transport_bookings_count,
         "upcoming_matches_count": upcoming_matches_count,
         "latest_notifications": latest_notifications,
+        "display_name": display_name,
     })
 
 

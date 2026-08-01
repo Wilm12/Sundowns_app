@@ -15,7 +15,7 @@
 
                     <div class="space-y-3">
                         <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
-                            Welcome, {{ request.user.first_name|default:request.user.username|default:request.user.email }}!
+                            Welcome, {{ display_name }}!
                         </h1>
                         <p class="text-base sm:text-lg text-green-950/90 max-w-2xl">
                             Manage memberships, tickets, transport bookings, and supporter rewards from one place.

@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from .models import Branch, BranchPolicy, BranchRole, BranchStatus
 from .serializers import BranchPolicySerializer, BranchRoleSerializer, BranchSerializer
+from .services.assign_branch_role import AssignBranchRoleService, BranchRoleAlreadyAssigned
 
 
 class BranchModelTests(TestCase):
@@ -105,6 +106,61 @@ class BranchModelTests(TestCase):
 
         self.assertEqual(serializer.data["role"], BranchRole.Role.TRANSPORT_COORDINATOR)
         self.assertEqual(serializer.data["is_active"], True)
+
+    def test_assign_branch_role_service_assigns_successfully(self):
+        branch = Branch.objects.create(name="Service Branch")
+        user = self._create_user(username="service-user")
+        assigner = self._create_user(username="assigner-user")
+
+        assigned_role = AssignBranchRoleService.assign(
+            branch=branch,
+            user=user,
+            role=BranchRole.Role.PRESIDENT,
+            assigned_by=assigner,
+        )
+
+        self.assertEqual(assigned_role.branch, branch)
+        self.assertEqual(assigned_role.user, user)
+        self.assertEqual(assigned_role.role, BranchRole.Role.PRESIDENT)
+        self.assertEqual(assigned_role.assigned_by, assigner)
+        self.assertTrue(assigned_role.is_active)
+
+    def test_assign_branch_role_service_prevents_duplicate_assignment(self):
+        branch = Branch.objects.create(name="Duplicate Service Branch")
+        user = self._create_user(username="duplicate-user")
+
+        AssignBranchRoleService.assign(
+            branch=branch,
+            user=user,
+            role=BranchRole.Role.SECRETARY,
+        )
+
+        with self.assertRaises(BranchRoleAlreadyAssigned):
+            AssignBranchRoleService.assign(
+                branch=branch,
+                user=user,
+                role=BranchRole.Role.SECRETARY,
+            )
+
+    def test_assign_branch_role_service_allows_multiple_different_roles(self):
+        branch = Branch.objects.create(name="Multi Role Service Branch")
+        user = self._create_user(username="multi-service-user")
+
+        AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.PRESIDENT)
+        AssignBranchRoleService.assign(branch=branch, user=user, role=BranchRole.Role.STUDENT_VERIFIER)
+
+        self.assertEqual(BranchRole.objects.filter(branch=branch, user=user).count(), 2)
+
+    def test_assign_branch_role_service_allows_same_role_for_different_users(self):
+        branch = Branch.objects.create(name="Shared Role Service Branch")
+        user_one = self._create_user(username="shared-user-one")
+        user_two = self._create_user(username="shared-user-two")
+
+        AssignBranchRoleService.assign(branch=branch, user=user_one, role=BranchRole.Role.PRESIDENT)
+        assigned_role = AssignBranchRoleService.assign(branch=branch, user=user_two, role=BranchRole.Role.PRESIDENT)
+
+        self.assertEqual(assigned_role.user, user_two)
+        self.assertEqual(BranchRole.objects.filter(branch=branch, role=BranchRole.Role.PRESIDENT).count(), 2)
 
     def _create_user(self, username):
         return get_user_model().objects.create_user(

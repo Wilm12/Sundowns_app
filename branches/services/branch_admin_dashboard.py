@@ -74,14 +74,13 @@ class BranchAdminDashboardService:
             allocated_count = journeys.filter(
                 status__in=[
                     JourneyStatus.TICKET_READY,
-                    JourneyStatus.TICKET_COLLECTED,
                     JourneyStatus.MATCH_ATTENDED,
                 ]
             ).count()
             attended_count = journeys.filter(
                 status=JourneyStatus.MATCH_ATTENDED
             ).count()
-            pending_count = max(allocated_count - attended_count, 0)
+            pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
             no_shows = max(booked_count - attended_count, 0)
 
             journey_metrics = {
@@ -266,7 +265,7 @@ class BranchAdminDashboardService:
         if activity.action == CommitteeAction.TICKET_ALLOCATED:
             return "Ticket allocated"
         if activity.action == CommitteeAction.TICKET_COLLECTED:
-            return "Ticket collected"
+            return "Ticket redeemed"
         if activity.action == CommitteeAction.ATTENDANCE_RECORDED:
             return "Attendance recorded"
         return activity.action.replace("_", " ").title()

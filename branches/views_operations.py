@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
@@ -31,20 +32,27 @@ def match_operations_console(request, branch_id, match_id):
             journey_id = request.POST.get("journey_id")
             journey = get_object_or_404(Journey, pk=journey_id, branch=branch, match=match)
             AllocateTicketService.allocate(journey, allocated_by=request.user)
+            messages.success(request, "Ticket allocated successfully.")
         elif action == "redeem":
-            code = request.POST.get("code", "")
-            CollectTicketService.collect(code, request.user, branch=branch, match=match)
+            collection_code = request.POST.get("collection_code", "") or request.POST.get("code", "")
+            try:
+                CollectTicketService.collect(collection_code, request.user, branch=branch, match=match)
+            except Exception as exc:
+                messages.error(request, str(exc))
+            else:
+                messages.success(request, "Ticket redeemed successfully.")
         elif action == "attend":
             journey_id = request.POST.get("journey_id")
             journey = get_object_or_404(Journey, pk=journey_id, branch=branch, match=match)
             RecordAttendanceService.record(journey, request.user)
+            messages.success(request, "Attendance recorded successfully.")
 
         return redirect("match_operations_console", branch_id=branch.pk, match_id=match.pk)
 
     search_query = request.GET.get("q", "")
     console = MatchOperationsService.get_console(branch, match, search_query=search_query)
 
-    return render(request, "branches/match_operations.html", {
+    return render(request, "branches/match_operations_console.html", {
         "branch": branch,
         "match": match,
         "console": console,

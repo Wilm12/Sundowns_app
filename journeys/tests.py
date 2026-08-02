@@ -10,10 +10,9 @@ from matches.models import Match
 from supporters.models import EligibilityReason, StudentVerification, StudentVerificationStatus, SupporterEligibility
 
 from engagement.events import EngagementEvent
-
+from branches.services.branch_admin_dashboard import BranchAdminDashboardService
 from .models import Journey, JourneyStatus
 from .services.allocate_ticket import AllocateTicketService, InvalidJourneyState, JourneyAlreadyHasTicket
-from branches.services.authorization import BranchAdminRequired
 from .services.book_journey import BookJourneyService, InvalidJourneyTransition
 from .services.collect_ticket import (
     CollectTicketService,
@@ -21,6 +20,7 @@ from .services.collect_ticket import (
     InvalidJourneyState as CollectionInvalidJourneyState,
     TicketAlreadyCollected,
 )
+from branches.services.authorization import BranchAdminRequired
 from .services.open_journey import IneligibleSupporter, InvalidBranch, JourneyAlreadyExists, OpenJourneyService
 from .services.record_attendance import (
     AttendanceAlreadyRecorded,
@@ -253,6 +253,36 @@ class JourneyServiceTests(TestCase):
 
         with self.assertRaises(BranchAdminRequired):
             CollectTicketService.collect(str(journey.collection_code), collector)
+
+    def test_dashboard_pending_and_attended_metrics_update_after_redemption(self):
+        branch = Branch.objects.create(name="Redemption Metrics Branch", status=BranchStatus.ACTIVE)
+        admin = self._create_user(username="redemption-admin")
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        supporter = self._create_user(username="redemption-supporter")
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+
+        SupporterEligibility.objects.create(
+            supporter=supporter,
+            is_eligible=True,
+            reason=EligibilityReason.VERIFIED,
+        )
+
+        match = Match.objects.create(date=timezone.now(), location="Johannesburg", opponent="Kaizer Chiefs")
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+        AllocateTicketService.allocate(journey)
+
+        dashboard_before = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+        self.assertEqual(dashboard_before["journey_metrics"]["pending_count"], 1)
+        self.assertEqual(dashboard_before["journey_metrics"]["attended_count"], 0)
+
+        CollectTicketService.collect(str(journey.collection_code), admin, branch=branch, match=match)
+
+        dashboard_after = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+        self.assertEqual(dashboard_after["journey_metrics"]["pending_count"], 0)
+        self.assertEqual(dashboard_after["journey_metrics"]["attended_count"], 1)
 
     @patch("journeys.services.record_attendance.publish")
     def test_collected_journey_can_record_attendance(self, mock_publish):

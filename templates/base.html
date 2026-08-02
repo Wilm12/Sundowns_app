@@ -21,7 +21,11 @@
                 <a href="/" class="px-3 py-2 rounded hover:bg-yellow-400 transition">Home</a>
 
                 {% if request.user.is_authenticated %}
-                    <a href="/dashboard/" class="px-3 py-2 rounded hover:bg-yellow-400 transition">Dashboard</a>
+                    {% if is_branch_admin %}
+                        <a href="{{ branch_admin_dashboard_url|default:'/branch-admin/' }}" class="px-3 py-2 rounded hover:bg-yellow-400 transition">Branch Admin</a>
+                    {% else %}
+                        <a href="/dashboard/" class="px-3 py-2 rounded hover:bg-yellow-400 transition">Dashboard</a>
+                    {% endif %}
 
                     <div class="relative group">
                         <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
@@ -130,7 +134,11 @@
                 <a href="/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Home</a>
 
                 {% if request.user.is_authenticated %}
-                    <a href="/dashboard/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Dashboard</a>
+                    {% if is_branch_admin %}
+                        <a href="{{ branch_admin_dashboard_url|default:'/branch-admin/' }}" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Branch Admin</a>
+                    {% else %}
+                        <a href="/dashboard/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Dashboard</a>
+                    {% endif %}
 
                     <div class="pt-4 border-t border-green-900/20">
                         <p class="px-3 pb-2 text-xs uppercase tracking-widest font-semibold">Supporter</p>

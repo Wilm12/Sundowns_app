@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from branches.models import Branch
+from branches.models import Branch, BranchRole
 from users.models import User
 
 
@@ -82,3 +82,50 @@ class LoginTests(APITestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(get_user(self.client).is_authenticated)
         self.assertEqual(get_user(self.client).email, user.email)
+
+    def test_branch_admin_login_redirects_to_branch_admin_dashboard(self):
+        branch = Branch.objects.create(name="Cape Town Branch", location="Cape Town")
+        user = User.objects.create_user(
+            username="branch-admin@example.com",
+            email="branch-admin@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+        BranchRole.objects.create(
+            branch=branch,
+            user=user,
+            role=BranchRole.Role.BRANCH_ADMIN,
+            is_active=True,
+        )
+
+        response = self.client.post(
+            reverse("login_page"),
+            {
+                "email": user.email,
+                "password": "StrongPass123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("branch_admin_dashboard"))
+
+    def test_navigation_shows_branch_admin_link_for_authorized_users(self):
+        branch = Branch.objects.create(name="Durban Branch", location="Durban")
+        user = User.objects.create_user(
+            username="nav-admin@example.com",
+            email="nav-admin@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+        BranchRole.objects.create(
+            branch=branch,
+            user=user,
+            role=BranchRole.Role.BRANCH_ADMIN,
+            is_active=True,
+        )
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("home"))
+
+        self.assertContains(response, "Branch Admin")
+        self.assertContains(response, reverse("branch_admin_dashboard"))

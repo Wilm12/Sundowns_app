@@ -22,10 +22,20 @@ from .services.committee import CommitteeService
 from .services.promote_branch_admin import BranchAdminAlreadyAssigned, PromoteBranchAdminService, UserNotInBranch
 from .services.remove_branch_admin import LastBranchAdminRemovalError, RemoveBranchAdminService
 from .services.remove_branch_role import BranchRoleNotAssigned, RemoveBranchRoleService
-from branches.services.authorization import BranchAdminRequired
+from branches.services.authorization import BranchAdminRequired, is_branch_admin
 
 
 class BranchAdminDashboardTests(TestCase):
+    def test_branch_admin_helper_returns_true_for_authorized_users(self):
+        branch = Branch.objects.create(name="Authorization Branch")
+        admin = self._create_user(username="authorization-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.assertTrue(is_branch_admin(admin))
+        self.assertTrue(is_branch_admin(admin, branch))
+
     def test_dashboard_metrics_are_correct(self):
         branch = Branch.objects.create(name="Metrics Branch")
         admin = self._create_user(username="metrics-admin")

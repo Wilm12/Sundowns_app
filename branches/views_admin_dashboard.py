@@ -3,19 +3,21 @@ from branches.services.branch_admin_dashboard import BranchAdminDashboardService
 from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from branches.models import BranchRole
+from branches.services.authorization import is_branch_admin
 
 @login_required
 def branch_admin_dashboard_view(request):
     branch = request.user.branch
 
-    is_admin = BranchRole.objects.filter(
-        branch=branch,
-        user=request.user,
-        role=BranchRole.Role.BRANCH_ADMIN,
-        is_active=True,
-    ).exists()
+    if branch is None:
+        branch_role = BranchRole.objects.filter(
+            user=request.user,
+            role=BranchRole.Role.BRANCH_ADMIN,
+            is_active=True,
+        ).select_related("branch").first()
+        branch = branch_role.branch if branch_role else None
 
-    if not is_admin:
+    if not is_branch_admin(request.user, branch):
         return HttpResponseForbidden()
 
     dashboard = BranchAdminDashboardService.get_dashboard(request.user, branch)

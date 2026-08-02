@@ -3,6 +3,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from branches.models import Branch
+from branches.services.authorization import is_branch_admin
 from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
@@ -25,6 +26,9 @@ def dashboard_view(request):
     from ticketing.models import Ticket
     from transport.models import TransportBooking
     from matches.models import Match
+
+    if is_branch_admin(request.user):
+        return redirect("branch_admin_dashboard")
 
     membership = Membership.objects.filter(
         user=request.user

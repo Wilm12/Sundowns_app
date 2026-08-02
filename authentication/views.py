@@ -8,12 +8,29 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from branches.models import Branch
+from branches.services.authorization import is_branch_admin
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect
+from django.utils.http import url_has_allowed_host_and_scheme
 from .serializers import RegisterSerializer
 from .permissions import IsAdminRole, IsMemberRole
 from .serializers import RegisterSerializer, MeSerializer, EmailTokenObtainPairSerializer
+
+
+def _get_post_login_redirect(request, user):
+    next_url = request.POST.get("next") or request.GET.get("next")
+
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        return redirect(next_url)
+
+    if user.is_superuser:
+        return redirect("/admin/")
+
+    if is_branch_admin(user):
+        return redirect("branch_admin_dashboard")
+
+    return redirect("membership_page")
 
 
 class RegisterView(generics.CreateAPIView):
@@ -80,7 +97,7 @@ def login_page(request):
 
         if user is not None:
             login(request, user)
-            return redirect("membership_page")
+            return _get_post_login_redirect(request, user)
 
         messages.error(request, "Invalid email or password.")
 
@@ -112,7 +129,7 @@ def register_page(request):
 
             if authenticated_user is not None:
                 login(request, authenticated_user)
-                return redirect("membership_page")
+                return _get_post_login_redirect(request, authenticated_user)
 
             messages.success(
                 request,

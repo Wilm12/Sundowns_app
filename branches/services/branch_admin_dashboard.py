@@ -6,7 +6,7 @@ from matches.models import Match
 from supporters.models import StudentVerification, StudentVerificationStatus
 from users.models import User
 
-from ..models import Branch, BranchRole, CommitteeAction, CommitteeActivity
+from ..models import Branch, BranchRole, CommitteeAction, CommitteeActivity, CommitteePosition
 
 
 class BranchAdminDashboardService:
@@ -52,11 +52,7 @@ class BranchAdminDashboardService:
             user__supporter_eligibility__is_eligible=True,
         ).values("user").distinct().count()
 
-        branch_admin_count = BranchRole.objects.filter(
-            branch=branch,
-            role=BranchRole.Role.BRANCH_ADMIN,
-            is_active=True,
-        ).count()
+        active_members, inactive_members = BranchAdminDashboardService._calculate_membership_status(branch)
 
         # ------------------------------------------------------------
         # Upcoming match
@@ -82,25 +78,18 @@ class BranchAdminDashboardService:
                     JourneyStatus.MATCH_ATTENDED,
                 ]
             ).count()
-            collected_count = journeys.filter(
-                status__in=[
-                    JourneyStatus.TICKET_COLLECTED,
-                    JourneyStatus.MATCH_ATTENDED,
-                ]
-            ).count()
             attended_count = journeys.filter(
                 status=JourneyStatus.MATCH_ATTENDED
             ).count()
-
-            pending_collection = max(allocated_count - collected_count, 0)
+            pending_count = max(allocated_count - attended_count, 0)
             no_shows = max(booked_count - attended_count, 0)
 
             journey_metrics = {
                 "booked_count": booked_count,
                 "allocated_count": allocated_count,
-                "collected_count": collected_count,
+                "pending_count": pending_count,
                 "attended_count": attended_count,
-                "pending_collection": pending_collection,
+                "pending_collection": pending_count,
                 "no_shows": no_shows,
                 "booked_progress": round(
                     (booked_count / max(booked_count, 1)) * 100, 1
@@ -108,8 +97,8 @@ class BranchAdminDashboardService:
                 "allocated_progress": round(
                     (allocated_count / max(booked_count, 1)) * 100, 1
                 ) if booked_count else 0,
-                "collected_progress": round(
-                    (collected_count / max(booked_count, 1)) * 100, 1
+                "pending_progress": round(
+                    (pending_count / max(booked_count, 1)) * 100, 1
                 ) if booked_count else 0,
                 "attended_progress": round(
                     (attended_count / max(booked_count, 1)) * 100, 1
@@ -119,13 +108,13 @@ class BranchAdminDashboardService:
             journey_metrics = {
                 "booked_count": 0,
                 "allocated_count": 0,
-                "collected_count": 0,
+                "pending_count": 0,
                 "attended_count": 0,
                 "pending_collection": 0,
                 "no_shows": 0,
                 "booked_progress": 0,
                 "allocated_progress": 0,
-                "collected_progress": 0,
+                "pending_progress": 0,
                 "attended_progress": 0,
             }
 
@@ -133,12 +122,15 @@ class BranchAdminDashboardService:
         # Committee members
         # ------------------------------------------------------------
         committee_members = []
-        for role in BranchRole.objects.filter(
+        for committee_position in CommitteePosition.objects.filter(
             branch=branch,
-            role=BranchRole.Role.BRANCH_ADMIN,
-            is_active=True,
-        ).select_related("user", "assigned_by").order_by("assigned_at"):
+        ).select_related("branch_role", "branch_role__user", "branch_role__assigned_by").order_by("position"):
+            role = committee_position.branch_role
+            if not role or not role.is_active or role.role != BranchRole.Role.BRANCH_ADMIN:
+                continue
+
             committee_members.append({
+                "position": committee_position.get_position_display(),
                 "user": role.user,
                 "name": role.user.get_full_name() or role.user.username,
                 "email": role.user.email,
@@ -198,7 +190,8 @@ class BranchAdminDashboardService:
                 "total_supporters": total_supporters,
                 "verified_supporters": verified_supporters,
                 "eligible_supporters": eligible_supporters,
-                "committee_members": branch_admin_count,
+                "active_members": active_members,
+                "inactive_members": inactive_members,
             },
             "verification_metrics": {
                 "verified_supporters": verified_supporters,
@@ -221,6 +214,46 @@ class BranchAdminDashboardService:
             "recent_activity": recent_activity,
             "quick_action_urls": quick_action_urls,
         }
+
+    @staticmethod
+    def _calculate_membership_status(branch):
+        recent_matches = list(
+            Match.objects.filter(journeys__branch=branch)
+            .order_by("-date")
+            .distinct()[:3]
+        )
+
+        if not recent_matches:
+            return 0, 0
+
+        active_members = 0
+        inactive_members = 0
+
+        supporter_roles = BranchRole.objects.filter(
+            branch=branch,
+            role=BranchRole.Role.MEMBER,
+            is_active=True,
+        ).values_list("user_id", flat=True)
+
+        for supporter_id in supporter_roles:
+            journey_records = list(
+                Journey.objects.filter(
+                    branch=branch,
+                    supporter_id=supporter_id,
+                    match__in=recent_matches,
+                ).select_related("match").order_by("match__date")
+            )
+
+            if not journey_records:
+                continue
+
+            attended = any(record.status == JourneyStatus.MATCH_ATTENDED for record in journey_records)
+            if attended:
+                active_members += 1
+            elif len(journey_records) >= len(recent_matches):
+                inactive_members += 1
+
+        return active_members, inactive_members
 
     @staticmethod
     def _activity_label(activity):

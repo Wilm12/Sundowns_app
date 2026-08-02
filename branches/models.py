@@ -102,6 +102,42 @@ class BranchRole(models.Model):
         return f"{self.user} - {self.role} ({self.branch})"
 
 
+class CommitteePosition(models.Model):
+    class Position(models.TextChoices):
+        CHAIRPERSON = "CHAIRPERSON", "Chairperson"
+        VICE_CHAIRPERSON = "VICE_CHAIRPERSON", "Vice Chairperson"
+        SECRETARY = "SECRETARY", "Secretary"
+        TREASURER = "TREASURER", "Treasurer"
+        MEDIA_OFFICER = "MEDIA_OFFICER", "Media Officer"
+        LOGISTICS_COORDINATOR = "LOGISTICS_COORDINATOR", "Logistics Coordinator"
+
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name="committee_positions",
+    )
+    branch_role = models.OneToOneField(
+        BranchRole,
+        on_delete=models.CASCADE,
+        related_name="committee_position",
+    )
+    position = models.CharField(max_length=40, choices=Position.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_committee_positions",
+    )
+
+    class Meta:
+        ordering = ["position"]
+
+    def __str__(self):
+        return f"{self.position} - {self.branch_role.user}"
+
+
 class CommitteeActivity(models.Model):
     branch = models.ForeignKey(
         Branch,

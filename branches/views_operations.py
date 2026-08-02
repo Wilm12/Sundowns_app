@@ -26,14 +26,17 @@ def match_operations_console(request, branch_id, match_id):
 
     if request.method == "POST":
         action = request.POST.get("action")
-        journey_id = request.POST.get("journey_id")
-        journey = get_object_or_404(Journey, pk=journey_id, branch=branch, match=match)
 
         if action == "allocate":
+            journey_id = request.POST.get("journey_id")
+            journey = get_object_or_404(Journey, pk=journey_id, branch=branch, match=match)
             AllocateTicketService.allocate(journey, allocated_by=request.user)
-        elif action == "collect":
-            CollectTicketService.collect(journey.collection_code, request.user)
+        elif action == "redeem":
+            code = request.POST.get("code", "")
+            CollectTicketService.collect(code, request.user, branch=branch, match=match)
         elif action == "attend":
+            journey_id = request.POST.get("journey_id")
+            journey = get_object_or_404(Journey, pk=journey_id, branch=branch, match=match)
             RecordAttendanceService.record(journey, request.user)
 
         return redirect("match_operations_console", branch_id=branch.pk, match_id=match.pk)

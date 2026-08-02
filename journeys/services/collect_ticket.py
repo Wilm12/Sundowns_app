@@ -1,5 +1,5 @@
 from datetime import datetime
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from django.utils import timezone
 
@@ -9,7 +9,7 @@ from engagement.events import EngagementEvent
 
 from branches.services.authorization import BranchAdminRequired, is_branch_admin
 
-from ..events import TicketCollected
+from ..events import AttendanceRecorded
 from ..models import Journey, JourneyStatus
 
 
@@ -22,54 +22,62 @@ class TicketAlreadyCollected(Exception):
 
 
 class InvalidJourneyState(Exception):
-    """Raised when a journey is not in a state that can be collected."""
+    """Raised when a journey is not in a state that can be redeemed."""
 
 
 class CollectTicketService:
-    """Collect a ticket from a booked journey using its collection code."""
+    """Redeem a ticket at the gate using a four-digit numeric code."""
 
     @staticmethod
-    def collect(collection_code, collector):
+    def collect(collection_code, collector, branch=None, match=None):
+        code = str(collection_code).strip() if collection_code is not None else ""
+        if not code.isdigit() or len(code) != 4:
+            raise InvalidCollectionCode("Collection code must be a 4-digit numeric code.")
+
+        journeys = Journey.objects.filter(collection_code=code)
+        if branch is not None:
+            journeys = journeys.filter(branch=branch)
+        if match is not None:
+            journeys = journeys.filter(match=match)
+
         try:
-            journey = Journey.objects.get(collection_code=UUID(str(collection_code)))
-        except (Journey.DoesNotExist, ValueError, TypeError):
+            journey = journeys.get()
+        except Journey.DoesNotExist:
             raise InvalidCollectionCode("Collection code does not match an existing journey.")
 
-        if journey.status == JourneyStatus.TICKET_COLLECTED:
-            raise TicketAlreadyCollected("Ticket has already been collected.")
+        if journey.status == JourneyStatus.MATCH_ATTENDED:
+            raise TicketAlreadyCollected("Ticket has already been redeemed.")
 
         if journey.status != JourneyStatus.TICKET_READY:
-            raise InvalidJourneyState("Only TICKET_READY journeys may be collected.")
+            raise InvalidJourneyState("Only TICKET_READY journeys may be redeemed at the gate.")
 
         if not is_branch_admin(collector, journey.branch):
-            raise BranchAdminRequired("Only branch admins can collect tickets for this branch.")
+            raise BranchAdminRequired("Only branch admins can redeem tickets for this branch.")
 
-        journey.ticket_collected_at = timezone.now()
-        journey.ticket_collected_by = collector
-        journey.status = JourneyStatus.TICKET_COLLECTED
-        journey.save(update_fields=["ticket_collected_at", "ticket_collected_by", "status", "updated_at"])
+        journey.attended_at = timezone.now()
+        journey.attended_by = collector
+        journey.status = JourneyStatus.MATCH_ATTENDED
+        journey.save(update_fields=["attended_at", "attended_by", "status", "updated_at"])
 
-        event = TicketCollected(
+        event = AttendanceRecorded(
             journey_id=journey.pk,
             supporter_id=journey.supporter_id,
             branch_id=journey.branch_id,
             match_id=journey.match_id,
-            ticket_id=journey.ticket_id,
-            collected_by=collector.pk,
-            collected_at=journey.ticket_collected_at,
+            attended_by=collector.pk,
+            attended_at=journey.attended_at,
             correlation_id=uuid4(),
         )
         envelope = EngagementEventEnvelope(
-            event=EngagementEvent.TICKET_COLLECTED,
+            event=EngagementEvent.ATTENDANCE_RECORDED,
             user=journey.supporter,
             payload={
                 "journey_id": journey.pk,
                 "supporter_id": journey.supporter_id,
                 "branch_id": journey.branch_id,
                 "match_id": journey.match_id,
-                "ticket_id": journey.ticket_id,
-                "collected_by": collector.pk,
-                "collected_at": datetime.now(),
+                "attended_by": collector.pk,
+                "attended_at": datetime.now(),
             },
             correlation_id=event.correlation_id,
         )

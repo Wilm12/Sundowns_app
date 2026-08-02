@@ -1,0 +1,18 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run journey tests",
+			"type": "shell",
+			"command": "C:/Users/USER/Sundowns/Sundowns_app/venv/Scripts/python.exe",
+			"args": [
+				"manage.py",
+				"test",
+				"journeys.tests.JourneyServiceTests",
+				"--verbosity=2"
+			],
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}

@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 from uuid import uuid4
 
@@ -45,9 +46,11 @@ class AllocateTicketService:
             status="booked",
         )
 
+        collection_code = AllocateTicketService._generate_collection_code(journey)
+
         journey.ticket = ticket
         journey.ticket_allocated_at = timezone.now()
-        journey.collection_code = uuid4()
+        journey.collection_code = collection_code
         journey.status = JourneyStatus.TICKET_READY
         journey.save(update_fields=["ticket", "ticket_allocated_at", "collection_code", "status", "updated_at"])
 
@@ -79,3 +82,10 @@ class AllocateTicketService:
         )
         publish(envelope)
         return journey
+
+    @staticmethod
+    def _generate_collection_code(journey):
+        while True:
+            code = f"{random.randint(1000, 9999)}"
+            if not Journey.objects.filter(branch=journey.branch, match=journey.match, collection_code=code).exists():
+                return code

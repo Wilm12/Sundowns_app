@@ -31,7 +31,7 @@ class TicketAllocated:
     branch_id: int
     match_id: int
     ticket_id: int
-    collection_code: UUID
+    collection_code: str
     allocated_by: Optional[int] = None
     timestamp: Optional[datetime] = None
     correlation_id: Optional[UUID] = None

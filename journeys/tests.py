@@ -1,3 +1,4 @@
+import re
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -172,6 +173,7 @@ class JourneyServiceTests(TestCase):
         updated_journey = AllocateTicketService.allocate(journey)
 
         self.assertIsNotNone(updated_journey.collection_code)
+        self.assertRegex(updated_journey.collection_code, r"^\d{4}$")
 
     @patch("journeys.services.allocate_ticket.publish")
     def test_ticket_allocated_event_is_published(self, mock_publish):
@@ -191,7 +193,7 @@ class JourneyServiceTests(TestCase):
         self.assertEqual(envelope.payload["supporter_id"], supporter.pk)
 
     @patch("journeys.services.collect_ticket.publish")
-    def test_ticket_collection_succeeds_for_authorized_branch_admin(self, mock_publish):
+    def test_gate_redemption_succeeds_for_authorized_branch_admin(self, mock_publish):
         supporter = self._create_user(username="collector-supporter")
         collector = self._create_user(username="ticket-branch-admin")
         branch = Branch.objects.create(name="Collection Branch", status=BranchStatus.ACTIVE)
@@ -203,15 +205,15 @@ class JourneyServiceTests(TestCase):
         BookJourneyService.book_journey(journey)
         AllocateTicketService.allocate(journey)
 
-        collected_journey = CollectTicketService.collect(str(journey.collection_code), collector)
+        redeemed_journey = CollectTicketService.collect(str(journey.collection_code), collector)
 
-        self.assertEqual(collected_journey.status, JourneyStatus.TICKET_COLLECTED)
-        self.assertIsNotNone(collected_journey.ticket_collected_at)
-        self.assertEqual(collected_journey.ticket_collected_by, collector)
+        self.assertEqual(redeemed_journey.status, JourneyStatus.MATCH_ATTENDED)
+        self.assertIsNotNone(redeemed_journey.attended_at)
+        self.assertEqual(redeemed_journey.attended_by, collector)
         self.assertEqual(mock_publish.call_count, 1)
         envelope = mock_publish.call_args.args[0]
-        self.assertEqual(envelope.event, EngagementEvent.TICKET_COLLECTED)
-        self.assertEqual(envelope.payload["collected_by"], collector.pk)
+        self.assertEqual(envelope.event, EngagementEvent.ATTENDANCE_RECORDED)
+        self.assertEqual(envelope.payload["attended_by"], collector.pk)
 
     def test_duplicate_ticket_collection_is_rejected(self):
         supporter = self._create_user(username="duplicate-collector-supporter")

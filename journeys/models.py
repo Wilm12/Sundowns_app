@@ -45,7 +45,7 @@ class Journey(models.Model):
         related_name="journey",
     )
     ticket_allocated_at = models.DateTimeField(null=True, blank=True)
-    collection_code = models.UUIDField(null=True, blank=True, unique=True)
+    collection_code = models.CharField(max_length=4, null=True, blank=True, unique=True)
     ticket_collected_at = models.DateTimeField(null=True, blank=True)
     ticket_collected_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

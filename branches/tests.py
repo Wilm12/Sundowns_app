@@ -84,7 +84,7 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(dashboard["supporter_metrics"]["eligible_supporters"], 1)
         self.assertEqual(dashboard["supporter_metrics"]["active_members"], 1)
         self.assertEqual(dashboard["journey_metrics"]["allocated_count"], 2)
-        self.assertEqual(dashboard["journey_metrics"]["booked_count"], 1)
+        self.assertEqual(dashboard["journey_metrics"]["booked_count"], 3)
         self.assertEqual(dashboard["journey_metrics"]["pending_count"], 1)
         self.assertEqual(dashboard["journey_metrics"]["attended_count"], 1)
 
@@ -113,6 +113,38 @@ class BranchAdminDashboardTests(TestCase):
         self.assertContains(response, "Chairperson")
         self.assertNotContains(response, "Collected")
         self.assertLess(content.index("Reports"), content.index("Committee"))
+
+    def test_dashboard_assigns_default_chairperson_when_no_leadership_positions_exist(self):
+        branch = Branch.objects.create(name="Auto Chair Branch")
+        admin = self._create_user(username="auto-chair-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        dashboard = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+
+        self.assertTrue(
+            CommitteePosition.objects.filter(
+                branch=branch,
+                branch_role__user=admin,
+                position=CommitteePosition.Position.CHAIRPERSON,
+            ).exists()
+        )
+        self.assertIn("Chairperson", dashboard["committee_members"][0]["position"])
+
+    def test_dashboard_renders_single_reports_and_recent_activity_sections(self):
+        branch = Branch.objects.create(name="Layout Branch")
+        admin = self._create_user(username="layout-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+        content = response.content.decode()
+
+        self.assertEqual(content.count("Quick access to branch reporting"), 1)
+        self.assertEqual(content.count("Leadership Panel"), 1)
 
     def test_promotion_and_committee_position_management_workflow(self):
         branch = Branch.objects.create(name="Committee Workflow Branch")

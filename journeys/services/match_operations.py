@@ -29,7 +29,9 @@ class MatchOperationsService:
                 | Q(supporter__student_verifications__student_number__icontains=search_query)
             )
 
-        booked_count = journeys.filter(status=JourneyStatus.BOOKED).count()
+        booked_count = journeys.filter(
+            status__in=[JourneyStatus.BOOKED, JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]
+        ).count()
         allocated_count = journeys.filter(
             status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]
         ).count()

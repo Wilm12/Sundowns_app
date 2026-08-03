@@ -69,7 +69,13 @@ class BranchAdminDashboardService:
         if upcoming_match:
             journeys = Journey.objects.filter(branch=branch, match=upcoming_match)
 
-            booked_count = journeys.filter(status=JourneyStatus.BOOKED).count()
+            booked_count = journeys.filter(
+                status__in=[
+                    JourneyStatus.BOOKED,
+                    JourneyStatus.TICKET_READY,
+                    JourneyStatus.MATCH_ATTENDED,
+                ],
+            ).count()
             allocated_count = journeys.filter(
                 status__in=[
                     JourneyStatus.TICKET_READY,
@@ -114,6 +120,20 @@ class BranchAdminDashboardService:
         # ------------------------------------------------------------
         # Committee members
         # ------------------------------------------------------------
+        if not CommitteePosition.objects.filter(branch=branch).exists():
+            first_admin_role = BranchRole.objects.filter(
+                branch=branch,
+                role=BranchRole.Role.BRANCH_ADMIN,
+                is_active=True,
+            ).order_by("assigned_at").first()
+            if first_admin_role:
+                CommitteePosition.objects.create(
+                    branch=branch,
+                    branch_role=first_admin_role,
+                    position=CommitteePosition.Position.CHAIRPERSON,
+                    created_by=admin_user,
+                )
+
         committee_members = []
         for committee_position in CommitteePosition.objects.filter(
             branch=branch,

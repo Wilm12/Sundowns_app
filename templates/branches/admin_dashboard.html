@@ -74,12 +74,12 @@
 
         <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div class="rounded-2xl bg-slate-50 p-3">
-                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Booked</p>
-                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.booked_count }}</p>
-            </div>
-            <div class="rounded-2xl bg-slate-50 p-3">
                 <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Allocated</p>
                 <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.allocated_count }}</p>
+            </div>
+            <div class="rounded-2xl bg-slate-50 p-3">
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Booked</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.booked_count }}</p>
             </div>
             <div class="rounded-2xl bg-slate-50 p-3">
                 <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Pending</p>
@@ -118,7 +118,7 @@
             <div class="mt-4 grid gap-3 sm:grid-cols-2">
                 <a href="{{ dashboard.quick_action_urls.verify_supporter }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-green-400 hover:bg-green-50">Verify Supporter</a>
                 <a href="{{ dashboard.quick_action_urls.allocate_ticket }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-yellow-400 hover:bg-yellow-50">Allocate Ticket</a>
-                <a href="{{ dashboard.quick_action_urls.collect_ticket }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-sky-400 hover:bg-sky-50">Collect Ticket</a>
+                <a href="{{ dashboard.quick_action_urls.collect_ticket }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-sky-400 hover:bg-sky-50">Redeem Ticket</a>
                 <a href="{{ dashboard.quick_action_urls.record_attendance }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-purple-400 hover:bg-purple-50">Record Attendance</a>
                 <a href="{{ dashboard.quick_action_urls.view_match_console }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-emerald-400 hover:bg-emerald-50">View Match Console</a>
                 <a href="{{ dashboard.quick_action_urls.view_supporters }}" class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-left font-semibold text-slate-900 transition hover:border-slate-400 hover:bg-slate-100">View Supporters</a>

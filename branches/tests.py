@@ -63,6 +63,10 @@ class BranchAdminDashboardTests(TestCase):
             is_active=True,
         )
 
+        supporter_three = self._create_user(username="metrics-supporter-three")
+        supporter_three.branch = branch
+        supporter_three.save(update_fields=["branch"])
+
         StudentVerification.objects.create(user=supporter_one, student_number="u10001", university="TUKS", status=StudentVerificationStatus.VERIFIED)
         StudentVerification.objects.create(user=supporter_two, student_number="u10002", university="TUKS", status=StudentVerificationStatus.PENDING)
         SupporterEligibility.objects.create(supporter=supporter_one, is_eligible=True, reason=EligibilityReason.VERIFIED)
@@ -71,6 +75,7 @@ class BranchAdminDashboardTests(TestCase):
         match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Orlando Pirates")
         Journey.objects.create(supporter=supporter_one, branch=branch, match=match, status=JourneyStatus.BOOKED)
         Journey.objects.create(supporter=supporter_two, branch=branch, match=match, status=JourneyStatus.MATCH_ATTENDED)
+        Journey.objects.create(supporter=supporter_three, branch=branch, match=match, status=JourneyStatus.TICKET_READY)
 
         dashboard = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
 
@@ -78,8 +83,9 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(dashboard["supporter_metrics"]["verified_supporters"], 1)
         self.assertEqual(dashboard["supporter_metrics"]["eligible_supporters"], 1)
         self.assertEqual(dashboard["supporter_metrics"]["active_members"], 1)
+        self.assertEqual(dashboard["journey_metrics"]["allocated_count"], 2)
         self.assertEqual(dashboard["journey_metrics"]["booked_count"], 1)
-        self.assertEqual(dashboard["journey_metrics"]["pending_count"], 0)
+        self.assertEqual(dashboard["journey_metrics"]["pending_count"], 1)
         self.assertEqual(dashboard["journey_metrics"]["attended_count"], 1)
 
     def test_dashboard_renders_leadership_positions_and_reports_before_committee(self):

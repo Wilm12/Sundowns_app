@@ -75,21 +75,18 @@ class BranchAdminDashboardService:
                 status__in=[
                     JourneyStatus.TICKET_READY,
                     JourneyStatus.MATCH_ATTENDED,
-                ]
+                ],
             ).count()
             attended_count = journeys.filter(
                 status=JourneyStatus.MATCH_ATTENDED
             ).count()
             pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
-            no_shows = max(booked_count - attended_count, 0)
 
             journey_metrics = {
-                "booked_count": booked_count,
                 "allocated_count": allocated_count,
+                "booked_count": booked_count,
                 "pending_count": pending_count,
                 "attended_count": attended_count,
-                "pending_collection": pending_count,
-                "no_shows": no_shows,
                 "booked_progress": round(
                     (booked_count / max(booked_count, 1)) * 100, 1
                 ) if booked_count else 0,
@@ -105,12 +102,10 @@ class BranchAdminDashboardService:
             }
         else:
             journey_metrics = {
-                "booked_count": 0,
                 "allocated_count": 0,
+                "booked_count": 0,
                 "pending_count": 0,
                 "attended_count": 0,
-                "pending_collection": 0,
-                "no_shows": 0,
                 "booked_progress": 0,
                 "allocated_progress": 0,
                 "pending_progress": 0,

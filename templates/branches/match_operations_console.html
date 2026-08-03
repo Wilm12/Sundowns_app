@@ -60,18 +60,17 @@
 
     <div class="card">
       <div class="stats">
-        <div class="stat"><strong>{{ console.booked_count }}</strong><br>Booked</div>
         <div class="stat"><strong>{{ console.allocated_count }}</strong><br>Allocated</div>
+        <div class="stat"><strong>{{ console.booked_count }}</strong><br>Booked</div>
         <div class="stat"><strong>{{ console.pending_count }}</strong><br>Pending</div>
         <div class="stat"><strong>{{ console.attended_count }}</strong><br>Attended</div>
-        <div class="stat"><strong>{{ console.no_shows }}</strong><br>No-Shows</div>
       </div>
     </div>
 
     <div class="card">
       <div class="funnel">
-        <div class="funnel-step">Booked<br>{{ console.booked_count }}</div>
         <div class="funnel-step">Allocated<br>{{ console.allocated_count }}</div>
+        <div class="funnel-step">Booked<br>{{ console.booked_count }}</div>
         <div class="funnel-step">Pending<br>{{ console.pending_count }}</div>
         <div class="funnel-step">Attended<br>{{ console.attended_count }}</div>
       </div>

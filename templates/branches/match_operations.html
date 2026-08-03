@@ -37,18 +37,17 @@
 
     <div class="card">
       <div class="stats">
-        <div class="stat"><strong>{{ console.booked_count }}</strong><br>Booked</div>
         <div class="stat"><strong>{{ console.allocated_count }}</strong><br>Allocated</div>
+        <div class="stat"><strong>{{ console.booked_count }}</strong><br>Booked</div>
         <div class="stat"><strong>{{ console.pending_count }}</strong><br>Pending</div>
         <div class="stat"><strong>{{ console.attended_count }}</strong><br>Attended</div>
-        <div class="stat"><strong>{{ console.no_shows }}</strong><br>No-Shows</div>
       </div>
     </div>
 
     <div class="card">
       <div class="funnel">
-        <div class="funnel-step">Booked<br>{{ console.booked_count }}</div>
         <div class="funnel-step">Allocated<br>{{ console.allocated_count }}</div>
+        <div class="funnel-step">Booked<br>{{ console.booked_count }}</div>
         <div class="funnel-step">Pending<br>{{ console.pending_count }}</div>
         <div class="funnel-step">Attended<br>{{ console.attended_count }}</div>
       </div>
@@ -84,8 +83,6 @@
                   <span class="pill booked">BOOKED</span>
                 {% elif journey.status == 'TICKET_READY' %}
                   <span class="pill ready">READY</span>
-                {% elif journey.status == 'TICKET_COLLECTED' %}
-                  <span class="pill collected">COLLECTED</span>
                 {% elif journey.status == 'MATCH_ATTENDED' %}
                   <span class="pill attended">ATTENDED</span>
                 {% else %}
@@ -107,12 +104,8 @@
                     <button class="btn success" name="action" value="redeem">Redeem</button>
                   </form>
                   <div style="margin-top: 4px; font-size: 12px; color: #64748b;">Enter the supporter’s 4-digit gate code.</div>
-                {% elif journey.status == 'TICKET_COLLECTED' %}
-                  <form method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <input type="hidden" name="journey_id" value="{{ journey.pk }}">
-                    <button class="btn success" name="action" value="attend">Attend</button>
-                  </form>
+                {% elif journey.status == 'MATCH_ATTENDED' %}
+                  <span class="pill attended">Completed</span>
                 {% else %}
                   <span class="pill attended">Completed</span>
                 {% endif %}

@@ -275,12 +275,14 @@ class JourneyServiceTests(TestCase):
         AllocateTicketService.allocate(journey)
 
         dashboard_before = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+        self.assertEqual(dashboard_before["journey_metrics"]["allocated_count"], 1)
         self.assertEqual(dashboard_before["journey_metrics"]["pending_count"], 1)
         self.assertEqual(dashboard_before["journey_metrics"]["attended_count"], 0)
 
         CollectTicketService.collect(str(journey.collection_code), admin, branch=branch, match=match)
 
         dashboard_after = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+        self.assertEqual(dashboard_after["journey_metrics"]["allocated_count"], 1)
         self.assertEqual(dashboard_after["journey_metrics"]["pending_count"], 0)
         self.assertEqual(dashboard_after["journey_metrics"]["attended_count"], 1)
 

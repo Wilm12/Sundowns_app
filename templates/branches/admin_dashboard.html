@@ -107,6 +107,49 @@
         </div>
     </section>
 
+    <section class="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+        <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Reports</p>
+                    <h2 class="text-xl font-bold text-slate-950">Quick access to branch reporting</h2>
+                </div>
+            </div>
+            <div class="mt-4 grid gap-3">
+                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Attendance Report</a>
+                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Participation Report</a>
+                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Verification Report</a>
+                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Match Operations Report</a>
+            </div>
+        </div>
+
+        <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Committee</p>
+                    <h2 class="text-xl font-bold text-slate-950">Leadership Panel</h2>
+                </div>
+            </div>
+            <div class="mt-4 space-y-3">
+                {% for member in dashboard.committee_members %}
+                    <div class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3">
+                        <p class="font-semibold text-slate-950">{{ member.position }}</p>
+                        <p class="text-sm text-slate-600">{{ member.name }}</p>
+                        <p class="text-sm text-slate-500">{{ member.email }}</p>
+                        <p class="mt-2 text-xs text-slate-500">Assigned {{ member.assigned_at|date:"M j, Y" }} by {{ member.assigned_by }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-slate-500">No leadership positions yet.</p>
+                {% endfor %}
+            </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <a href="{{ dashboard.quick_action_urls.view_match_console }}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900">Promote Member</a>
+                <a href="{{ dashboard.quick_action_urls.verify_supporter }}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900">Manage Leadership</a>
+                <a href="{{ dashboard.quick_action_urls.view_supporters }}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900">Remove Admin</a>
+            </div>
+        </div>
+    </section>
+
     <section class="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
             <div class="flex items-center justify-between gap-3">
@@ -128,20 +171,18 @@
         <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
             <div class="flex items-center justify-between gap-3">
                 <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Committee</p>
-                    <h2 class="text-xl font-bold text-slate-950">Leadership Positions</h2>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Recent Activity</p>
+                    <h2 class="text-xl font-bold text-slate-950">Latest operational events</h2>
                 </div>
             </div>
             <div class="mt-4 space-y-3">
-                {% for member in dashboard.committee_members %}
+                {% for activity in dashboard.recent_activity %}
                     <div class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3">
-                        <p class="font-semibold text-slate-950">{{ member.position }}</p>
-                        <p class="text-sm text-slate-600">{{ member.name }}</p>
-                        <p class="text-sm text-slate-500">{{ member.email }}</p>
-                        <p class="mt-2 text-xs text-slate-500">Assigned {{ member.assigned_at|date:"M j, Y" }} by {{ member.assigned_by }}</p>
+                        <p class="font-semibold text-slate-950">{{ activity.title }}</p>
+                        <p class="text-sm text-slate-600">By {{ activity.actor }} • {{ activity.created_at|date:"M j, Y H:i" }}</p>
                     </div>
                 {% empty %}
-                    <p class="text-sm text-slate-500">No leadership positions yet.</p>
+                    <p class="text-sm text-slate-500">No activity recorded yet.</p>
                 {% endfor %}
             </div>
         </div>

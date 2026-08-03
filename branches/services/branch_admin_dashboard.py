@@ -32,25 +32,24 @@ class BranchAdminDashboardService:
         # ------------------------------------------------------------
         # Supporter metrics
         # ------------------------------------------------------------
-        total_supporters = BranchRole.objects.filter(
-            branch=branch,
-            role=BranchRole.Role.MEMBER,
-            is_active=True,
-        ).count()
+        supporters = (
+            User.objects.filter(
+                branch_roles__branch=branch,
+                branch_roles__role=BranchRole.Role.MEMBER,
+                branch_roles__is_active=True,
+            )
+            .distinct()
+        )
 
-        verified_supporters = BranchRole.objects.filter(
-            branch=branch,
-            role=BranchRole.Role.MEMBER,
-            is_active=True,
-            user__student_verifications__status=StudentVerificationStatus.VERIFIED,
-        ).values("user").distinct().count()
+        total_supporters = supporters.count()
 
-        eligible_supporters = BranchRole.objects.filter(
-            branch=branch,
-            role=BranchRole.Role.MEMBER,
-            is_active=True,
-            user__supporter_eligibility__is_eligible=True,
-        ).values("user").distinct().count()
+        verified_supporters = supporters.filter(
+            student_verifications__status=StudentVerificationStatus.VERIFIED,
+        ).distinct().count()
+
+        eligible_supporters = supporters.filter(
+            supporter_eligibility__is_eligible=True,
+        ).distinct().count()
 
         active_members, inactive_members = BranchAdminDashboardService._calculate_membership_status(branch)
 

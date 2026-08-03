@@ -2,30 +2,87 @@
 <html>
 <head>
   <title>{{ branch.name }} Committee</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; color: #14213d; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .pill { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; font-size: 12px; font-weight: bold; }
+    form { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+    input, select, button { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; }
+    button { background: #16a34a; color: white; border: none; cursor: pointer; }
+    .message { padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; }
+    .message.success { background: #dcfce7; color: #166534; }
+    .message.error { background: #fee2e2; color: #991b1b; }
+  </style>
 </head>
 <body>
   <h1>{{ branch.name }} Committee</h1>
   <p>Branch Admins: {{ committee_members|length }}</p>
-  <p>Total supporters: {{ stats.total_supporters }}</p>
-  <p>Verified supporters: {{ stats.verified_supporters }}</p>
-  <p>Active journeys: {{ stats.active_journeys }}</p>
 
-  <h2>Committee Members</h2>
-  <ul>
-    {% for member in committee_members %}
-      <li>{{ member.username }}</li>
-    {% empty %}
-      <li>No committee members yet.</li>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
     {% endfor %}
-  </ul>
+  {% endif %}
 
-  <h2>Recent Activity</h2>
-  <ul>
-    {% for activity in activities %}
-      <li>{{ activity.created_at }} - {{ activity.action }} by {{ activity.actor.username|default:"system" }}</li>
-    {% empty %}
-      <li>No activity yet.</li>
-    {% endfor %}
-  </ul>
+  <div class="card">
+    <h2>Leadership Panel</h2>
+    <div class="grid">
+      {% for position, member in leadership_positions.items %}
+        <div>
+          <div class="pill">{{ position|title }}</div>
+          <p>{% if member %}{{ member.get_full_name|default:member.username }}{% else %}Unassigned{% endif %}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Actions</h2>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="promote" value="1">
+      {{ promote_form.supporter.label_tag }} {{ promote_form.supporter }}
+      <button type="submit">Promote Member</button>
+    </form>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="committee_action" value="1">
+      {{ position_form.member.label_tag }} {{ position_form.member }}
+      {{ position_form.action.label_tag }} {{ position_form.action }}
+      {{ position_form.position.label_tag }} {{ position_form.position }}
+      <button type="submit">Manage Leadership</button>
+    </form>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="remove_admin" value="1">
+      {{ remove_form.user.label_tag }} {{ remove_form.user }}
+      <button type="submit">Remove Admin</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Committee Members</h2>
+    <ul>
+      {% for member in committee_members %}
+        <li>{{ member.get_full_name|default:member.username }} — {{ member.email|default:"No email" }}</li>
+      {% empty %}
+        <li>No committee members yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Recent Activity</h2>
+    <ul>
+      {% for activity in activities %}
+        <li>{{ activity.created_at }} - {{ activity.action }} by {{ activity.actor.get_full_name|default:activity.actor.username|default:"system" }}</li>
+      {% empty %}
+        <li>No activity yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
 </body>
 </html>

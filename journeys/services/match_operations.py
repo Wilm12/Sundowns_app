@@ -30,10 +30,11 @@ class MatchOperationsService:
             )
 
         booked_count = journeys.filter(status=JourneyStatus.BOOKED).count()
-        allocated_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
+        allocated_count = journeys.filter(
+            status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]
+        ).count()
         attended_count = journeys.filter(status=JourneyStatus.MATCH_ATTENDED).count()
         pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
-        no_shows = max(booked_count - attended_count, 0)
 
         return {
             "branch": branch,
@@ -41,14 +42,10 @@ class MatchOperationsService:
             "journeys": journeys,
             "booked_count": booked_count,
             "allocated_count": allocated_count,
-            "collected_count": attended_count,
             "attended_count": attended_count,
             "pending_count": pending_count,
-            "pending_collections": pending_count,
-            "no_shows": no_shows,
             "booking_completion": round((attended_count / booked_count) * 100, 1) if booked_count else 0,
             "allocation_completion": round((allocated_count / max(booked_count, 1)) * 100, 1),
-            "collection_completion": round((attended_count / max(allocated_count, 1)) * 100, 1),
             "attendance_completion": round((attended_count / max(allocated_count, 1)) * 100, 1),
             "search_query": search_query or "",
         }

@@ -114,6 +114,42 @@ class BranchAdminDashboardTests(TestCase):
         self.assertNotContains(response, "Collected")
         self.assertLess(content.index("Reports"), content.index("Committee"))
 
+    def test_promotion_and_committee_position_management_workflow(self):
+        branch = Branch.objects.create(name="Committee Workflow Branch")
+        admin = self._create_user(username="committee-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="committee-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        promoted = PromoteBranchAdminService.promote(branch, supporter, admin)
+        self.assertEqual(promoted.role, BranchRole.Role.BRANCH_ADMIN)
+
+        role = BranchRole.objects.get(branch=branch, user=supporter, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        CommitteePosition.objects.create(branch=branch, branch_role=role, position=CommitteePosition.Position.SECRETARY, created_by=admin)
+        committee_position = CommitteePosition.objects.get(branch=branch, branch_role=role)
+        committee_position.position = CommitteePosition.Position.CHAIRPERSON
+        committee_position.save(update_fields=["position"])
+
+        self.assertEqual(committee_position.position, CommitteePosition.Position.CHAIRPERSON)
+
+        committee_position.delete()
+        self.assertFalse(CommitteePosition.objects.filter(branch=branch, branch_role=role).exists())
+
+    def test_last_branch_admin_cannot_be_removed(self):
+        branch = Branch.objects.create(name="Last Admin Branch")
+        admin = self._create_user(username="last-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        with self.assertRaises(LastBranchAdminRemovalError):
+            RemoveBranchAdminService.remove(branch, admin, admin)
+
     def _create_user(self, username):
         return get_user_model().objects.create_user(
             username=username,

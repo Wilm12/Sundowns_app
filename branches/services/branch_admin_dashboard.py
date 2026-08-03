@@ -33,9 +33,10 @@ class BranchAdminDashboardService:
         # Supporter metrics
         # ------------------------------------------------------------
         supporters = (
-            User.objects.filter(
+            User.objects.filter(branch=branch)
+            .exclude(
                 branch_roles__branch=branch,
-                branch_roles__role=BranchRole.Role.MEMBER,
+                branch_roles__role=BranchRole.Role.BRANCH_ADMIN,
                 branch_roles__is_active=True,
             )
             .distinct()
@@ -51,7 +52,8 @@ class BranchAdminDashboardService:
             supporter_eligibility__is_eligible=True,
         ).distinct().count()
 
-        active_members, inactive_members = BranchAdminDashboardService._calculate_membership_status(branch)
+        active_members = eligible_supporters
+        inactive_members = max(total_supporters - eligible_supporters, 0)
 
         # ------------------------------------------------------------
         # Upcoming match

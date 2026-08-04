@@ -10,6 +10,7 @@ from engagement.events import EngagementEvent
 
 from ..events import JourneyBooked
 from ..models import Journey, JourneyStatus
+from .open_journey import JourneyAlreadyExists
 
 
 class InvalidJourneyTransition(Exception):
@@ -23,6 +24,15 @@ class BookJourneyService:
     def book_journey(journey):
         if journey.status != JourneyStatus.OPEN:
             raise InvalidJourneyTransition("Journey must be OPEN to be booked.")
+
+        existing_active_journey = Journey.objects.filter(
+            supporter=journey.supporter,
+            branch=journey.branch,
+            match=journey.match,
+            status__in=[JourneyStatus.OPEN, JourneyStatus.BOOKED],
+        ).exclude(pk=journey.pk).exists()
+        if existing_active_journey:
+            raise JourneyAlreadyExists("An active journey already exists for the same supporter/branch/match.")
 
         collection_code = BookJourneyService._generate_collection_code(journey)
         journey.collection_code = collection_code

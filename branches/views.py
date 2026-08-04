@@ -173,9 +173,9 @@ def supporter_verification_view(request, branch_id, supporter_id):
     if not is_branch_admin(request.user, branch):
         return render(request, "403.html", status=403)
 
-    next_path = request.GET.get("next")
-    collection_code = request.GET.get("code", "")
-    match_id = request.GET.get("match_id")
+    next_path = request.POST.get("next") or request.GET.get("next")
+    collection_code = request.POST.get("code", "") or request.GET.get("code", "")
+    match_id = request.POST.get("match_id") or request.GET.get("match_id")
 
     if request.method == "POST":
         verification = (

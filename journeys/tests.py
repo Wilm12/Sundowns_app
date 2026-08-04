@@ -2,6 +2,7 @@ import re
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
@@ -97,6 +98,17 @@ class JourneyServiceTests(TestCase):
 
         with self.assertRaises(JourneyAlreadyExists):
             OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+
+    def test_duplicate_active_journey_is_rejected_by_database_constraint(self):
+        supporter = self._create_user(username="duplicate-journey-db-user")
+        branch = Branch.objects.create(name="Duplicate Journey DB Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        match = Match.objects.create(date=timezone.now(), location="Pretoria", opponent="Mamelodi Sundowns")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.OPEN)
+
+        with self.assertRaises(IntegrityError):
+            Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
 
     def test_open_journey_can_be_booked(self):
         supporter = self._create_user(username="bookable-journey-user")

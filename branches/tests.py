@@ -147,6 +147,36 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
         self.assertEqual(journey.attended_by, admin)
 
+    def test_verification_form_post_uses_hidden_gate_redemption_values(self):
+        branch = Branch.objects.create(name="Verification Form Branch")
+        admin = self._create_user(username="verification-form-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="verification-form-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        match = Match.objects.create(date=timezone.now(), location="Mthatha", opponent="Golden Arrows")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        verification = StudentVerification.objects.create(user=supporter, student_number="u90003", university="UCT", status=StudentVerificationStatus.PENDING)
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED, collection_code="4827")
+
+        self.client.force_login(admin)
+        response = self.client.post(
+            reverse("branch_supporter_verification", args=[branch.pk, supporter.pk]),
+            data={"next": "gate-redemption", "code": "4827", "match_id": match.pk},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        verification.refresh_from_db()
+        journey.refresh_from_db()
+        self.assertEqual(verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
+        self.assertEqual(journey.attended_by, admin)
+
     def test_redemption_redirects_unverified_supporter_to_verification(self):
         branch = Branch.objects.create(name="Gate Redirect Branch")
         admin = self._create_user(username="gate-redirect-admin")

@@ -38,6 +38,21 @@
   </div>
 
   <div class="card">
+    <h2>Verification Queue</h2>
+    <p>Pending supporters for this branch.</p>
+    <ul>
+      {% for verification in pending_verifications %}
+        <li>
+          <a href="{% url 'branch_supporter_verification' branch.id verification.user.id %}?next=gate-redemption&code={{ request.GET.code|default:'' }}&match_id={{ request.GET.match_id|default:'' }}">{{ verification.user.get_full_name|default:verification.user.username }}</a>
+          {% if verification.user.email %}({{ verification.user.email }}){% endif %}
+        </li>
+      {% empty %}
+        <li>No pending verifications.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card">
     <h2>Actions</h2>
     <form method="post">
       {% csrf_token %}

@@ -52,6 +52,7 @@ class StudentVerificationServiceTests(TestCase):
         self.assertIsNotNone(updated_verification.verified_at)
         self.assertIsNotNone(updated_verification.expires_at)
         self.assertEqual(updated_verification.verified_by, verifier)
+        self.assertTrue(updated_verification.user.is_active)
 
     def test_verified_at_is_populated(self):
         user = self._create_user(username="verified-at-user")

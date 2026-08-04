@@ -4,6 +4,7 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
+from django.urls import reverse
 
 from branches.models import Branch, BranchPolicy, BranchRole, BranchStatus
 from matches.models import Match
@@ -19,6 +20,7 @@ from .services.collect_ticket import (
     InvalidCollectionCode,
     InvalidJourneyState as CollectionInvalidJourneyState,
     TicketAlreadyCollected,
+    VerificationRequired,
 )
 from branches.services.authorization import BranchAdminRequired
 from .services.open_journey import IneligibleSupporter, InvalidBranch, JourneyAlreadyExists, OpenJourneyService
@@ -30,6 +32,37 @@ from .services.record_attendance import (
 
 
 class JourneyServiceTests(TestCase):
+    def test_supporter_ticket_page_shows_collection_code_and_verification_warning(self):
+        supporter = self._create_user(username="supporter-ticket-page")
+        branch = Branch.objects.create(name="Ticket Page Branch")
+        match = Match.objects.create(date=timezone.now(), location="Johannesburg", opponent="Mamelodi Sundowns")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED, collection_code="4827")
+
+        self.client.force_login(supporter)
+        response = self.client.get(reverse("my_tickets_page"))
+
+        self.assertContains(response, "Journey Pass")
+        self.assertContains(response, "4827")
+        self.assertContains(response, "Verification required before stadium entry")
+        self.assertEqual(journey.collection_code, "4827")
+
+    def test_supporter_ticket_page_shows_redeemed_state_when_attended(self):
+        supporter = self._create_user(username="supporter-redeemed-page")
+        branch = Branch.objects.create(name="Redeemed Page Branch")
+        match = Match.objects.create(date=timezone.now(), location="Cape Town", opponent="Orlando Pirates")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.MATCH_ATTENDED, collection_code="4827")
+
+        self.client.force_login(supporter)
+        response = self.client.get(reverse("my_tickets_page"))
+
+        self.assertContains(response, "Ticket Redeemed")
+        self.assertContains(response, "Match attended")
+        self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
+
     def test_eligible_supporter_can_open_a_journey(self):
         supporter = self._create_user(username="journey-supporter")
         branch = Branch.objects.create(name="Journey Branch", status=BranchStatus.ACTIVE)
@@ -76,6 +109,28 @@ class JourneyServiceTests(TestCase):
         booked_journey = BookJourneyService.book_journey(journey)
 
         self.assertEqual(booked_journey.status, JourneyStatus.BOOKED)
+        self.assertIsNotNone(booked_journey.collection_code)
+        self.assertRegex(booked_journey.collection_code, r"^\d{4}$")
+
+    def test_gate_redemption_requires_active_verification(self):
+        supporter = self._create_user(username="unverified-gate-supporter")
+        collector = self._create_user(username="unverified-gate-collector")
+        branch = Branch.objects.create(name="Verification Gate Branch", status=BranchStatus.ACTIVE)
+        BranchPolicy.objects.get(branch=branch)
+        BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        match = Match.objects.create(date=timezone.now(), location="Pretoria", opponent="Mamelodi Sundowns")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        StudentVerification.objects.create(
+            user=supporter,
+            student_number="90001",
+            university="UP",
+            status=StudentVerificationStatus.PENDING,
+        )
+        journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
+        BookJourneyService.book_journey(journey)
+
+        with self.assertRaises(VerificationRequired):
+            CollectTicketService.collect(str(journey.collection_code), collector, branch=branch, match=match)
 
     def test_invalid_transition_is_rejected(self):
         supporter = self._create_user(username="invalid-transition-user")
@@ -201,6 +256,13 @@ class JourneyServiceTests(TestCase):
         BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
         match = Match.objects.create(date=timezone.now(), location="Durban", opponent="AmaZulu")
         SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        StudentVerification.objects.create(
+            user=supporter,
+            student_number="90010",
+            university="UCT",
+            status=StudentVerificationStatus.VERIFIED,
+            expires_at=timezone.now() + timezone.timedelta(days=365),
+        )
         journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
         BookJourneyService.book_journey(journey)
         AllocateTicketService.allocate(journey)
@@ -223,6 +285,13 @@ class JourneyServiceTests(TestCase):
         BranchRole.objects.create(branch=branch, user=collector, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
         match = Match.objects.create(date=timezone.now(), location="Cape Town", opponent="Cape Town City")
         SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        StudentVerification.objects.create(
+            user=supporter,
+            student_number="90011",
+            university="Wits",
+            status=StudentVerificationStatus.VERIFIED,
+            expires_at=timezone.now() + timezone.timedelta(days=365),
+        )
         journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
         BookJourneyService.book_journey(journey)
         AllocateTicketService.allocate(journey)
@@ -247,6 +316,13 @@ class JourneyServiceTests(TestCase):
         BranchPolicy.objects.get(branch=branch)
         match = Match.objects.create(date=timezone.now(), location="Mafikeng", opponent="Platinum Stars")
         SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        StudentVerification.objects.create(
+            user=supporter,
+            student_number="90012",
+            university="UJ",
+            status=StudentVerificationStatus.VERIFIED,
+            expires_at=timezone.now() + timezone.timedelta(days=365),
+        )
         journey = OpenJourneyService.open_journey(supporter=supporter, branch=branch, match=match)
         BookJourneyService.book_journey(journey)
         AllocateTicketService.allocate(journey)
@@ -267,6 +343,13 @@ class JourneyServiceTests(TestCase):
             supporter=supporter,
             is_eligible=True,
             reason=EligibilityReason.VERIFIED,
+        )
+        StudentVerification.objects.create(
+            user=supporter,
+            student_number="90099",
+            university="UJ",
+            status=StudentVerificationStatus.VERIFIED,
+            expires_at=timezone.now() + timezone.timedelta(days=365),
         )
 
         match = Match.objects.create(date=timezone.now(), location="Johannesburg", opponent="Kaizer Chiefs")

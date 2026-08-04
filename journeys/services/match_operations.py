@@ -32,11 +32,12 @@ class MatchOperationsService:
         booked_count = journeys.filter(
             status__in=[JourneyStatus.BOOKED, JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]
         ).count()
-        allocated_count = journeys.filter(
-            status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]
-        ).count()
+        allocated_count = (
+            journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]).count()
+            + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
+        )
         attended_count = journeys.filter(status=JourneyStatus.MATCH_ATTENDED).count()
-        pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
+        pending_count = journeys.filter(status__in=[JourneyStatus.BOOKED, JourneyStatus.TICKET_READY]).count()
 
         return {
             "branch": branch,

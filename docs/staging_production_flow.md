@@ -270,7 +270,7 @@ Commands (example):
 # On the EC2 host
 sudo apt update && sudo apt install -y docker.io docker-compose
 sudo usermod -aG docker $USER
-git clone git@github.com:your-org/sundowns.git
+git clone git@github.com:your-org/sundowns_app.git
 cd sundowns
 docker-compose -f docker-compose.prod.yml pull
 docker-compose -f docker-compose.prod.yml up -d --build
@@ -289,7 +289,7 @@ Principles:
 - Redirect HTTP to HTTPS.
 - Use modern TLS configuration and HSTS.
 
-Obtaining certificates (Let\'s Encrypt example):
+Obtaining certificates (Let\'s Encrypt):
 
 ```bash
 sudo apt install certbot python3-certbot-nginx

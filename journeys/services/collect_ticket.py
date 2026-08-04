@@ -8,6 +8,7 @@ from engagement.envelope import EngagementEventEnvelope
 from engagement.events import EngagementEvent
 
 from branches.services.authorization import BranchAdminRequired, is_branch_admin
+from supporters.models import StudentVerification, StudentVerificationStatus
 
 from ..events import AttendanceRecorded
 from ..models import Journey, JourneyStatus
@@ -23,6 +24,10 @@ class TicketAlreadyCollected(Exception):
 
 class InvalidJourneyState(Exception):
     """Raised when a journey is not in a state that can be redeemed."""
+
+
+class VerificationRequired(Exception):
+    """Raised when the supporter has not completed active verification."""
 
 
 class CollectTicketService:
@@ -48,8 +53,18 @@ class CollectTicketService:
         if journey.status == JourneyStatus.MATCH_ATTENDED:
             raise TicketAlreadyCollected("Ticket has already been redeemed.")
 
-        if journey.status != JourneyStatus.TICKET_READY:
-            raise InvalidJourneyState("Only TICKET_READY journeys may be redeemed at the gate.")
+        active_verification = (
+            StudentVerification.objects.filter(
+                user=journey.supporter,
+                status=StudentVerificationStatus.VERIFIED,
+                expires_at__gt=timezone.now(),
+            ).exists()
+        )
+        if not active_verification:
+            raise VerificationRequired("Supporter verification is required before gate entry.")
+
+        if journey.status not in [JourneyStatus.BOOKED, JourneyStatus.TICKET_READY]:
+            raise InvalidJourneyState("Only BOOKED or TICKET_READY journeys may be redeemed at the gate.")
 
         if not is_branch_admin(collector, journey.branch):
             raise BranchAdminRequired("Only branch admins can redeem tickets for this branch.")

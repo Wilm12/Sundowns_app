@@ -46,7 +46,7 @@ class AllocateTicketService:
             status="booked",
         )
 
-        collection_code = AllocateTicketService._generate_collection_code(journey)
+        collection_code = journey.collection_code or AllocateTicketService._generate_collection_code(journey)
 
         journey.ticket = ticket
         journey.ticket_allocated_at = timezone.now()

@@ -97,8 +97,8 @@
             <tr>
               <td>{{ journey.supporter.get_full_name|default:journey.supporter.username }}</td>
               <td>
-                {% if journey.status == 'TICKET_READY' %}
-                  {{ journey.collection_code|default:"—" }}
+                {% if journey.collection_code %}
+                  {{ journey.collection_code }}
                 {% elif journey.status == 'MATCH_ATTENDED' %}
                   <span class="pill attended">Attended</span>
                 {% else %}
@@ -117,14 +117,12 @@
                 {% endif %}
               </td>
               <td>
-                {% if journey.status == 'BOOKED' %}
-                  <form method="post" style="display:inline;">
+                {% if journey.status == 'BOOKED' or journey.status == 'TICKET_READY' %}
+                  <form method="post" style="display:inline-flex; gap: 6px; align-items: center;">
                     {% csrf_token %}
-                    <input type="hidden" name="journey_id" value="{{ journey.pk }}">
-                    <button class="btn" name="action" value="allocate">Allocate</button>
+                    <input type="hidden" name="collection_code" value="{{ journey.collection_code|default:'' }}">
+                    <button class="btn success" name="action" value="redeem">Redeem</button>
                   </form>
-                {% elif journey.status == 'TICKET_READY' %}
-                  <span class="pill redeemed">Pending</span>
                 {% elif journey.status == 'MATCH_ATTENDED' %}
                   <span class="pill attended">Redeemed</span>
                 {% else %}

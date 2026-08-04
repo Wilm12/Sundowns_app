@@ -8,12 +8,13 @@ from rest_framework.response import Response
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404, render
+from django.utils import timezone
 
 from matches.models import Match
 from membership.models import Membership
 from branches.models import BranchPolicy
 from supporters.models import EligibilityReason, SupporterEligibility
-from journeys.services.allocate_ticket import AllocateTicketService
+from journeys.models import Journey
 from journeys.services.book_journey import BookJourneyService
 from journeys.services.open_journey import OpenJourneyService
 from .models import Ticket
@@ -41,22 +42,32 @@ def _book_complimentary_ticket_for_user(user, match):
 
     journey = OpenJourneyService.open_journey(supporter=user, branch=branch, match=match)
     journey = BookJourneyService.book_journey(journey)
-    journey = AllocateTicketService.allocate(journey)
-    return journey.ticket
+
+    ticket = Ticket.objects.create(
+        user=user,
+        match=match,
+        status="booked",
+    )
+    journey.ticket = ticket
+    journey.ticket_allocated_at = timezone.now()
+    journey.save(update_fields=["ticket", "ticket_allocated_at", "updated_at"])
+    return ticket
 
 
 @login_required
 def my_tickets_page(request):
     """Render the current user's ticket history page."""
 
-    tickets = Ticket.objects.filter(
-        user=request.user
-    ).order_by("-created_at")
+    journeys = (
+        Journey.objects.filter(supporter=request.user)
+        .select_related("branch", "match", "ticket")
+        .order_by("-created_at")
+    )
 
     return render(
         request,
         "ticketing/my_tickets.html",
-        {"tickets": tickets}
+        {"journeys": journeys}
     )
 
 

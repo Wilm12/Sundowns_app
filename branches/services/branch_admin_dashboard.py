@@ -56,20 +56,28 @@ class BranchAdminDashboardService:
         inactive_members = max(total_supporters - eligible_supporters, 0)
 
         # ------------------------------------------------------------
-        # Upcoming match
+        # Upcoming / relevant match
         # ------------------------------------------------------------
         upcoming_match = Match.objects.filter(
             date__gte=timezone.now()
         ).order_by("date").first()
 
-        if upcoming_match is None:
-            upcoming_match = Match.objects.order_by("date").first()
+        branch_match = (
+            Match.objects.filter(journeys__branch=branch)
+            .order_by("-date")
+            .distinct()
+            .first()
+        )
+
+        dashboard_match = branch_match or upcoming_match
+        if dashboard_match is None:
+            dashboard_match = Match.objects.order_by("date").first()
 
         # ------------------------------------------------------------
         # Journey metrics
         # ------------------------------------------------------------
-        if upcoming_match:
-            journeys = Journey.objects.filter(branch=branch, match=upcoming_match)
+        if dashboard_match:
+            journeys = Journey.objects.filter(branch=branch, match=dashboard_match)
 
             booked_count = journeys.filter(
                 status__in=[
@@ -78,16 +86,16 @@ class BranchAdminDashboardService:
                     JourneyStatus.MATCH_ATTENDED,
                 ],
             ).count()
-            allocated_count = journeys.filter(
-                status__in=[
-                    JourneyStatus.TICKET_READY,
-                    JourneyStatus.MATCH_ATTENDED,
-                ],
-            ).count()
+            allocated_count = (
+                journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]).count()
+                + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
+            )
             attended_count = journeys.filter(
                 status=JourneyStatus.MATCH_ATTENDED
             ).count()
-            pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
+            pending_count = journeys.filter(
+                status=JourneyStatus.TICKET_READY
+            ).count()
 
             journey_metrics = {
                 "allocated_count": allocated_count,
@@ -180,20 +188,20 @@ class BranchAdminDashboardService:
         quick_action_urls = {
             "verify_supporter": reverse("branch_committee", args=[branch.pk]),
             "allocate_ticket": (
-                reverse("match_operations_console", args=[branch.pk, upcoming_match.pk])
-                if upcoming_match else "#"
+                reverse("match_operations_console", args=[branch.pk, dashboard_match.pk])
+                if dashboard_match else "#"
             ),
             "collect_ticket": (
-                reverse("match_operations_console", args=[branch.pk, upcoming_match.pk])
-                if upcoming_match else "#"
+                reverse("match_operations_console", args=[branch.pk, dashboard_match.pk])
+                if dashboard_match else "#"
             ),
             "record_attendance": (
-                reverse("match_operations_console", args=[branch.pk, upcoming_match.pk])
-                if upcoming_match else "#"
+                reverse("match_operations_console", args=[branch.pk, dashboard_match.pk])
+                if dashboard_match else "#"
             ),
             "view_match_console": (
-                reverse("match_operations_console", args=[branch.pk, upcoming_match.pk])
-                if upcoming_match else "#"
+                reverse("match_operations_console", args=[branch.pk, dashboard_match.pk])
+                if dashboard_match else "#"
             ),
             "view_supporters": reverse("branch_detail_page", args=[branch.pk]),
         }
@@ -201,6 +209,7 @@ class BranchAdminDashboardService:
         return {
             "branch": branch,
             "admin_branches": list(admin_branches.order_by("name")),
+            "dashboard_match": dashboard_match,
             "supporter_metrics": {
                 "total_supporters": total_supporters,
                 "verified_supporters": verified_supporters,

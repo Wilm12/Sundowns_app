@@ -88,6 +88,124 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(dashboard["journey_metrics"]["pending_count"], 1)
         self.assertEqual(dashboard["journey_metrics"]["attended_count"], 1)
 
+    def test_gate_redemption_redirects_unverified_supporter_to_verification(self):
+        branch = Branch.objects.create(name="Gate Redirect Branch")
+        admin = self._create_user(username="gate-redirect-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="gate-redirect-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        match = Match.objects.create(date=timezone.now(), location="Cape Town", opponent="Mamelodi Sundowns")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        StudentVerification.objects.create(user=supporter, student_number="u90001", university="UCT", status=StudentVerificationStatus.PENDING)
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED, collection_code="4827")
+
+        self.client.force_login(admin)
+        response = self.client.post(
+            reverse("match_operations_console", args=[branch.pk, match.pk]),
+            data={"action": "redeem", "collection_code": "4827"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("branch_supporter_verification", args=[branch.pk, supporter.pk]), response.url)
+        self.assertIn("next=gate-redemption", response.url)
+        self.assertIn("code=4827", response.url)
+        self.assertEqual(journey.status, JourneyStatus.BOOKED)
+
+    def test_verification_redirect_completes_redemption_after_verification(self):
+        branch = Branch.objects.create(name="Verification Redemption Branch")
+        admin = self._create_user(username="verification-redemption-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="verification-redemption-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        match = Match.objects.create(date=timezone.now(), location="Durban", opponent="Kaizer Chiefs")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        verification = StudentVerification.objects.create(user=supporter, student_number="u90002", university="Wits", status=StudentVerificationStatus.PENDING)
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED, collection_code="4827")
+
+        self.client.force_login(admin)
+        response = self.client.post(
+            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=gate-redemption&code=4827&match_id={match.pk}",
+            data={},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        verification.refresh_from_db()
+        journey.refresh_from_db()
+        self.assertEqual(verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
+        self.assertEqual(journey.attended_by, admin)
+
+    def test_redemption_redirects_unverified_supporter_to_verification(self):
+        branch = Branch.objects.create(name="Gate Redirect Branch")
+        admin = self._create_user(username="gate-redirect-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="gate-redirect-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        match = Match.objects.create(date=timezone.now(), location="Cape Town", opponent="Mamelodi Sundowns")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        StudentVerification.objects.create(user=supporter, student_number="u90001", university="UCT", status=StudentVerificationStatus.PENDING)
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED, collection_code="4827")
+
+        self.client.force_login(admin)
+        response = self.client.post(
+            reverse("match_operations_console", args=[branch.pk, match.pk]),
+            data={"action": "redeem", "collection_code": "4827"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(reverse("branch_supporter_verification", args=[branch.pk, supporter.pk]), response.url)
+        self.assertIn("next=gate-redemption", response.url)
+        self.assertIn("code=4827", response.url)
+        self.assertEqual(journey.status, JourneyStatus.BOOKED)
+
+    def test_verification_redirect_completes_redemption_after_verification(self):
+        branch = Branch.objects.create(name="Verification Redemption Branch")
+        admin = self._create_user(username="verification-redemption-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="verification-redemption-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        match = Match.objects.create(date=timezone.now(), location="Durban", opponent="Kaizer Chiefs")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        verification = StudentVerification.objects.create(user=supporter, student_number="u90002", university="Wits", status=StudentVerificationStatus.PENDING)
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED, collection_code="4827")
+
+        self.client.force_login(admin)
+        response = self.client.post(
+            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=gate-redemption&code=4827&match_id={match.pk}",
+            data={},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        verification.refresh_from_db()
+        journey.refresh_from_db()
+        self.assertEqual(verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
+        self.assertEqual(journey.attended_by, admin)
+
     def test_dashboard_renders_leadership_positions_and_reports_before_committee(self):
         branch = Branch.objects.create(name="Leadership Branch")
         admin = self._create_user(username="leadership-admin")

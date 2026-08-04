@@ -10,6 +10,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from users.models import User
 from transport.models import Transport
+from supporters.models import StudentVerification, StudentVerificationStatus
+from supporters.services.verify_student import VerifyStudentService
+from journeys.services.collect_ticket import CollectTicketService
+from matches.models import Match
 from .models import Branch, BranchRole, CommitteeAction, CommitteePosition
 from authentication.permissions import IsAdminOrReadOnly
 from .serializers import BranchSerializer
@@ -138,6 +142,14 @@ def committee_management_view(request, branch_id):
     stats = CommitteeService.get_committee_stats(branch)
     activities = branch.committee_activities.select_related("actor", "target_user")[:10]
     leadership_positions = CommitteeService.get_leadership_positions(branch)
+    pending_verifications = (
+        StudentVerification.objects.filter(
+            user__branch=branch,
+            status=StudentVerificationStatus.PENDING,
+        )
+        .select_related("user")
+        .order_by("created_at")
+    )
 
     return render(request, "branches/committee.html", {
         "branch": branch,
@@ -148,5 +160,53 @@ def committee_management_view(request, branch_id):
         "promote_form": PromoteBranchAdminForm(branch=branch),
         "position_form": CommitteePositionManagementForm(branch=branch),
         "remove_form": RemoveBranchAdminForm(branch=branch),
+        "pending_verifications": pending_verifications,
+    })
+
+
+@login_required
+def supporter_verification_view(request, branch_id, supporter_id):
+    """Allow branch admins to verify a supporter and continue gate redemption."""
+
+    branch = get_object_or_404(Branch, id=branch_id)
+    supporter = get_object_or_404(User, id=supporter_id)
+    if not is_branch_admin(request.user, branch):
+        return render(request, "403.html", status=403)
+
+    next_path = request.GET.get("next")
+    collection_code = request.GET.get("code", "")
+    match_id = request.GET.get("match_id")
+
+    if request.method == "POST":
+        verification = (
+            StudentVerification.objects.filter(
+                user=supporter,
+                status=StudentVerificationStatus.PENDING,
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        if verification is None:
+            messages.error(request, "No pending verification record was found for this supporter.")
+        else:
+            VerifyStudentService.verify(verification, request.user)
+            if next_path == "gate-redemption" and collection_code and match_id:
+                try:
+                    match = get_object_or_404(Match, pk=match_id)
+                    CollectTicketService.collect(collection_code, request.user, branch=branch, match=match)
+                except Exception as exc:
+                    messages.error(request, f"Verification succeeded but redemption failed: {exc}")
+                else:
+                    messages.success(request, "Supporter verified and ticket redeemed successfully.")
+                return redirect("match_operations_console", branch_id=branch.pk, match_id=match_id)
+            messages.success(request, "Supporter verification completed.")
+        return redirect("match_operations_console", branch_id=branch.pk, match_id=match_id) if next_path == "gate-redemption" and match_id else redirect("branch_committee", branch_id=branch.pk)
+
+    return render(request, "branches/supporter_verification.html", {
+        "branch": branch,
+        "supporter": supporter,
+        "next_path": next_path,
+        "collection_code": collection_code,
+        "match_id": match_id,
     })
 

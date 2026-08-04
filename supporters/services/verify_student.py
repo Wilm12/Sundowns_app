@@ -47,6 +47,9 @@ class VerifyStudentService:
         verification.verified_by = verifier
         verification.save()
 
+        verification.user.is_active = True
+        verification.user.save(update_fields=["is_active"])
+
         event = StudentVerified(
             supporter_id=verification.user_id,
             verification_id=verification.pk,

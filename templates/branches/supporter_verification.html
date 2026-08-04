@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Supporter | Sundowns WPA{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200">
+        <h1 class="text-3xl font-bold text-slate-950">Verify Supporter</h1>
+        <p class="mt-2 text-sm text-slate-600">{{ supporter.get_full_name|default:supporter.username }} • {{ branch.name }}</p>
+    </div>
+
+    {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+                <div class="rounded-[1.25rem] px-4 py-3 text-sm {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-700{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200">
+        <p class="text-sm text-slate-600">
+            {% if next_path == 'gate-redemption' %}
+                This verification will return to gate redemption and complete the saved code once approved.
+            {% else %}
+                Approve this supporter’s verification request.
+            {% endif %}
+        </p>
+
+        <form method="post" class="mt-6 space-y-4">
+            {% csrf_token %}
+            {% if next_path == 'gate-redemption' %}
+                <input type="hidden" name="next" value="{{ next_path }}">
+                <input type="hidden" name="code" value="{{ collection_code }}">
+                <input type="hidden" name="match_id" value="{{ match_id }}">
+            {% endif %}
+            <button type="submit" class="rounded-full bg-green-600 px-4 py-2 font-semibold text-white">Verify Supporter</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,12 +1,15 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from branches.models import Branch
 from journeys.models import Journey
 from journeys.services.allocate_ticket import AllocateTicketService
-from journeys.services.collect_ticket import CollectTicketService
+from journeys.services.collect_ticket import CollectTicketService, VerificationRequired
 from journeys.services.match_operations import MatchOperationsService
 from journeys.services.record_attendance import RecordAttendanceService
 from matches.models import Match
@@ -37,6 +40,13 @@ def match_operations_console(request, branch_id, match_id):
             collection_code = request.POST.get("collection_code", "") or request.POST.get("code", "")
             try:
                 CollectTicketService.collect(collection_code, request.user, branch=branch, match=match)
+            except VerificationRequired as exc:
+                journey = Journey.objects.filter(collection_code=collection_code, branch=branch, match=match).first()
+                if journey:
+                    verification_url = reverse("branch_supporter_verification", args=[branch.pk, journey.supporter_id])
+                    params = urlencode({"next": "gate-redemption", "code": collection_code, "match_id": match.pk})
+                    return redirect(f"{verification_url}?{params}")
+                messages.error(request, str(exc))
             except Exception as exc:
                 messages.error(request, str(exc))
             else:

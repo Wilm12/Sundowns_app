@@ -79,7 +79,7 @@ class BranchAdminDashboardTests(TestCase):
 
         dashboard = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
 
-        self.assertEqual(dashboard["supporter_metrics"]["total_supporters"], 3)
+        self.assertEqual(dashboard["supporter_metrics"]["total_supporters"], 4)
         self.assertEqual(dashboard["supporter_metrics"]["verified_supporters"], 1)
         self.assertEqual(dashboard["supporter_metrics"]["eligible_supporters"], 1)
         self.assertEqual(dashboard["supporter_metrics"]["active_members"], 1)

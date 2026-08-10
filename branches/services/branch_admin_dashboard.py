@@ -32,17 +32,14 @@ class BranchAdminDashboardService:
         # ------------------------------------------------------------
         # Supporter metrics
         # ------------------------------------------------------------
-        supporters = (
-            User.objects.filter(branch=branch)
-            .exclude(
-                branch_roles__branch=branch,
-                branch_roles__role=BranchRole.Role.BRANCH_ADMIN,
-                branch_roles__is_active=True,
-            )
-            .distinct()
-        )
+        assigned_users = User.objects.filter(branch=branch).distinct()
+        supporters = assigned_users.exclude(
+            branch_roles__branch=branch,
+            branch_roles__role=BranchRole.Role.BRANCH_ADMIN,
+            branch_roles__is_active=True,
+        ).distinct()
 
-        total_supporters = supporters.count()
+        total_supporters = assigned_users.count()
 
         verified_supporters = supporters.filter(
             student_verifications__status=StudentVerificationStatus.VERIFIED,

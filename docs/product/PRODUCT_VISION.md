@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Sundowns WPA is being repositioned from a supporter membership platform into an operating platform for student supporters' branches.
+BranchRoute is being repositioned from a supporter membership platform into an operating platform for student supporters' branches.
 
 The platform should help branches coordinate branch operations around each match, reduce manual administration, and create a persistent digital record of supporter participation.
 

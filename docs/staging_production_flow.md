@@ -1,6 +1,6 @@
 # Sundowns — Staging & Production Flow
 
-This document describes the full evolution of the Sundowns WPA platform from local Docker development through production-style deployment on AWS EC2. It explains why each stage exists, how components (Docker, Nginx, Gunicorn, PostgreSQL, Redis, GitHub Actions, HTTPS, health checks, backups, logging) are used in this project, and contains operational guidance, commands, and architecture diagrams.
+This document describes the full evolution of the BranchRoute platform from local Docker development through production-style deployment on AWS EC2. It explains why each stage exists, how components (Docker, Nginx, Gunicorn, PostgreSQL, Redis, GitHub Actions, HTTPS, health checks, backups, logging) are used in this project, and contains operational guidance, commands, and architecture diagrams.
 
 ## 1. Purpose
 

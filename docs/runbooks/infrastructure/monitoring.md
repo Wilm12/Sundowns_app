@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document describes the monitoring stack for Sundowns WPA.
+This document describes the monitoring stack for BranchRoute.
 
 The monitoring stack provides:
 

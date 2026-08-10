@@ -8,7 +8,7 @@
 
 # Context
 
-The Sundowns WPA platform initially handled supporter engagement directly inside business domains.
+The BranchRoute platform initially handled supporter engagement directly inside business domains.
 
 For example:
 
@@ -369,6 +369,6 @@ Business domains continue publishing the same events.
 
 # Decision Summary
 
-The Sundowns WPA platform adopts an **event-driven engagement architecture** in which business domains publish domain events and the Engagement Engine orchestrates supporter engagement through dedicated handlers and independent services.
+The BranchRoute platform adopts an **event-driven engagement architecture** in which business domains publish domain events and the Engagement Engine orchestrates supporter engagement through dedicated handlers and independent services.
 
 This architecture separates business state changes from engagement workflows, improving maintainability, extensibility, observability, and readiness for future asynchronous event processing.

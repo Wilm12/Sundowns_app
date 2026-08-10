@@ -2,7 +2,7 @@
 
 # Overview
 
-This document explains how the Sundowns WPA project moves from feature development into automated testing before eventually reaching staging and production environments.
+This document explains how the BranchRoute project moves from feature development into automated testing before eventually reaching staging and production environments.
 
 The goal is to create a clear engineering workflow that supports:
 
@@ -320,7 +320,7 @@ Testing protects the system from accidental breakage.
 
 # Current Development Workflow
 
-The current engineering workflow for Sundowns WPA is:
+The current engineering workflow for BranchRoute is:
 
 ```text
 Create feature branch

@@ -1,6 +1,6 @@
-# Sundowns WPA Platform
+# BranchRoute Platform
 
-A production-deployed membership, ticketing, and transport management platform built with Django, PostgreSQL, Redis, Docker, AWS EC2, Nginx, HTTPS, and GitHub Actions CI/CD.
+A production-deployed supporter operations platform for branches, ticketing, transport, and match-day engagement, built with Django, PostgreSQL, Redis, Docker, AWS EC2, Nginx, HTTPS, and GitHub Actions CI/CD.
 
 This project demonstrates end-to-end software delivery, covering backend development, containerization, cloud deployment, production operations, infrastructure management, and automated deployment pipelines.
 
@@ -8,7 +8,7 @@ This project demonstrates end-to-end software delivery, covering backend develop
 
 ## Project Overview
 
-Sundowns WPA is a membership platform that allows supporters to:
+BranchRoute is a supporter operations platform that allows branches and supporters to:
 
 - Register and belong to a branch
 - Manage membership status

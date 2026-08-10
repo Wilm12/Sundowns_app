@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Sundowns WPA project uses a Docker-based local development environment to ensure consistency across development, testing, staging, and future production deployments.
+The BranchRoute project uses a Docker-based local development environment to ensure consistency across development, testing, staging, and future production deployments.
 
 The development environment is designed to support:
 

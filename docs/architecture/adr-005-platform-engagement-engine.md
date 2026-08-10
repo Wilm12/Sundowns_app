@@ -8,7 +8,7 @@
 
 ## Context
 
-The Sundowns WPA platform has evolved beyond a membership management system.
+The BranchRoute platform has evolved beyond a membership management system.
 
 Current domains include:
 
@@ -242,7 +242,7 @@ Future evolution:
 
 Accepted.
 
-The Sundowns WPA platform will adopt an event-driven Platform Engagement Engine as the centralized orchestration layer for supporter engagement.
+The BranchRoute platform will adopt an event-driven Platform Engagement Engine as the centralized orchestration layer for supporter engagement.
 
 ## Implementation Roadmap
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the rollback procedures for the Sundowns WPA production environment.
+This document defines the rollback procedures for the BranchRoute production environment.
 
 Rollback procedures are used when:
 

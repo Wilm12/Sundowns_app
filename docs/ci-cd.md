@@ -4,7 +4,7 @@
 
 ## Purpose
 
-This document explains the CI/CD flow for the Sundowns WPA Platform.
+This document explains the CI/CD flow for the BranchRoute Platform.
 
 The goal of the pipeline is to reduce manual deployment work and make production updates more repeatable, visible, and reliable.
 

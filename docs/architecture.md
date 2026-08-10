@@ -1,8 +1,8 @@
-# Sundowns WPA System Architecture
+# BranchRoute System Architecture
 
 ## Overview
 
-Sundowns WPA is a Django-based supporter membership and engagement platform designed for football supporter communities.
+BranchRoute is a Django-based supporter operations and engagement platform designed for football supporter communities.
 
 The platform manages:
 

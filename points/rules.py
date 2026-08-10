@@ -1,4 +1,4 @@
-"""Point awarding rules for the Sundowns WPA Points System."""
+"""Point awarding rules for the BranchRoute Points System."""
 
 from enum import Enum
 

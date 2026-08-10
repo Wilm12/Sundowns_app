@@ -117,6 +117,37 @@ class BranchAdminDashboardTests(TestCase):
         self.assertIn("code=4827", response.url)
         self.assertEqual(journey.status, JourneyStatus.BOOKED)
 
+    def test_verification_flow_creates_missing_record_and_redeems_ticket(self):
+        branch = Branch.objects.create(name="Verification Auto Redemption Branch")
+        admin = self._create_user(username="verification-auto-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="verification-auto-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        match = Match.objects.create(date=timezone.now(), location="Durban", opponent="Kaizer Chiefs")
+        SupporterEligibility.objects.create(supporter=supporter, is_eligible=True, reason=EligibilityReason.VERIFIED)
+        journey = Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED, collection_code="4827")
+
+        self.client.force_login(admin)
+        response = self.client.post(
+            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=gate-redemption&code=4827&match_id={match.pk}",
+            data={},
+            follow=True,
+        )
+
+        self.assertRedirects(response, reverse("match_operations_console", args=[branch.pk, match.pk]))
+        self.assertContains(response, "Supporter verified and ticket redeemed successfully.")
+        verification = StudentVerification.objects.get(user=supporter)
+        journey.refresh_from_db()
+        self.assertEqual(verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
+        self.assertEqual(journey.attended_by, admin)
+
     def test_verification_redirect_completes_redemption_after_verification(self):
         branch = Branch.objects.create(name="Verification Redemption Branch")
         admin = self._create_user(username="verification-redemption-admin")

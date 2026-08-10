@@ -181,26 +181,37 @@ def supporter_verification_view(request, branch_id, supporter_id):
         verification = (
             StudentVerification.objects.filter(
                 user=supporter,
-                status=StudentVerificationStatus.PENDING,
             )
             .order_by("-created_at")
             .first()
         )
+
         if verification is None:
-            messages.error(request, "No pending verification record was found for this supporter.")
+            verification = StudentVerification.objects.create(
+                user=supporter,
+                student_number=f"auto-{supporter.pk}",
+                university="BranchRoute",
+                status=StudentVerificationStatus.PENDING,
+            )
+
+        if verification.status == StudentVerificationStatus.VERIFIED:
+            should_redemption_run = bool(collection_code and match_id)
         else:
             VerifyStudentService.verify(verification, request.user)
-            if next_path == "gate-redemption" and collection_code and match_id:
-                try:
-                    match = get_object_or_404(Match, pk=match_id)
-                    CollectTicketService.collect(collection_code, request.user, branch=branch, match=match)
-                except Exception as exc:
-                    messages.error(request, f"Verification succeeded but redemption failed: {exc}")
-                else:
-                    messages.success(request, "Supporter verified and ticket redeemed successfully.")
-                return redirect("match_operations_console", branch_id=branch.pk, match_id=match_id)
-            messages.success(request, "Supporter verification completed.")
-        return redirect("match_operations_console", branch_id=branch.pk, match_id=match_id) if next_path == "gate-redemption" and match_id else redirect("branch_committee", branch_id=branch.pk)
+            should_redemption_run = bool(collection_code and match_id)
+
+        if should_redemption_run:
+            try:
+                match = get_object_or_404(Match, pk=match_id)
+                CollectTicketService.collect(collection_code, request.user, branch=branch, match=match)
+            except Exception as exc:
+                messages.error(request, f"Verification succeeded but redemption failed: {exc}")
+            else:
+                messages.success(request, "Supporter verified and ticket redeemed successfully.")
+            return redirect("match_operations_console", branch_id=branch.pk, match_id=match_id)
+
+        messages.success(request, "Supporter verification completed.")
+        return redirect("branch_committee", branch_id=branch.pk)
 
     return render(request, "branches/supporter_verification.html", {
         "branch": branch,

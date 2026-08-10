@@ -19,6 +19,13 @@
 			"type": "shell",
 			"command": "python manage.py test branches.tests.BranchAdminDashboardTests.test_dashboard_metrics_are_correct --settings=sundowns_app.settings.test",
 			"group": "test"
+		},
+		{
+			"label": "django-regression-tests",
+			"type": "shell",
+			"command": "python manage.py test ticketing.tests.test_ticket_booking_redirect common.tests.test_core_flows --settings=sundowns_app.settings.test --keepdb --noinput",
+			"problemMatcher": [],
+			"group": "test"
 		}
 	]
 }

@@ -11,7 +11,6 @@ from django.shortcuts import redirect, get_object_or_404, render
 from django.utils import timezone
 
 from matches.models import Match
-from membership.models import Membership
 from branches.models import BranchPolicy
 from supporters.models import EligibilityReason, SupporterEligibility
 from journeys.models import Journey
@@ -134,21 +133,9 @@ class MyTicketsView(generics.ListAPIView):
 
 @login_required
 def book_ticket_page(request, match_id):
-    """Book a ticket for a match if the user has an active membership."""
+    """Book a ticket for a match as part of the supporter launch journey."""
 
     match = get_object_or_404(Match, id=match_id)
-
-    has_active_membership = Membership.objects.filter(
-        user=request.user,
-        status="active"
-    ).exists()
-
-    if not has_active_membership:
-        messages.error(
-            request,
-            "You need an active membership to book tickets. Please complete payment to activate your membership."
-        )
-        return redirect("/payments/")
 
     existing_ticket = Ticket.objects.filter(
         user=request.user,

@@ -2,7 +2,6 @@
 
 from rest_framework import serializers
 
-from membership.models import Membership
 from .models import Ticket
 
 
@@ -45,11 +44,6 @@ class TicketSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = request.user if request and request.user.is_authenticated else None
         match = attrs.get('match')
-
-        if user and not Membership.objects.filter(user=user, status='active').exists():
-            raise serializers.ValidationError({
-                'user': 'User must have an active membership to book a ticket.'
-            })
 
         if user and match and Ticket.objects.filter(user=user, match=match).exists():
             raise serializers.ValidationError({

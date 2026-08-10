@@ -8,6 +8,7 @@ from branches.models import Branch
 from users.models import User
 from membership.models import Membership
 from matches.models import Match
+from ticketing.models import Ticket
 
 
 class TicketBookingRedirectTests(TestCase):
@@ -46,3 +47,30 @@ class TicketBookingRedirectTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertIn("/transport-prompt/", response.url)
+
+    def test_ticket_booking_does_not_require_an_active_membership(self):
+        branch = Branch.objects.create(
+            name="Johannesburg Branch",
+            location="Johannesburg",
+        )
+
+        user = User.objects.create_user(
+            username="supporter",
+            email="supporter@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+
+        match = Match.objects.create(
+            opponent="Kaizer Chiefs",
+            location="FNB Stadium",
+            date=timezone.now(),
+        )
+
+        self.client.login(username="supporter", password="StrongPass123!")
+
+        response = self.client.get(reverse("book_ticket_page", args=[match.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/transport-prompt/", response.url)
+        self.assertEqual(Ticket.objects.filter(user=user, match=match).count(), 1)

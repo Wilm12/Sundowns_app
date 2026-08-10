@@ -14,6 +14,7 @@ from users.models import User
 from membership.models import Membership
 from ticketing.models import Ticket
 from transport.models import TransportBooking
+from supporters.models import StudentVerification, StudentVerificationStatus, SupporterEligibility
 
 from django.http import JsonResponse
 from django.db import connection
@@ -49,6 +50,35 @@ def dashboard_view(request):
         user=request.user
     ).order_by('-created_at')[:5]
 
+    verification = (
+        StudentVerification.objects.filter(user=request.user)
+        .order_by('-created_at')
+        .first()
+    )
+    eligibility = (
+        SupporterEligibility.objects.filter(supporter=request.user)
+        .order_by('-updated_at')
+        .first()
+    )
+
+    if verification and verification.status == StudentVerificationStatus.VERIFIED and (
+        verification.expires_at is None or verification.expires_at > timezone.now()
+    ):
+        supporter_status = "Active"
+        supporter_status_detail = "Verified and eligible for booking and redemption."
+    elif eligibility and eligibility.is_eligible:
+        supporter_status = "Active"
+        supporter_status_detail = "Eligible for participation."
+    elif verification and verification.status == StudentVerificationStatus.REJECTED:
+        supporter_status = "Inactive"
+        supporter_status_detail = "Verification was rejected."
+    elif verification and verification.status == StudentVerificationStatus.PENDING:
+        supporter_status = "Pending"
+        supporter_status_detail = "Awaiting branch verification."
+    else:
+        supporter_status = "Inactive"
+        supporter_status_detail = "Verification is still required."
+
     display_name = (
         request.user.first_name
         or request.user.username
@@ -63,6 +93,8 @@ def dashboard_view(request):
         "upcoming_matches_count": upcoming_matches_count,
         "latest_notifications": latest_notifications,
         "display_name": display_name,
+        "supporter_status": supporter_status,
+        "supporter_status_detail": supporter_status_detail,
     })
 
 

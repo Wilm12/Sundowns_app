@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -6,6 +8,7 @@ from rest_framework.test import APIClient
 from users.models import User
 from membership.models import Membership
 from payments.models import Payment
+from supporters.models import StudentVerification, StudentVerificationStatus, SupporterEligibility
 
 
 class CoreFlowTests(TestCase):
@@ -67,3 +70,21 @@ class CoreFlowTests(TestCase):
 
         membership.refresh_from_db()
         self.assertEqual(membership.status, "active")
+
+    def test_dashboard_uses_verification_status_for_supporter_activation(self):
+        verification = StudentVerification.objects.create(
+            user=self.user,
+            student_number="12345",
+            university="BranchRoute",
+            status=StudentVerificationStatus.VERIFIED,
+            verified_at=timezone.now(),
+        )
+        verification.expires_at = timezone.now() + timedelta(days=365)
+        verification.save(update_fields=["expires_at"])
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Active")
+        self.assertContains(response, "Eligible")

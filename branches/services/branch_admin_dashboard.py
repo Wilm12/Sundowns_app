@@ -106,16 +106,12 @@ class BranchAdminDashboardService:
                     JourneyStatus.MATCH_ATTENDED,
                 ],
             ).count()
-            allocated_count = (
-                journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]).count()
-                + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
-            )
-            attended_count = journeys.filter(
-                status=JourneyStatus.MATCH_ATTENDED
-            ).count()
-            pending_count = journeys.filter(
-                status=JourneyStatus.TICKET_READY
-            ).count()
+            # Allocated = journeys that have tickets issued (TICKET_READY or MATCH_ATTENDED),
+            # plus any BOOKED journeys where a ticket record exists.
+            allocated_count = journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]).count() + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
+            attended_count = journeys.filter(status=JourneyStatus.MATCH_ATTENDED).count()
+            # Pending = tickets issued but not yet redeemed
+            pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
 
             journey_metrics = {
                 "allocated_count": allocated_count,

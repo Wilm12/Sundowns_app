@@ -61,9 +61,10 @@ def dashboard_view(request):
         .first()
     )
 
-    if verification and verification.status == StudentVerificationStatus.VERIFIED and (
-        verification.expires_at is None or verification.expires_at > timezone.now()
-    ):
+    if verification and verification.status in {
+        StudentVerificationStatus.APPROVED,
+        StudentVerificationStatus.VERIFIED,
+    } and (verification.expires_at is None or verification.expires_at > timezone.now()):
         supporter_status = "Active"
         supporter_status_detail = "Verified and eligible for booking and redemption."
     elif eligibility and eligibility.is_eligible:

@@ -110,7 +110,7 @@ class BranchAdminDashboardService:
             # plus any BOOKED journeys where a ticket record exists.
             allocated_count = journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]).count() + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
             attended_count = journeys.filter(status=JourneyStatus.MATCH_ATTENDED).count()
-            # Pending = tickets issued but not yet redeemed
+            # Pending should mirror MatchOperationsService: only TICKET_READY
             pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
 
             journey_metrics = {

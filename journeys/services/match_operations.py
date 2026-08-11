@@ -37,7 +37,8 @@ class MatchOperationsService:
             + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
         )
         attended_count = journeys.filter(status=JourneyStatus.MATCH_ATTENDED).count()
-        pending_count = journeys.filter(status__in=[JourneyStatus.BOOKED, JourneyStatus.TICKET_READY]).count()
+        # Pending should represent tickets issued but not yet redeemed
+        pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
 
         return {
             "branch": branch,

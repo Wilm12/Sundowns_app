@@ -61,15 +61,13 @@ def dashboard_view(request):
         .first()
     )
 
+    # A supporter is only 'Active' after a successful verification approval.
     if verification and verification.status in {
         StudentVerificationStatus.APPROVED,
         StudentVerificationStatus.VERIFIED,
     } and (verification.expires_at is None or verification.expires_at > timezone.now()):
         supporter_status = "Active"
         supporter_status_detail = "Verified and eligible for booking and redemption."
-    elif eligibility and eligibility.is_eligible:
-        supporter_status = "Active"
-        supporter_status_detail = "Eligible for participation."
     elif verification and verification.status == StudentVerificationStatus.REJECTED:
         supporter_status = "Inactive"
         supporter_status_detail = "Verification was rejected."
@@ -77,8 +75,12 @@ def dashboard_view(request):
         supporter_status = "Pending"
         supporter_status_detail = "Awaiting branch verification."
     else:
+        # Booking should not affect activation; eligibility alone does not make the supporter Active.
         supporter_status = "Inactive"
-        supporter_status_detail = "Verification is still required."
+        if eligibility and eligibility.is_eligible:
+            supporter_status_detail = "Eligible but unverified; complete branch verification to activate."
+        else:
+            supporter_status_detail = "Verification is still required."
 
     display_name = (
         request.user.first_name

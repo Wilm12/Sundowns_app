@@ -78,9 +78,20 @@ class BranchAdminDashboardService:
         # ------------------------------------------------------------
         # Upcoming / relevant match
         # ------------------------------------------------------------
-        upcoming_match = Match.objects.filter(
-            date__gte=timezone.now()
-        ).order_by("date").first()
+        # Operational match is the earliest branch match that still has
+        # journeys waiting in BOOKED or TICKET_READY state.
+        operational_match = (
+            Match.objects.filter(
+                journeys__branch=branch,
+                journeys__status__in=[
+                    JourneyStatus.BOOKED,
+                    JourneyStatus.TICKET_READY,
+                ],
+            )
+            .order_by("date")
+            .distinct()
+            .first()
+        )
 
         branch_match = (
             Match.objects.filter(journeys__branch=branch)
@@ -89,7 +100,11 @@ class BranchAdminDashboardService:
             .first()
         )
 
-        dashboard_match = branch_match or upcoming_match
+        upcoming_match = Match.objects.filter(
+            date__gte=timezone.now()
+        ).order_by("date").first()
+
+        dashboard_match = operational_match or branch_match or upcoming_match
         if dashboard_match is None:
             dashboard_match = Match.objects.order_by("date").first()
 

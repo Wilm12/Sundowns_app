@@ -56,7 +56,10 @@ class CollectTicketService:
         active_verification = (
             StudentVerification.objects.filter(
                 user=journey.supporter,
-                status=StudentVerificationStatus.VERIFIED,
+                status__in=[
+                    StudentVerificationStatus.VERIFIED,
+                    StudentVerificationStatus.APPROVED,
+                ],
                 expires_at__gt=timezone.now(),
             ).exists()
         )

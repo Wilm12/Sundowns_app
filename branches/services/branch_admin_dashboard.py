@@ -3,7 +3,7 @@ from django.utils import timezone
 
 from journeys.models import Journey, JourneyStatus
 from matches.models import Match
-from supporters.models import StudentVerification, StudentVerificationStatus
+from supporters.models import StudentVerification, StudentVerificationStatus, SupporterEligibility
 from users.models import User
 
 from ..models import Branch, BranchRole, CommitteeAction, CommitteeActivity, CommitteePosition
@@ -41,16 +41,39 @@ class BranchAdminDashboardService:
 
         total_supporters = assigned_users.count()
 
-        verified_supporters = supporters.filter(
-            student_verifications__status=StudentVerificationStatus.VERIFIED,
-        ).distinct().count()
+        verified_supporters = 0
+        eligible_supporters = 0
+        active_members = 0
 
-        eligible_supporters = supporters.filter(
-            supporter_eligibility__is_eligible=True,
-        ).distinct().count()
+        for supporter in supporters:
+            latest_verification = (
+                StudentVerification.objects.filter(user=supporter)
+                .order_by("-created_at")
+                .first()
+            )
+            latest_eligibility = (
+                SupporterEligibility.objects.filter(supporter=supporter)
+                .order_by("-updated_at")
+                .first()
+            )
 
-        active_members = eligible_supporters
-        inactive_members = max(total_supporters - eligible_supporters, 0)
+            is_verified = bool(
+                latest_verification
+                and latest_verification.status in {
+                    StudentVerificationStatus.APPROVED,
+                    StudentVerificationStatus.VERIFIED,
+                }
+            )
+            is_eligible = bool(latest_eligibility and latest_eligibility.is_eligible) or is_verified
+
+            if is_verified:
+                verified_supporters += 1
+            if is_eligible:
+                eligible_supporters += 1
+            if is_verified and supporter.is_active and is_eligible:
+                active_members += 1
+
+        inactive_members = max(total_supporters - active_members, 0)
 
         # ------------------------------------------------------------
         # Upcoming / relevant match
@@ -207,6 +230,7 @@ class BranchAdminDashboardService:
             "branch": branch,
             "admin_branches": list(admin_branches.order_by("name")),
             "dashboard_match": dashboard_match,
+            "selected_match": dashboard_match,
             "supporter_metrics": {
                 "total_supporters": total_supporters,
                 "verified_supporters": verified_supporters,

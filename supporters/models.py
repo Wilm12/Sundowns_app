@@ -4,6 +4,7 @@ from django.db import models
 
 class StudentVerificationStatus(models.TextChoices):
     PENDING = "PENDING", "Pending"
+    APPROVED = "APPROVED", "Approved"
     VERIFIED = "VERIFIED", "Verified"
     REJECTED = "REJECTED", "Rejected"
     EXPIRED = "EXPIRED", "Expired"

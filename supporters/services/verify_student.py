@@ -41,7 +41,7 @@ class VerifyStudentService:
                 f"An active verified record already exists for {verification.user}."
             )
 
-        verification.status = StudentVerificationStatus.VERIFIED
+        verification.status = StudentVerificationStatus.APPROVED
         verification.verified_at = timezone.now()
         verification.expires_at = timezone.now() + timedelta(days=365)
         verification.verified_by = verifier

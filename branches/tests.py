@@ -144,7 +144,7 @@ class BranchAdminDashboardTests(TestCase):
         self.assertContains(response, "Supporter verified and ticket redeemed successfully.")
         verification = StudentVerification.objects.get(user=supporter)
         journey.refresh_from_db()
-        self.assertEqual(verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(verification.status, StudentVerificationStatus.APPROVED)
         self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
         self.assertEqual(journey.attended_by, admin)
 
@@ -174,7 +174,7 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(response.status_code, 302)
         verification.refresh_from_db()
         journey.refresh_from_db()
-        self.assertEqual(verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(verification.status, StudentVerificationStatus.APPROVED)
         self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
         self.assertEqual(journey.attended_by, admin)
 
@@ -204,7 +204,7 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(response.status_code, 302)
         verification.refresh_from_db()
         journey.refresh_from_db()
-        self.assertEqual(verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(verification.status, StudentVerificationStatus.APPROVED)
         self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
         self.assertEqual(journey.attended_by, admin)
 
@@ -263,9 +263,30 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(response.status_code, 302)
         verification.refresh_from_db()
         journey.refresh_from_db()
-        self.assertEqual(verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(verification.status, StudentVerificationStatus.APPROVED)
         self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
         self.assertEqual(journey.attended_by, admin)
+
+    def test_dashboard_uses_branch_operational_match_when_available(self):
+        branch = Branch.objects.create(name="Operational Match Branch")
+        admin = self._create_user(username="operational-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="operational-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        future_match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=7), location="Loftus", opponent="Future Opponent")
+        operational_match = Match.objects.create(date=timezone.now() - timezone.timedelta(days=1), location="Loftus", opponent="Current Opponent")
+        Journey.objects.create(supporter=supporter, branch=branch, match=operational_match, status=JourneyStatus.BOOKED)
+
+        dashboard = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+
+        self.assertEqual(dashboard["dashboard_match"], operational_match)
+        self.assertEqual(dashboard["dashboard_match"].opponent, "Current Opponent")
 
     def test_dashboard_renders_leadership_positions_and_reports_before_committee(self):
         branch = Branch.objects.create(name="Leadership Branch")

@@ -14,10 +14,10 @@
                     <p class="text-sm sm:text-base text-green-50/90">2026/27 Season</p>
                 </div>
                 <div class="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">
-                    <p class="text-xs uppercase tracking-[0.2em] text-green-100">Next Match</p>
+                    <p class="text-xs uppercase tracking-[0.2em] text-green-100">Current Match</p>
                     <p class="mt-2 text-sm font-semibold">
-                        {% if dashboard.upcoming_match %}
-                            {{ dashboard.upcoming_match.opponent }}
+                        {% if dashboard.dashboard_match %}
+                            {{ dashboard.dashboard_match.opponent }}
                         {% else %}
                             No upcoming match
                         {% endif %}
@@ -57,17 +57,21 @@
             <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Active Members</p>
             <p class="mt-2 text-3xl font-bold text-slate-950">{{ dashboard.supporter_metrics.active_members }}</p>
         </div>
+        <div class="rounded-[1.5rem] bg-white p-4 shadow-lg shadow-slate-200">
+            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Pending</p>
+            <p class="mt-2 text-3xl font-bold text-slate-950">{{ dashboard.verification_metrics.pending_verifications }}</p>
+        </div>
     </section>
 
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="flex items-center justify-between gap-3">
             <div>
                 <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Reports</p>
-                <h2 class="text-xl font-bold text-slate-950">{{ dashboard.upcoming_match.opponent|default:"No upcoming match" }}</h2>
+                <h2 class="text-xl font-bold text-slate-950">{{ dashboard.dashboard_match.opponent|default:"No upcoming match" }}</h2>
             </div>
             <div class="rounded-2xl bg-green-50 px-3 py-2 text-sm font-semibold text-green-800">
-                {% if dashboard.upcoming_match %}
-                    {{ dashboard.upcoming_match.date|date:"M j, Y" }}
+                {% if dashboard.dashboard_match %}
+                    {{ dashboard.dashboard_match.date|date:"M j, Y" }}
                 {% endif %}
             </div>
         </div>

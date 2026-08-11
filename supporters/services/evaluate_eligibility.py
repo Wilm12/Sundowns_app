@@ -26,7 +26,10 @@ class EvaluateEligibilityService:
             .first()
         )
 
-        if verification and verification.status == StudentVerificationStatus.VERIFIED:
+        if verification and verification.status in {
+            StudentVerificationStatus.APPROVED,
+            StudentVerificationStatus.VERIFIED,
+        }:
             if verification.expires_at is None or verification.expires_at > timezone.now():
                 is_eligible = True
                 reason = EligibilityReason.VERIFIED

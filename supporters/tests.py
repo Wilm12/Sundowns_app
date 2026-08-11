@@ -48,11 +48,34 @@ class StudentVerificationServiceTests(TestCase):
 
         updated_verification = VerifyStudentService.verify(verification, verifier)
 
-        self.assertEqual(updated_verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(updated_verification.status, StudentVerificationStatus.APPROVED)
         self.assertIsNotNone(updated_verification.verified_at)
         self.assertIsNotNone(updated_verification.expires_at)
         self.assertEqual(updated_verification.verified_by, verifier)
         self.assertTrue(updated_verification.user.is_active)
+
+    def test_approve_verification_synchronizes_eligibility_and_activation(self):
+        user = self._create_user(username="sync-user")
+        verification = StudentVerification.objects.create(
+            user=user,
+            student_number="54322",
+            university="Wits",
+        )
+        verifier = self._create_user(username="sync-verifier")
+        branch = Branch.objects.create(name="Sync Verification Branch")
+        verifier.branch = branch
+        verifier.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=verifier, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        verification.user.branch = branch
+        verification.user.save(update_fields=["branch"])
+
+        updated_verification = VerifyStudentService.verify(verification, verifier)
+        eligibility = SupporterEligibility.objects.get(supporter=user)
+
+        self.assertEqual(updated_verification.status, StudentVerificationStatus.APPROVED)
+        self.assertTrue(user.is_active)
+        self.assertTrue(eligibility.is_eligible)
+        self.assertEqual(eligibility.reason, EligibilityReason.VERIFIED)
 
     def test_verified_at_is_populated(self):
         user = self._create_user(username="verified-at-user")
@@ -174,7 +197,7 @@ class StudentVerificationServiceTests(TestCase):
 
         updated_verification = VerifyStudentService.verify(new_verification, verifier)
 
-        self.assertEqual(updated_verification.status, StudentVerificationStatus.VERIFIED)
+        self.assertEqual(updated_verification.status, StudentVerificationStatus.APPROVED)
         self.assertEqual(updated_verification.user, user)
 
     @patch("supporters.services.request_student_verification.publish")

@@ -120,7 +120,9 @@ class JourneyServiceTests(TestCase):
 
         booked_journey = BookJourneyService.book_journey(journey)
 
-        self.assertEqual(booked_journey.status, JourneyStatus.BOOKED)
+        # Booking now generates a collection code and immediately marks
+        # the journey as TICKET_READY.
+        self.assertEqual(booked_journey.status, JourneyStatus.TICKET_READY)
         self.assertIsNotNone(booked_journey.collection_code)
         self.assertRegex(booked_journey.collection_code, r"^\d{4}$")
 
@@ -225,7 +227,7 @@ class JourneyServiceTests(TestCase):
         BookJourneyService.book_journey(journey)
         AllocateTicketService.allocate(journey)
 
-        with self.assertRaises(InvalidJourneyState):
+        with self.assertRaises(JourneyAlreadyHasTicket):
             AllocateTicketService.allocate(journey)
 
     def test_collection_code_is_generated(self):

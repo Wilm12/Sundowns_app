@@ -36,7 +36,10 @@ class BookJourneyService:
 
         collection_code = BookJourneyService._generate_collection_code(journey)
         journey.collection_code = collection_code
-        journey.status = JourneyStatus.BOOKED
+        # When a collection code is generated during booking the journey
+        # immediately becomes TICKET_READY (ticket issued and awaiting
+        # redemption). BOOKED must not have a collection code.
+        journey.status = JourneyStatus.TICKET_READY
         journey.save(update_fields=["collection_code", "status", "updated_at"])
 
         event = JourneyBooked(

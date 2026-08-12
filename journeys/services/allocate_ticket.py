@@ -34,8 +34,8 @@ class AllocateTicketService:
         if not isinstance(journey, Journey):
             raise TicketAllocationFailed("Journey is invalid.")
 
-        if journey.status != JourneyStatus.BOOKED:
-            raise InvalidJourneyState("Only BOOKED journeys may receive a ticket.")
+        if journey.status not in [JourneyStatus.BOOKED, JourneyStatus.TICKET_READY]:
+            raise InvalidJourneyState("Only BOOKED or TICKET_READY journeys may receive a ticket.")
 
         if journey.ticket_id is not None:
             raise JourneyAlreadyHasTicket("Journey already has a ticket.")

@@ -3,6 +3,13 @@ from django import forms
 from users.models import User
 
 from .models import BranchRole, CommitteePosition
+from matches.models import Match
+
+
+class MatchForm(forms.ModelForm):
+    class Meta:
+        model = Match
+        fields = ["date", "location", "opponent"]
 
 
 class PromoteBranchAdminForm(forms.Form):

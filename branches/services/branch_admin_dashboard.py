@@ -78,20 +78,24 @@ class BranchAdminDashboardService:
         # ------------------------------------------------------------
         # Upcoming / relevant match
         # ------------------------------------------------------------
-        # Operational match is the earliest branch match that still has
-        # journeys waiting in BOOKED or TICKET_READY state.
-        operational_match = (
-            Match.objects.filter(
-                journeys__branch=branch,
-                journeys__status__in=[
-                    JourneyStatus.BOOKED,
-                    JourneyStatus.TICKET_READY,
-                ],
+        # First prefer an explicitly published operational match on the branch.
+        operational_match = getattr(branch, "operational_match", None)
+
+        # If none published, fall back to the earliest branch match with
+        # journeys in BOOKED or TICKET_READY state.
+        if not operational_match:
+            operational_match = (
+                Match.objects.filter(
+                    journeys__branch=branch,
+                    journeys__status__in=[
+                        JourneyStatus.BOOKED,
+                        JourneyStatus.TICKET_READY,
+                    ],
+                )
+                .order_by("date")
+                .distinct()
+                .first()
             )
-            .order_by("date")
-            .distinct()
-            .first()
-        )
 
         branch_match = (
             Match.objects.filter(journeys__branch=branch)
@@ -218,6 +222,7 @@ class BranchAdminDashboardService:
         # ------------------------------------------------------------
         quick_action_urls = {
             "verify_supporter": reverse("branch_committee", args=[branch.pk]),
+            "manage_matches": reverse("branch_matches_manage", args=[branch.pk]),
             "allocate_ticket": (
                 reverse("match_operations_console", args=[branch.pk, dashboard_match.pk])
                 if dashboard_match else "#"

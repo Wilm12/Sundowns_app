@@ -23,6 +23,8 @@ from .services.promote_branch_admin import PromoteBranchAdminService, BranchAdmi
 from .services.remove_branch_admin import RemoveBranchAdminService, LastBranchAdminRemovalError
 from .forms import PromoteBranchAdminForm, CommitteePositionManagementForm, RemoveBranchAdminForm
 from django.contrib import messages
+from .forms import MatchForm
+from django.utils import timezone
 
 @login_required
 def my_branch_page(request):
@@ -162,6 +164,62 @@ def committee_management_view(request, branch_id):
         "remove_form": RemoveBranchAdminForm(branch=branch),
         "pending_verifications": pending_verifications,
     })
+
+
+@login_required
+def match_management_view(request, branch_id):
+    """Render a simple match management UI for branch admins.
+
+    Allows creating matches scoped to the branch and publishing a match
+    as the branch's operational match.
+    """
+
+    branch = get_object_or_404(Branch, id=branch_id)
+    if not is_branch_admin(request.user, branch):
+        return render(request, "403.html", status=403)
+
+    if request.method == "POST":
+        form = MatchForm(request.POST)
+        if form.is_valid():
+            match = form.save()
+            messages.success(request, "Match created successfully.")
+            # Optionally publish immediately when requested
+            if request.POST.get("publish"):
+                branch.operational_match = match
+                branch.save(update_fields=["operational_match"])
+                messages.success(request, "Match published as operational match.")
+            return redirect("branch_matches_manage", branch_id=branch.pk)
+
+    matches = Match.objects.filter(journeys__branch=branch).distinct().order_by("date")[:25]
+    if not matches.exists():
+        matches = Match.objects.order_by("date")[:25]
+    form = MatchForm()
+
+    return render(request, "branches/match_management.html", {
+        "branch": branch,
+        "matches": matches,
+        "form": form,
+    })
+
+
+@login_required
+def match_publish_view(request, branch_id, match_id):
+    branch = get_object_or_404(Branch, id=branch_id)
+    if not is_branch_admin(request.user, branch):
+        return render(request, "403.html", status=403)
+
+    match = get_object_or_404(Match, id=match_id)
+    # Toggle publish if already published
+    if branch.operational_match_id == match.id:
+        branch.operational_match = None
+        branch.save(update_fields=["operational_match"])
+        messages.success(request, "Operational match cleared.")
+    else:
+        branch.operational_match = match
+        branch.save(update_fields=["operational_match"])
+        messages.success(request, "Match published as operational match.")
+
+    return redirect("branch_matches_manage", branch_id=branch.pk)
 
 
 @login_required

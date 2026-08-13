@@ -35,6 +35,13 @@ class Branch(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    operational_match = models.ForeignKey(
+        "matches.Match",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="operational_branches",
+    )
 
     def __str__(self):
         return self.name

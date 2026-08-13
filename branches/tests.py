@@ -288,6 +288,24 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(dashboard["dashboard_match"], operational_match)
         self.assertEqual(dashboard["dashboard_match"].opponent, "Current Opponent")
 
+    def test_match_management_page_loads_and_publish_sets_operational_match(self):
+        branch = Branch.objects.create(name="Match Management Branch")
+        admin = self._create_user(username="match-management-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_matches_manage", args=[branch.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Match Management")
+
+        match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=2), location="Loftus", opponent="Orlando Pirates")
+        publish_response = self.client.get(reverse("branch_match_publish", args=[branch.pk, match.pk]))
+        self.assertEqual(publish_response.status_code, 302)
+        branch.refresh_from_db()
+        self.assertEqual(branch.operational_match, match)
+
     def test_dashboard_renders_leadership_positions_and_reports_before_committee(self):
         branch = Branch.objects.create(name="Leadership Branch")
         admin = self._create_user(username="leadership-admin")

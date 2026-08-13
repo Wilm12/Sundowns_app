@@ -19,11 +19,12 @@ class CommitteeService:
     @staticmethod
     def get_leadership_positions(branch):
         positions = {
-            position[0]: None for position in CommitteePosition.Position.choices
+            CommitteePosition.Position(position_value).label: None
+            for position_value, _ in CommitteePosition.Position.choices
         }
         for committee_position in CommitteePosition.objects.filter(branch=branch).select_related("branch_role", "branch_role__user"):
             if committee_position.branch_role and committee_position.branch_role.is_active:
-                positions[committee_position.position] = committee_position.branch_role.user
+                positions[committee_position.get_position_display()] = committee_position.branch_role.user
         return positions
 
     @staticmethod

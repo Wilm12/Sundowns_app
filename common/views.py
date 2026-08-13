@@ -43,7 +43,7 @@ def dashboard_view(request):
         ticket__user=request.user
     ).count()
 
-    upcoming_matches_count = Match.objects.count()
+    upcoming_matches_count = Match.objects.filter(published=True).count()
 
     from notifications.models import Notification
     latest_notifications = Notification.objects.filter(

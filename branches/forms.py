@@ -9,7 +9,20 @@ from matches.models import Match
 class MatchForm(forms.ModelForm):
     class Meta:
         model = Match
-        fields = ["date", "location", "opponent"]
+        fields = ["opponent", "date", "location", "ticket_collection_timeframe", "gate_number", "published"]
+        labels = {
+            "opponent": "Opposition",
+            "date": "Match Date",
+            "location": "Venue",
+            "ticket_collection_timeframe": "Ticket Collection Timeframe",
+            "gate_number": "Gate Number",
+            "published": "Publish Match",
+        }
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date"}),
+            "ticket_collection_timeframe": forms.TextInput(attrs={"placeholder": "18:00–19:00"}),
+            "gate_number": forms.TextInput(attrs={"placeholder": "Gate 3"}),
+        }
 
 
 class PromoteBranchAdminForm(forms.Form):

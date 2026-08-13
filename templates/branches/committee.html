@@ -27,24 +27,6 @@
 
   <div class="card">
     <h2>Supporter Verification</h2>
-    <div class="grid">
-      {% for position, member in leadership_positions.items %}
-        <div>
-          <div class="pill">{{ position|title }}</div>
-          <p>{% if member %}{{ member.get_full_name|default:member.username }}{% else %}Unassigned{% endif %}</p>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Match Management</h2>
-    <p>Manage branch matches: create, publish, edit, close.</p>
-    <p><a href="{% url 'branch_matches_manage' branch.id %}">Open Match Management</a></p>
-  </div>
-
-  <div class="card">
-    <h2>Verification Queue</h2>
     <p>Pending supporters for this branch.</p>
     <ul>
       {% for verification in pending_verifications %}
@@ -59,13 +41,34 @@
   </div>
 
   <div class="card">
-    <h2>Actions</h2>
+    <h2>Match Management</h2>
     <form method="post">
       {% csrf_token %}
-      <input type="hidden" name="promote" value="1">
-      {{ promote_form.supporter.label_tag }} {{ promote_form.supporter }}
-      <button type="submit">Promote Member</button>
+      <input type="hidden" name="match_submit" value="1">
+      {{ match_form.as_p }}
+      <button type="submit">Save Match</button>
     </form>
+
+    <h3>Published Match</h3>
+    <ul>
+      {% for match in branch_matches %}
+        <li>{{ match.opponent }} — {{ match.date|date:"j M Y" }} — {{ match.location }} {% if match.id == branch.operational_match_id %}<strong>(Operational)</strong>{% endif %}</li>
+      {% empty %}
+        <li>No published matches.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Leadership Panel</h2>
+    <div class="grid">
+      {% for position, member in leadership_positions.items %}
+        <div>
+          <div class="pill">{{ position|title }}</div>
+          <p>{% if member %}{{ member.get_full_name|default:member.username }}{% else %}Unassigned{% endif %}</p>
+        </div>
+      {% endfor %}
+    </div>
 
     <form method="post">
       {% csrf_token %}
@@ -74,13 +77,6 @@
       {{ position_form.action.label_tag }} {{ position_form.action }}
       {{ position_form.position.label_tag }} {{ position_form.position }}
       <button type="submit">Manage Leadership</button>
-    </form>
-
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="remove_admin" value="1">
-      {{ remove_form.user.label_tag }} {{ remove_form.user }}
-      <button type="submit">Remove Admin</button>
     </form>
   </div>
 
@@ -93,6 +89,31 @@
         <li>No committee members yet.</li>
       {% endfor %}
     </ul>
+  </div>
+
+  <div class="card">
+    <h2>Branch Administrators</h2>
+    <ul>
+      {% for member in committee_members %}
+        <li>{{ member.get_full_name|default:member.username }} — {{ member.email|default:"No email" }}</li>
+      {% empty %}
+        <li>No branch administrators yet.</li>
+      {% endfor %}
+    </ul>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="promote" value="1">
+      {{ promote_form.supporter.label_tag }} {{ promote_form.supporter }}
+      <button type="submit">Promote Member</button>
+    </form>
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="remove_admin" value="1">
+      {{ remove_form.user.label_tag }} {{ remove_form.user }}
+      <button type="submit">Remove Admin</button>
+    </form>
   </div>
 
   <div class="card">

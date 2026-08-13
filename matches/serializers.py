@@ -8,4 +8,4 @@ class MatchSerializer(serializers.ModelSerializer):
     """Serializer for match resource representation."""
     class Meta:
         model = Match
-        fields = ['id', 'opponent', 'location', 'date']
+        fields = ['id', 'opponent', 'location', 'date', 'ticket_collection_timeframe', 'gate_number', 'published']

@@ -32,9 +32,9 @@ def match_detail_page(request, match_id):
 
 @login_required
 def match_list_page(request):
-    """Render a list of upcoming matches."""
+    """Render a list of published upcoming matches."""
 
-    matches = Match.objects.all().order_by("date")
+    matches = Match.objects.filter(published=True).order_by("date")
     return render(request, "matches/list.html", {"matches": matches})
 
 class MatchViewSet(viewsets.ModelViewSet):

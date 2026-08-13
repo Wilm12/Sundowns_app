@@ -80,14 +80,38 @@ def branch_detail_page(request, branch_id):
 
 @login_required
 def committee_management_view(request, branch_id):
-    """Render a lightweight committee management dashboard for branch admins."""
+    """Render the branch operations dashboard for branch admins."""
 
     branch = get_object_or_404(Branch, id=branch_id)
     if not is_branch_admin(request.user, branch):
         return render(request, "403.html", status=403)
 
     if request.method == "POST":
-        if "promote" in request.POST:
+        if "match_submit" in request.POST:
+            form = MatchForm(request.POST)
+            if form.is_valid():
+                published = form.cleaned_data.get("published", False)
+                match = form.save(commit=False)
+                match.published = published
+                match.save()
+                if published:
+                    previous_operational = branch.operational_match
+                    if previous_operational and previous_operational.pk != match.pk:
+                        previous_operational.published = False
+                        previous_operational.save(update_fields=["published"])
+                    branch.operational_match = match
+                    branch.save(update_fields=["operational_match"])
+                    messages.success(request, "Match created and published as the branch operational match.")
+                else:
+                    if branch.operational_match_id == match.pk:
+                        branch.operational_match = None
+                        branch.save(update_fields=["operational_match"])
+                    match.published = False
+                    match.save(update_fields=["published"])
+                    messages.success(request, "Match saved successfully.")
+                return redirect("branch_committee", branch_id=branch.pk)
+            messages.error(request, "Please correct the match form and try again.")
+        elif "promote" in request.POST:
             form = PromoteBranchAdminForm(request.POST, branch=branch)
             if form.is_valid():
                 try:
@@ -152,6 +176,7 @@ def committee_management_view(request, branch_id):
         .select_related("user")
         .order_by("created_at")
     )
+    branch_matches = Match.objects.filter(published=True).order_by("date")
 
     return render(request, "branches/committee.html", {
         "branch": branch,
@@ -163,6 +188,8 @@ def committee_management_view(request, branch_id):
         "position_form": CommitteePositionManagementForm(branch=branch),
         "remove_form": RemoveBranchAdminForm(branch=branch),
         "pending_verifications": pending_verifications,
+        "match_form": MatchForm(),
+        "branch_matches": branch_matches,
     })
 
 

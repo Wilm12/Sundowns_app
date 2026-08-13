@@ -222,7 +222,6 @@ class BranchAdminDashboardService:
         # ------------------------------------------------------------
         quick_action_urls = {
             "verify_supporter": reverse("branch_committee", args=[branch.pk]),
-            "manage_matches": reverse("branch_matches_manage", args=[branch.pk]),
             "allocate_ticket": (
                 reverse("match_operations_console", args=[branch.pk, dashboard_match.pk])
                 if dashboard_match else "#"

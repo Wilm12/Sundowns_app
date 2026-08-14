@@ -178,6 +178,20 @@ def committee_management_view(request, branch_id):
     )
     branch_matches = Match.objects.filter(published=True).order_by("date")
 
+    supporter_email_query = request.GET.get("supporter_email", "").strip()
+    supporter_search_results = []
+    if supporter_email_query:
+        supporter_search_results = (
+            User.objects.filter(branch=branch, email__icontains=supporter_email_query)
+            .exclude(
+                branch_roles__branch=branch,
+                branch_roles__role=BranchRole.Role.BRANCH_ADMIN,
+                branch_roles__is_active=True,
+            )
+            .order_by("email")
+            .distinct()[:10]
+        )
+
     return render(request, "branches/committee.html", {
         "branch": branch,
         "committee_members": committee_members,
@@ -190,6 +204,8 @@ def committee_management_view(request, branch_id):
         "pending_verifications": pending_verifications,
         "match_form": MatchForm(),
         "branch_matches": branch_matches,
+        "supporter_email_query": supporter_email_query,
+        "supporter_search_results": supporter_search_results,
     })
 
 

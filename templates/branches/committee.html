@@ -1,109 +1,366 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>{{ branch.name }} Branch Operations</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 24px; color: #14213d; }
-    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-    .pill { display: inline-block; padding: 4px 8px; border-radius: 999px; background: #f3f4f6; font-size: 12px; font-weight: bold; }
-    form { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
-    input, select, button { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; }
-    button { background: #16a34a; color: white; border: none; cursor: pointer; }
-    .message { padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; }
-    .message.success { background: #dcfce7; color: #166534; }
-    .message.error { background: #fee2e2; color: #991b1b; }
-  </style>
-</head>
-<body>
-  <h1>{{ branch.name }} Branch Operations</h1>
-  <p>Branch Admins: {{ committee_members|length }}</p>
+{% extends "base.html" %}
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
+{% block title %}{{ branch.name }} Branch Operations | BranchRoute{% endblock %}
 
-  <div class="card">
-    <h2>Supporter Verification</h2>
-    <p>Pending supporters for this branch.</p>
-    <ul>
-      {% for verification in pending_verifications %}
-        <li>
-          <a href="{% url 'branch_supporter_verification' branch.id verification.user.id %}?next=gate-redemption&code={{ request.GET.code|default:'' }}&match_id={{ request.GET.match_id|default:'' }}">{{ verification.user.get_full_name|default:verification.user.username }}</a>
-          {% if verification.user.email %}({{ verification.user.email }}){% endif %}
-        </li>
-      {% empty %}
-        <li>No pending verifications.</li>
-      {% endfor %}
-    </ul>
-  </div>
+{% block content %}
+<div class="space-y-6">
+    <section class="overflow-hidden rounded-[2rem] bg-gradient-to-r from-green-900 via-green-800 to-yellow-500 text-white shadow-2xl shadow-green-950/20">
+        <div class="px-4 py-5 sm:px-6 sm:py-8">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-[0.24em] text-green-100">Branch Operations</p>
+                    <h1 class="mt-2 text-2xl font-bold sm:text-3xl">{{ branch.name }}</h1>
+                </div>
+                <div class="rounded-2xl bg-white/12 px-4 py-3 backdrop-blur-sm">
+                    <p class="text-xs uppercase tracking-[0.2em] text-green-100">Branch Admins</p>
+                    <p class="mt-2 text-xl font-semibold">{{ committee_members|length }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <div class="card">
-    <h2>Match Management</h2>
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="match_submit" value="1">
-      {{ match_form.as_p }}
-      <button type="submit">Save Match</button>
-    </form>
+    {% if messages %}
+        <div class="space-y-2">
+            {% for message in messages %}
+                <div class="rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-900 {% if message.tags and 'error' in message.tags %}border-red-200 bg-red-50 text-red-900{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-    <h3>Published Match</h3>
-    <ul>
-      {% for match in branch_matches %}
-        <li>{{ match.opponent }} — {{ match.date|date:"j M Y" }} — {{ match.location }} {% if match.id == branch.operational_match_id %}<strong>(Operational)</strong>{% endif %}</li>
-      {% empty %}
-        <li>No published matches.</li>
-      {% endfor %}
-    </ul>
-  </div>
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="mb-5 flex items-center justify-between gap-3">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Supporter Verification</p>
+                <h2 class="text-xl font-bold text-slate-950">Pending verifications</h2>
+            </div>
+            <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-800">
+                {{ pending_verifications|length }} pending
+            </span>
+        </div>
 
-  <div class="card">
-    <h2>Committee Members</h2>
-    <ul>
-      {% for member in committee_members %}
-        <li>{{ member.get_full_name|default:member.username }} — {{ member.email|default:"No email" }}</li>
-      {% empty %}
-        <li>No committee members yet.</li>
-      {% endfor %}
-    </ul>
-  </div>
+        {% if pending_verifications %}
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {% for verification in pending_verifications %}
+                    <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="font-semibold text-slate-900">{{ verification.user.get_full_name|default:verification.user.username }}</p>
+                                <p class="mt-1 text-sm text-slate-600">{{ verification.user.email|default:"No email recorded" }}</p>
+                            </div>
+                            <span class="rounded-full bg-yellow-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-yellow-800">Pending</span>
+                        </div>
+                        <div class="mt-4">
+                            <a href="{% url 'branch_supporter_verification' branch.id verification.user.id %}?next=gate-redemption&code={{ request.GET.code|default:'' }}&match_id={{ request.GET.match_id|default:'' }}" class="inline-flex items-center justify-center rounded-full bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800">
+                                Review Supporter
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+                No supporters are currently awaiting branch verification.
+            </div>
+        {% endif %}
+    </section>
 
-  <div class="card">
-    <h2>Branch Administrators</h2>
-    <ul>
-      {% for member in committee_members %}
-        <li>{{ member.get_full_name|default:member.username }} — {{ member.email|default:"No email" }}</li>
-      {% empty %}
-        <li>No branch administrators yet.</li>
-      {% endfor %}
-    </ul>
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="mb-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Match Management</p>
+            <h2 class="text-xl font-bold text-slate-950">Operational match planning</h2>
+        </div>
 
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="promote" value="1">
-      {{ promote_form.supporter.label_tag }} {{ promote_form.supporter }}
-      <button type="submit">Promote Member</button>
-    </form>
+        <div class="grid gap-4 xl:grid-cols-2">
+            <div class="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
+                <div class="mb-4 flex items-center justify-between gap-3">
+                    <h3 class="text-lg font-bold text-slate-950">Create Next Match</h3>
+                    <span class="rounded-full bg-green-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-green-800">New</span>
+                </div>
 
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="remove_admin" value="1">
-      {{ remove_form.user.label_tag }} {{ remove_form.user }}
-      <button type="submit">Remove Admin</button>
-    </form>
-  </div>
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="match_submit" value="1">
 
-  <div class="card">
-    <h2>Recent Activity</h2>
-    <ul>
-      {% for activity in activities %}
-        <li>{{ activity.created_at }} - {{ activity.action }} by {{ activity.actor.get_full_name|default:activity.actor.username|default:"system" }}</li>
-      {% empty %}
-        <li>No activity yet.</li>
-      {% endfor %}
-    </ul>
-  </div>
-</body>
-</html>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-slate-700">Home Team</label>
+                        <input type="text" value="Mamelodi Sundowns" readonly class="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700">
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label for="id_opponent" class="block text-sm font-semibold text-slate-700">Opposition</label>
+                            {{ match_form.opponent }}
+                        </div>
+                        <div class="space-y-2">
+                            <label for="id_date" class="block text-sm font-semibold text-slate-700">Match Date</label>
+                            {{ match_form.date }}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-slate-700">Kickoff Time</label>
+                            <input type="time" name="kickoff_time" class="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="id_location" class="block text-sm font-semibold text-slate-700">Venue</label>
+                            {{ match_form.location }}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-slate-700">Ticket Collection From</label>
+                            <input type="time" name="ticket_collection_from" class="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-slate-700">Ticket Collection To</label>
+                            <input type="time" name="ticket_collection_to" class="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700">
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <div class="space-y-2">
+                            <label for="id_gate_number" class="block text-sm font-semibold text-slate-700">Gate Number</label>
+                            {{ match_form.gate_number }}
+                        </div>
+                        <div class="space-y-2">
+                            <label for="id_ticket_collection_timeframe" class="block text-sm font-semibold text-slate-700">Ticket Collection Window</label>
+                            {{ match_form.ticket_collection_timeframe }}
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 rounded-2xl bg-white px-3 py-2">
+                        {{ match_form.published }}
+                        <label for="id_published" class="text-sm font-semibold text-slate-700">Publish Immediately</label>
+                    </div>
+
+                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-green-700 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-green-700/20 hover:bg-green-800">
+                        Publish Match
+                    </button>
+                </form>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
+                <div class="mb-4 flex items-center justify-between gap-3">
+                    <h3 class="text-lg font-bold text-slate-950">Active Match</h3>
+                    {% if branch.operational_match %}
+                        <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-800">Published</span>
+                    {% else %}
+                        <span class="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-700">No active match</span>
+                    {% endif %}
+                </div>
+
+                {% if branch.operational_match %}
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Opposition</p>
+                            <p class="mt-2 text-2xl font-bold text-slate-950">{{ branch.operational_match.opponent }}</p>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="rounded-2xl bg-white p-3">
+                                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Date</p>
+                                <p class="mt-2 font-semibold text-slate-900">{{ branch.operational_match.date|date:"D, M j, Y" }}</p>
+                            </div>
+                            <div class="rounded-2xl bg-white p-3">
+                                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Kickoff Time</p>
+                                <p class="mt-2 font-semibold text-slate-900">{{ branch.operational_match.date|date:"H:i" }}</p>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl bg-white p-3">
+                            <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Venue</p>
+                            <p class="mt-2 font-semibold text-slate-900">{{ branch.operational_match.location }}</p>
+                        </div>
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div class="rounded-2xl bg-white p-3">
+                                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Ticket Collection Window</p>
+                                <p class="mt-2 font-semibold text-slate-900">{{ branch.operational_match.ticket_collection_timeframe|default:"TBC" }}</p>
+                            </div>
+                            <div class="rounded-2xl bg-white p-3">
+                                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Gate Number</p>
+                                <p class="mt-2 font-semibold text-slate-900">{{ branch.operational_match.gate_number|default:"TBC" }}</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-2 pt-2">
+                            <button type="button" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900">Edit Match</button>
+                            <a href="{% url 'branch_match_publish' branch.id branch.operational_match.id %}" class="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">Close Match</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
+                        No active match has been published for this branch yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="mb-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Committee Members</p>
+            <h2 class="text-xl font-bold text-slate-950">Branch committee</h2>
+        </div>
+
+        <div class="mb-5 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+            <form method="get" class="flex flex-col gap-3 md:flex-row md:items-end">
+                <div class="flex-1">
+                    <label for="supporter_email" class="mb-2 block text-sm font-semibold text-slate-700">Search supporter by email</label>
+                    <input id="supporter_email" name="supporter_email" type="email" value="{{ supporter_email_query }}" placeholder="supporter@email.com" class="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700">
+                </div>
+                <button type="submit" class="rounded-full bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Search</button>
+            </form>
+
+            {% if supporter_email_query %}
+                <div class="mt-4 space-y-2">
+                    {% if supporter_search_results %}
+                        {% for supporter in supporter_search_results %}
+                            <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3 md:flex-row md:items-center md:justify-between">
+                                <div>
+                                    <p class="font-semibold text-slate-900">{{ supporter.get_full_name|default:supporter.username }}</p>
+                                    <p class="text-sm text-slate-600">{{ supporter.email }}</p>
+                                </div>
+                                <form method="post" class="m-0">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="promote" value="1">
+                                    <input type="hidden" name="supporter" value="{{ supporter.id }}">
+                                    <button type="submit" class="rounded-full border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-800">Promote to Committee</button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-sm text-slate-600">No matching supporter was found in this branch.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {% for member in committee_members %}
+                <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <p class="font-semibold text-slate-900">{{ member.get_full_name|default:member.username }}</p>
+                            <p class="text-sm text-slate-600">{{ member.email|default:"No email" }}</p>
+                        </div>
+                        <span class="rounded-full bg-green-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-green-800">Committee</span>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <form method="post" class="m-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="remove_admin" value="1">
+                            <input type="hidden" name="user" value="{{ member.id }}">
+                            <button type="submit" class="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-red-700">Remove</button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 md:col-span-2 xl:col-span-3">
+                    No committee members are assigned yet.
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="mb-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Leadership Assignment</p>
+            <h2 class="text-xl font-bold text-slate-950">Committee leadership</h2>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {% for position, assignee in leadership_positions.items %}
+                <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                    <p class="text-xs uppercase tracking-[0.2em] text-slate-500">{{ position }}</p>
+                    {% if assignee %}
+                        <p class="mt-2 font-semibold text-slate-900">{{ assignee.get_full_name|default:assignee.username }}</p>
+                        <p class="text-sm text-slate-600">{{ assignee.email|default:"No email" }}</p>
+                    {% else %}
+                        <p class="mt-2 text-sm text-slate-500">Vacant</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-5 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+            <form method="post" class="grid gap-3 md:grid-cols-[1.2fr_1fr_auto]">
+                {% csrf_token %}
+                <input type="hidden" name="committee_action" value="1">
+                <div>
+                    <label for="id_member" class="mb-2 block text-sm font-semibold text-slate-700">Committee member</label>
+                    {{ position_form.member }}
+                </div>
+                <div>
+                    <label for="id_position" class="mb-2 block text-sm font-semibold text-slate-700">Position</label>
+                    {{ position_form.position }}
+                </div>
+                <div class="self-end">
+                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Assign</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="mb-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Branch Administrators</p>
+            <h2 class="text-xl font-bold text-slate-950">Manage branch access</h2>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {% for admin in committee_members %}
+                <div class="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                    <p class="font-semibold text-slate-900">{{ admin.get_full_name|default:admin.username }}</p>
+                    <p class="text-sm text-slate-600">{{ admin.email|default:"No email" }}</p>
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="remove_admin" value="1">
+                        <input type="hidden" name="user" value="{{ admin.id }}">
+                        <button type="submit" class="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-red-700">Remove Admin</button>
+                    </form>
+                </div>
+            {% empty %}
+                <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600 md:col-span-2 xl:col-span-3">
+                    No branch administrators have been assigned.
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-5 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+            <form method="post" class="grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+                {% csrf_token %}
+                <input type="hidden" name="promote" value="1">
+                <div>
+                    <label for="id_supporter" class="mb-2 block text-sm font-semibold text-slate-700">Promote member to admin</label>
+                    {{ promote_form.supporter }}
+                </div>
+                <button type="submit" class="rounded-full bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Add Admin</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="mb-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Recent Activity</p>
+            <h2 class="text-xl font-bold text-slate-950">Branch operations log</h2>
+        </div>
+
+        <div class="space-y-3">
+            {% for activity in activities %}
+                <div class="flex flex-col gap-2 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="font-semibold text-slate-900">{{ activity.action }}</p>
+                        <p class="text-sm text-slate-600">{{ activity.actor.get_full_name|default:activity.actor.username|default:"System" }}</p>
+                    </div>
+                    <p class="text-sm text-slate-500">{{ activity.created_at|date:"M j, Y H:i" }}</p>
+                </div>
+            {% empty %}
+                <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-600">
+                    No recent activity has been recorded for this branch.
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

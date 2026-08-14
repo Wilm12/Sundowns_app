@@ -364,6 +364,34 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(content.count("Quick access to branch reporting"), 1)
         self.assertEqual(content.count("Leadership Panel"), 1)
 
+    def test_branch_operations_page_has_required_sections_in_order(self):
+        branch = Branch.objects.create(name="Operations Layout Branch")
+        admin = self._create_user(username="ops-layout-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_committee", args=[branch.pk]))
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+
+        required_sections = [
+            "Supporter Verification",
+            "Match Management",
+            "Committee Members",
+            "Leadership Assignment",
+            "Branch Administrators",
+            "Recent Activity",
+        ]
+        for label in required_sections:
+            self.assertIn(label, content)
+
+        self.assertNotIn("Leadership Panel", content)
+
+        positions = [content.index(label) for label in required_sections]
+        self.assertEqual(positions, sorted(positions))
+
     def test_promotion_and_committee_position_management_workflow(self):
         branch = Branch.objects.create(name="Committee Workflow Branch")
         admin = self._create_user(username="committee-admin")

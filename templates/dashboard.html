@@ -141,6 +141,41 @@
 
     </section>
 
+    <section class="w-full rounded-[2rem] bg-gradient-to-r from-green-900 via-green-800 to-yellow-500 p-6 text-white shadow-2xl shadow-green-950/20">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div class="space-y-3">
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-green-100">My Next Match</p>
+                {% if next_match %}
+                    <h2 class="text-3xl font-bold sm:text-4xl">Mamelodi Sundowns vs {{ next_match.opponent }}</h2>
+                    <div class="flex flex-wrap gap-3 text-sm text-green-50/90">
+                        <span>{{ next_match.date|date:"D, M j, Y" }}</span>
+                        <span>•</span>
+                        <span>{{ next_match.date|date:"H:i" }}</span>
+                        <span>•</span>
+                        <span>{{ next_match.location }}</span>
+                    </div>
+                {% else %}
+                    <h2 class="text-3xl font-bold sm:text-4xl">No match scheduled yet</h2>
+                {% endif %}
+            </div>
+            <div class="rounded-[1.5rem] bg-white/10 p-4 backdrop-blur-sm">
+                {% if next_match %}
+                    <p class="text-xs uppercase tracking-[0.2em] text-green-100">Ticket Collection</p>
+                    <p class="mt-2 text-lg font-semibold">{{ next_match.ticket_collection_timeframe|default:"TBC" }}</p>
+                    <p class="mt-2 text-sm text-green-50/90">Gate {{ next_match.gate_number|default:"TBC" }}</p>
+                {% else %}
+                    <p class="text-sm text-green-50/90">Check back soon for the next published fixture.</p>
+                {% endif %}
+            </div>
+        </div>
+        {% if next_match %}
+            <div class="mt-6 flex flex-wrap gap-3">
+                <a href="/matches/" class="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-green-900 shadow-sm">Book Ticket</a>
+                <a href="/tickets/my-tickets/" class="rounded-full border border-white/40 bg-transparent px-5 py-2.5 text-sm font-semibold text-white">View Ticket</a>
+            </div>
+        {% endif %}
+    </section>
+
     <section class="w-full rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200">
         <div class="flex flex-col gap-4 border-b border-slate-200 pb-5 mb-6 sm:flex-row sm:items-center sm:justify-between">
             <div>

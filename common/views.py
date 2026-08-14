@@ -44,6 +44,7 @@ def dashboard_view(request):
     ).count()
 
     upcoming_matches_count = Match.objects.filter(published=True).count()
+    next_match = Match.objects.filter(published=True).order_by('date').first()
 
     from notifications.models import Notification
     latest_notifications = Notification.objects.filter(
@@ -94,6 +95,7 @@ def dashboard_view(request):
         "tickets_count": tickets_count,
         "transport_bookings_count": transport_bookings_count,
         "upcoming_matches_count": upcoming_matches_count,
+        "next_match": next_match,
         "latest_notifications": latest_notifications,
         "display_name": display_name,
         "supporter_status": supporter_status,

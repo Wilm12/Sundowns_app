@@ -37,7 +37,7 @@ class RegistrationTests(APITestCase):
         self.assertEqual(user.role, "member")
         self.assertEqual(user.branch, branch)
 
-    def test_register_page_logs_user_in_and_redirects_to_membership_page(self):
+    def test_register_page_logs_user_in_and_redirects_to_dashboard(self):
         branch = Branch.objects.create(
             name="Mamelodi West",
             location="Mamelodi"
@@ -56,7 +56,7 @@ class RegistrationTests(APITestCase):
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("membership_page"))
+        self.assertEqual(response.url, reverse("dashboard"))
         user = get_user(self.client)
         self.assertTrue(user.is_authenticated)
         self.assertEqual(user.email, "newuser@example.com")

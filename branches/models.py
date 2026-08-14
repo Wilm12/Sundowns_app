@@ -2,6 +2,11 @@ from django.conf import settings
 from django.db import models
 
 
+class BranchCategory(models.TextChoices):
+    COMMUNITY = "COMMUNITY", "Community"
+    INSTITUTIONAL = "INSTITUTIONAL", "Institutional"
+
+
 class BranchStatus(models.TextChoices):
     ACTIVE = "ACTIVE", "Active"
     INACTIVE = "INACTIVE", "Inactive"
@@ -22,6 +27,12 @@ class Branch(models.Model):
     branch_code = models.CharField(max_length=20, unique=True, blank=True, null=True)
     location = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
+    category = models.CharField(
+        max_length=20,
+        choices=BranchCategory.choices,
+        default=BranchCategory.COMMUNITY,
+    )
+    institution = models.CharField(max_length=200, blank=True)
     university = models.CharField(max_length=255, blank=True, null=True)
     meeting_point = models.CharField(max_length=255, blank=True, null=True)
     ticket_collection_point = models.CharField(max_length=255, blank=True, null=True)

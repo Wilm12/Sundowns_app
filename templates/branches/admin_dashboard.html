@@ -10,7 +10,11 @@
                 <div class="space-y-2">
                     <p class="text-sm font-semibold uppercase tracking-[0.24em] text-green-100">Branch Admin Dashboard</p>
                     <h1 class="text-2xl font-bold sm:text-3xl">{{ dashboard.branch.name }}</h1>
-                    <p class="text-sm sm:text-base text-green-50/90">{{ dashboard.branch.university|default:"University not set" }}</p>
+                    {% if dashboard.branch.category == 'INSTITUTIONAL' %}
+                        <p class="text-sm sm:text-base text-green-50/90">{{ dashboard.branch.institution }}</p>
+                    {% else %}
+                        <p class="text-sm sm:text-base text-green-50/90">Community Branch</p>
+                    {% endif %}
                     <p class="text-sm sm:text-base text-green-50/90">2026/27 Season</p>
                 </div>
                 <div class="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">

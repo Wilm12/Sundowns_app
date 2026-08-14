@@ -18,19 +18,27 @@ from .permissions import IsAdminRole, IsMemberRole
 from .serializers import RegisterSerializer, MeSerializer, EmailTokenObtainPairSerializer
 
 
+def _get_app_redirect(user):
+    if user.is_superuser or is_branch_admin(user):
+        return "branch_admin_dashboard"
+    return "dashboard"
+
+
 def _get_post_login_redirect(request, user):
     next_url = request.POST.get("next") or request.GET.get("next")
+    normalized_next = next_url.strip() if isinstance(next_url, str) else ""
 
-    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
-        return redirect(next_url)
+    if normalized_next and normalized_next.startswith("/admin/"):
+        normalized_next = ""
 
-    if user.is_superuser:
-        return redirect("/admin/")
+    if normalized_next and url_has_allowed_host_and_scheme(
+        normalized_next,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(normalized_next)
 
-    if is_branch_admin(user):
-        return redirect("branch_admin_dashboard")
-
-    return redirect("membership_page")
+    return redirect(_get_app_redirect(user))
 
 
 class RegisterView(generics.CreateAPIView):
@@ -85,6 +93,9 @@ class MemberOnlyView(APIView):
 
 def login_page(request):
     """Render and process the authentication login page."""
+    if request.user.is_authenticated:
+        return redirect(_get_app_redirect(request.user))
+
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")

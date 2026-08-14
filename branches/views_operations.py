@@ -44,7 +44,7 @@ def match_operations_console(request, branch_id, match_id):
                 journey = Journey.objects.filter(collection_code=collection_code, branch=branch, match=match).first()
                 if journey:
                     verification_url = reverse("branch_supporter_verification", args=[branch.pk, journey.supporter_id])
-                    params = urlencode({"next": "gate-redemption", "code": collection_code, "match_id": match.pk})
+                    params = urlencode({"next": "ticket-collection", "code": collection_code, "match_id": match.pk})
                     return redirect(f"{verification_url}?{params}")
                 messages.error(request, str(exc))
             except Exception as exc:

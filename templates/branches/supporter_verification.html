@@ -21,8 +21,8 @@
 
     <div class="rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200">
         <p class="text-sm text-slate-600">
-            {% if next_path == 'gate-redemption' %}
-                This verification will return to gate redemption and complete the saved code once approved.
+            {% if next_path == 'ticket-collection' or next_path == 'gate-redemption' %}
+                This verification will return to ticket collection and complete the saved code once approved.
             {% else %}
                 Approve this supporter’s verification request.
             {% endif %}
@@ -30,7 +30,7 @@
 
         <form method="post" class="mt-6 space-y-4">
             {% csrf_token %}
-            {% if next_path == 'gate-redemption' %}
+            {% if next_path == 'ticket-collection' or next_path == 'gate-redemption' %}
                 <input type="hidden" name="next" value="{{ next_path }}">
                 <input type="hidden" name="code" value="{{ collection_code }}">
                 <input type="hidden" name="match_id" value="{{ match_id }}">

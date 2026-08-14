@@ -52,7 +52,7 @@
                             <span class="rounded-full bg-yellow-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-yellow-800">Pending</span>
                         </div>
                         <div class="mt-4">
-                            <a href="{% url 'branch_supporter_verification' branch.id verification.user.id %}?next=gate-redemption&code={{ request.GET.code|default:'' }}&match_id={{ request.GET.match_id|default:'' }}" class="inline-flex items-center justify-center rounded-full bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800">
+                            <a href="{% url 'branch_supporter_verification' branch.id verification.user.id %}?next=ticket-collection&code={{ request.GET.code|default:'' }}&match_id={{ request.GET.match_id|default:'' }}" class="inline-flex items-center justify-center rounded-full bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800">
                                 Review Supporter
                             </a>
                         </div>

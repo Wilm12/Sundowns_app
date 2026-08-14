@@ -267,7 +267,7 @@ def match_publish_view(request, branch_id, match_id):
 
 @login_required
 def supporter_verification_view(request, branch_id, supporter_id):
-    """Allow branch admins to verify a supporter and continue gate redemption."""
+    """Allow branch admins to verify a supporter and continue ticket collection."""
 
     branch = get_object_or_404(Branch, id=branch_id)
     supporter = get_object_or_404(User, id=supporter_id)

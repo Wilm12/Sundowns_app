@@ -48,8 +48,8 @@
 
     <div class="card">
       <div class="gate-panel">
-        <h2>Gate Redemption</h2>
-        <p>Enter the supporter’s 4-digit collection code.</p>
+        <h2>Ticket Collection</h2>
+        <p>Verify supporters and issue tickets using collection codes during the collection window.</p>
         <form method="post" style="display:flex; flex-direction:column; gap:10px; align-items:center;">
           {% csrf_token %}
           <input type="text" class="gate-input" name="collection_code" maxlength="4" inputmode="numeric" pattern="[0-9]{4}" placeholder="4827" required>

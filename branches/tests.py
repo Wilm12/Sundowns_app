@@ -113,7 +113,7 @@ class BranchAdminDashboardTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("branch_supporter_verification", args=[branch.pk, supporter.pk]), response.url)
-        self.assertIn("next=gate-redemption", response.url)
+        self.assertIn("next=ticket-collection", response.url)
         self.assertIn("code=4827", response.url)
         self.assertEqual(journey.status, JourneyStatus.BOOKED)
 
@@ -135,7 +135,7 @@ class BranchAdminDashboardTests(TestCase):
 
         self.client.force_login(admin)
         response = self.client.post(
-            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=gate-redemption&code=4827&match_id={match.pk}",
+            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=ticket-collection&code=4827&match_id={match.pk}",
             data={},
             follow=True,
         )
@@ -167,7 +167,7 @@ class BranchAdminDashboardTests(TestCase):
 
         self.client.force_login(admin)
         response = self.client.post(
-            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=gate-redemption&code=4827&match_id={match.pk}",
+            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=ticket-collection&code=4827&match_id={match.pk}",
             data={},
         )
 
@@ -198,7 +198,7 @@ class BranchAdminDashboardTests(TestCase):
         self.client.force_login(admin)
         response = self.client.post(
             reverse("branch_supporter_verification", args=[branch.pk, supporter.pk]),
-            data={"next": "gate-redemption", "code": "4827", "match_id": match.pk},
+            data={"next": "ticket-collection", "code": "4827", "match_id": match.pk},
         )
 
         self.assertEqual(response.status_code, 302)
@@ -233,7 +233,7 @@ class BranchAdminDashboardTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("branch_supporter_verification", args=[branch.pk, supporter.pk]), response.url)
-        self.assertIn("next=gate-redemption", response.url)
+        self.assertIn("next=ticket-collection", response.url)
         self.assertIn("code=4827", response.url)
         self.assertEqual(journey.status, JourneyStatus.BOOKED)
 
@@ -256,7 +256,7 @@ class BranchAdminDashboardTests(TestCase):
 
         self.client.force_login(admin)
         response = self.client.post(
-            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=gate-redemption&code=4827&match_id={match.pk}",
+            f"{reverse('branch_supporter_verification', args=[branch.pk, supporter.pk])}?next=ticket-collection&code=4827&match_id={match.pk}",
             data={},
         )
 

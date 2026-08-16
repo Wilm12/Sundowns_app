@@ -58,6 +58,40 @@ class Branch(models.Model):
         return self.name
 
 
+class MatchAllocation(models.Model):
+    branch = models.ForeignKey(
+        Branch,
+        on_delete=models.CASCADE,
+        related_name="match_allocations",
+    )
+    match = models.ForeignKey(
+        "matches.Match",
+        on_delete=models.CASCADE,
+        related_name="branch_allocations",
+    )
+    allocated_tickets = models.PositiveIntegerField(default=0)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="updated_match_allocations",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["branch", "match"],
+                name="unique_match_allocation_per_branch_match",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.branch} - {self.match}: {self.allocated_tickets} tickets"
+
+
 class BranchPolicy(models.Model):
     branch = models.OneToOneField(
         Branch,

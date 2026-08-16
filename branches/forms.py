@@ -2,8 +2,27 @@ from django import forms
 
 from users.models import User
 
-from .models import BranchRole, CommitteePosition
+from .models import BranchRole, CommitteePosition, MatchAllocation
 from matches.models import Match
+
+
+class MatchAllocationForm(forms.Form):
+    match_id = forms.ModelChoiceField(
+        queryset=Match.objects.none(),
+        label="Match",
+        required=True,
+    )
+    allocated_tickets = forms.IntegerField(
+        min_value=0,
+        required=True,
+        label="Allocated tickets",
+        widget=forms.NumberInput(attrs={"min": 0, "placeholder": "0"}),
+    )
+
+    def __init__(self, *args, branch=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if branch is not None:
+            self.fields["match_id"].queryset = Match.objects.filter(journeys__branch=branch).distinct().order_by("date")
 
 
 class MatchForm(forms.ModelForm):

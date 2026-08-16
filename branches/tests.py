@@ -453,6 +453,40 @@ class BranchAdminDashboardTests(TestCase):
         branch.refresh_from_db()
         self.assertEqual(branch.operational_match, match)
 
+    def test_branch_match_allocation_updates_match_management_and_dashboard_metric(self):
+        branch = Branch.objects.create(name="Allocation Branch")
+        admin = self._create_user(username="allocation-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="allocation-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=5), location="Loftus", opponent="Kaizer Chiefs")
+        Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
+
+        self.client.force_login(admin)
+        response = self.client.post(
+            reverse("branch_committee", args=[branch.pk]),
+            data={
+                "allocation_submit": "1",
+                "match_id": str(match.pk),
+                "allocated_tickets": "18",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        allocation = branch.match_allocations.get(match=match)
+        self.assertEqual(allocation.allocated_tickets, 18)
+        self.assertContains(response, "Ticket allocation updated")
+
+        dashboard = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
+        self.assertEqual(dashboard["journey_metrics"]["allocated_count"], 18)
+
     def test_edit_match_action_links_to_existing_edit_page_and_requires_authorization(self):
         branch = Branch.objects.create(name="Edit Match Branch")
         admin = self._create_user(username="edit-match-admin")

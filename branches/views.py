@@ -16,14 +16,14 @@ from supporters.services.verify_student import VerifyStudentService
 from journeys.services.collect_ticket import CollectTicketService
 from analytics.services import AnalyticsSnapshotService
 from matches.models import Match
-from .models import Branch, BranchRole, CommitteeAction, CommitteePosition
+from .models import Branch, BranchRole, CommitteeAction, CommitteePosition, MatchAllocation
 from authentication.permissions import IsAdminOrReadOnly
 from .serializers import BranchSerializer
 from .services.committee import CommitteeService
 from .services.authorization import is_branch_admin
 from .services.promote_branch_admin import PromoteBranchAdminService, BranchAdminAlreadyAssigned, UserNotInBranch
 from .services.remove_branch_admin import RemoveBranchAdminService, LastBranchAdminRemovalError
-from .forms import PromoteBranchAdminForm, CommitteePositionManagementForm, RemoveBranchAdminForm
+from .forms import PromoteBranchAdminForm, CommitteePositionManagementForm, RemoveBranchAdminForm, MatchAllocationForm
 from django.contrib import messages
 from .forms import MatchForm
 from django.utils import timezone
@@ -113,6 +113,17 @@ def committee_management_view(request, branch_id):
                     messages.success(request, "Match saved successfully.")
                 return redirect("branch_committee", branch_id=branch.pk)
             messages.error(request, "Please correct the match form and try again.")
+        elif "allocation_submit" in request.POST:
+            form = MatchAllocationForm(request.POST, branch=branch)
+            if form.is_valid():
+                match = form.cleaned_data["match_id"]
+                allocation, _ = MatchAllocation.objects.get_or_create(branch=branch, match=match)
+                allocation.allocated_tickets = form.cleaned_data["allocated_tickets"]
+                allocation.updated_by = request.user
+                allocation.save(update_fields=["allocated_tickets", "updated_by", "updated_at"])
+                messages.success(request, "Ticket allocation updated.")
+            else:
+                messages.error(request, "Please select a valid match and ticket allocation.")
         elif "promote" in request.POST:
             form = PromoteBranchAdminForm(request.POST, branch=branch)
             if form.is_valid():
@@ -170,6 +181,7 @@ def committee_management_view(request, branch_id):
     stats = CommitteeService.get_committee_stats(branch)
     activities = branch.committee_activities.select_related("actor", "target_user")[:10]
     leadership_positions = CommitteeService.get_leadership_positions(branch)
+    operational_allocation = MatchAllocation.objects.filter(branch=branch, match=branch.operational_match).first() if branch.operational_match else None
     pending_verifications = (
         StudentVerification.objects.filter(
             user__branch=branch,
@@ -205,6 +217,8 @@ def committee_management_view(request, branch_id):
         "remove_form": RemoveBranchAdminForm(branch=branch),
         "pending_verifications": pending_verifications,
         "match_form": MatchForm(),
+        "match_allocation_form": MatchAllocationForm(branch=branch),
+        "operational_allocation": operational_allocation,
         "branch_matches": branch_matches,
         "supporter_email_query": supporter_email_query,
         "supporter_search_results": supporter_search_results,

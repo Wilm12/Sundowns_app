@@ -7,7 +7,7 @@ from matches.models import Match
 from supporters.models import StudentVerification, StudentVerificationStatus, SupporterEligibility
 from users.models import User
 
-from ..models import Branch, BranchRole, CommitteeAction, CommitteeActivity, CommitteePosition
+from ..models import Branch, BranchRole, CommitteeAction, CommitteeActivity, CommitteePosition, MatchAllocation
 
 
 class BranchAdminDashboardService:
@@ -127,7 +127,11 @@ class BranchAdminDashboardService:
                     JourneyStatus.MATCH_ATTENDED,
                 ],
             ).count()
-            allocated_count = journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]).count() + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
+            allocation_record = MatchAllocation.objects.filter(branch=branch, match=dashboard_match).first()
+            allocated_count = allocation_record.allocated_tickets if allocation_record else (
+                journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]).count()
+                + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
+            )
             attended_count = journeys.filter(status__in=[JourneyStatus.TICKET_COLLECTED, JourneyStatus.MATCH_ATTENDED]).count()
             pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
 

@@ -385,6 +385,23 @@ class BranchAdminDashboardTests(TestCase):
         # Button should link to dedicated performance page
         self.assertContains(response, f'href="{reverse("branch_performance", args=[branch.id])}"')
 
+    def test_branch_performance_back_to_dashboard_link_returns_to_landing_dashboard(self):
+        branch = Branch.objects.create(name="Back Link Branch")
+        admin = self._create_user(username="back-link-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        performance_response = self.client.get(reverse("branch_performance", args=[branch.id]))
+
+        self.assertEqual(performance_response.status_code, 200)
+        dashboard_url = reverse("branch_admin_dashboard")
+        self.assertContains(performance_response, f'href="{dashboard_url}"')
+
+        dashboard_response = self.client.get(dashboard_url)
+        self.assertEqual(dashboard_response.status_code, 200)
+
     def test_branch_performance_page_requires_branch_admin_authorization(self):
         branch = Branch.objects.create(name="Auth Test Branch")
         supporter = self._create_user(username="auth-supp")

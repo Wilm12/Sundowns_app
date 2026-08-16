@@ -65,50 +65,97 @@
     </section>
 
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
-        <div class="flex items-center justify-between gap-3">
-            <div>
-                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Reports</p>
-                <h2 class="text-xl font-bold text-slate-950">{{ dashboard.dashboard_match.opponent|default:"No upcoming match" }}</h2>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between gap-3">
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Current Match Performance</p>
+                    <h2 class="text-xl font-bold text-slate-950">{{ dashboard.branch.name }}</h2>
+                </div>
+                <div class="rounded-2xl bg-green-50 px-3 py-2 text-sm font-semibold text-green-800">
+                    {% if dashboard.dashboard_match %}
+                        {{ dashboard.dashboard_match.date|date:"M j, Y" }}
+                    {% endif %}
+                </div>
             </div>
-            <div class="rounded-2xl bg-green-50 px-3 py-2 text-sm font-semibold text-green-800">
-                {% if dashboard.dashboard_match %}
-                    {{ dashboard.dashboard_match.date|date:"M j, Y" }}
-                {% endif %}
-            </div>
+            <p class="text-sm text-slate-600">vs. {{ dashboard.dashboard_match.opponent|default:"No upcoming match" }}</p>
         </div>
 
         <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div class="rounded-2xl bg-slate-50 p-3">
-                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Allocated</p>
-                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.allocated_count }}</p>
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Supporters Booked</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.branch_analytics.booked }}</p>
             </div>
             <div class="rounded-2xl bg-slate-50 p-3">
-                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Booked</p>
-                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.booked_count }}</p>
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Supporters Attended</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.branch_analytics.attended }}</p>
             </div>
             <div class="rounded-2xl bg-slate-50 p-3">
-                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Pending</p>
-                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.pending_count }}</p>
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Attendance Rate</p>
+                <div class="mt-2 flex items-center gap-2">
+                    <p class="text-2xl font-bold text-slate-950">{{ dashboard.branch_analytics.attendance_rate }}%</p>
+                    {% if dashboard.branch_analytics.booked > 0 %}
+                        {% if dashboard.branch_analytics.attendance_rate >= 75 %}
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">Good</span>
+                        {% elif dashboard.branch_analytics.attendance_rate >= 50 %}
+                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-2 py-1 text-xs font-semibold text-yellow-800">Fair</span>
+                        {% else %}
+                            <span class="inline-flex items-center rounded-full bg-red-100 px-2 py-1 text-xs font-semibold text-red-800">Low</span>
+                        {% endif %}
+                    {% endif %}
+                </div>
             </div>
             <div class="rounded-2xl bg-slate-50 p-3">
-                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Attended</p>
-                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.journey_metrics.attended_count }}</p>
+                <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Verification Completed</p>
+                <p class="mt-2 text-2xl font-bold text-slate-950">{{ dashboard.branch_analytics.verification_completed }}</p>
             </div>
         </div>
+    </section>
 
-        <div class="mt-4 space-y-2">
-            <div class="h-2 rounded-full bg-slate-200">
-                <div class="h-2 rounded-full bg-green-600" style="width: {{ dashboard.journey_metrics.allocated_progress }}%"></div>
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Performance Across Matches</p>
+                <h2 class="text-xl font-bold text-slate-950">{{ dashboard.branch.name }} - Recent History</h2>
             </div>
-            <div class="h-2 rounded-full bg-slate-200">
-                <div class="h-2 rounded-full bg-amber-500" style="width: {{ dashboard.journey_metrics.booked_progress }}%"></div>
-            </div>
-            <div class="h-2 rounded-full bg-slate-200">
-                <div class="h-2 rounded-full bg-slate-400" style="width: {{ dashboard.journey_metrics.pending_progress }}%"></div>
-            </div>
-            <div class="h-2 rounded-full bg-slate-200">
-                <div class="h-2 rounded-full bg-blue-600" style="width: {{ dashboard.journey_metrics.attended_progress }}%"></div>
-            </div>
+        </div>
+        <div class="mt-4 overflow-x-auto">
+            <table class="min-w-full text-left text-sm text-slate-700">
+                <thead>
+                    <tr class="border-b border-slate-200 text-slate-500">
+                        <th class="pb-2 pr-4 font-semibold">Date</th>
+                        <th class="pb-2 pr-4 font-semibold">Match</th>
+                        <th class="pb-2 pr-4 font-semibold">Booked</th>
+                        <th class="pb-2 pr-4 font-semibold">Attended</th>
+                        <th class="pb-2 pr-4 font-semibold">Attendance</th>
+                        <th class="pb-2 font-semibold">Verified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in dashboard.branch_performance %}
+                    <tr class="border-b border-slate-100 align-top">
+                        <td class="py-3 pr-4 text-slate-600 text-xs">{{ item.match.date|date:"M j" }}</td>
+                        <td class="py-3 pr-4 font-medium text-slate-900">{{ item.match.opponent }}</td>
+                        <td class="py-3 pr-4">{{ item.booked }}</td>
+                        <td class="py-3 pr-4">{{ item.attended }}</td>
+                        <td class="py-3 pr-4">
+                            <span class="font-semibold">{{ item.attendance_rate }}%</span>
+                            {% if item.booked > 0 %}
+                                {% if item.attendance_rate >= 75 %}
+                                    <span class="ml-1 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-800">✓</span>
+                                {% elif item.attendance_rate < 50 %}
+                                    <span class="ml-1 inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-800">!</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td class="py-3">{{ item.verification_completed }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="py-3 text-slate-500">No historical branch performance yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </section>
 
@@ -121,7 +168,7 @@
                 </div>
             </div>
             <div class="mt-4 grid gap-3">
-                <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Attendance Report</a>
+                <a href="{% url 'branch_performance' branch.id %}" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Branch Performance</a>
                 <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Participation Report</a>
                 <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Verification Report</a>
                 <a href="#" class="rounded-[1.25rem] border border-slate-200 bg-slate-50 p-3 font-semibold text-slate-900">Match Operations Report</a>

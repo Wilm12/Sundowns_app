@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Match Snapshots | BranchRoute{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200">
+        <h1 class="text-3xl font-bold text-slate-950">Analytics - Match Snapshots</h1>
+        <p class="mt-2 text-sm text-slate-600">Historical snapshots of branch-match data by date</p>
+    </div>
+
+    {% if snapshots %}
+        <div class="rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-200">
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Date</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Branch</th>
+                            <th class="px-4 py-3 text-left font-semibold text-slate-700">Match</th>
+                            <th class="px-4 py-3 text-right font-semibold text-slate-700">Booked</th>
+                            <th class="px-4 py-3 text-right font-semibold text-slate-700">Ticket Ready</th>
+                            <th class="px-4 py-3 text-right font-semibold text-slate-700">Collected</th>
+                            <th class="px-4 py-3 text-right font-semibold text-slate-700">Attended</th>
+                            <th class="px-4 py-3 text-right font-semibold text-slate-700">Verified</th>
+                            <th class="px-4 py-3 text-right font-semibold text-slate-700">Transport</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for snapshot in snapshots %}
+                            <tr class="border-b border-slate-100 hover:bg-slate-50">
+                                <td class="px-4 py-3 text-slate-900">{{ snapshot.snapshot_date }}</td>
+                                <td class="px-4 py-3 text-slate-900">{{ snapshot.branch.name }}</td>
+                                <td class="px-4 py-3 text-slate-900">{{ snapshot.match.opponent }}</td>
+                                <td class="px-4 py-3 text-right text-slate-700">{{ snapshot.booked }}</td>
+                                <td class="px-4 py-3 text-right text-slate-700">{{ snapshot.ticket_ready }}</td>
+                                <td class="px-4 py-3 text-right text-slate-700">{{ snapshot.collected }}</td>
+                                <td class="px-4 py-3 text-right text-slate-700">{{ snapshot.attended }}</td>
+                                <td class="px-4 py-3 text-right text-slate-700">{{ snapshot.verification_completed }}</td>
+                                <td class="px-4 py-3 text-right text-slate-700">{{ snapshot.transport_booked }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="rounded-[2rem] bg-white p-6 shadow-xl shadow-slate-200">
+            <p class="text-slate-600">No snapshots available yet. Generate snapshots using the management command:</p>
+            <p class="mt-2 font-mono text-sm text-slate-500">python manage.py generate_match_snapshots</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

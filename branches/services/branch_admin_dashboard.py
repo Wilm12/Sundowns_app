@@ -1,6 +1,7 @@
 from django.urls import reverse
 from django.utils import timezone
 
+from analytics.services import BranchAnalyticsService
 from journeys.models import Journey, JourneyStatus
 from matches.models import Match
 from supporters.models import StudentVerification, StudentVerificationStatus, SupporterEligibility
@@ -122,35 +123,33 @@ class BranchAdminDashboardService:
                 status__in=[
                     JourneyStatus.BOOKED,
                     JourneyStatus.TICKET_READY,
+                    JourneyStatus.TICKET_COLLECTED,
                     JourneyStatus.MATCH_ATTENDED,
                 ],
             ).count()
-            # Allocated = journeys that have tickets issued (TICKET_READY or MATCH_ATTENDED),
-            # plus any BOOKED journeys where a ticket record exists.
             allocated_count = journeys.filter(status__in=[JourneyStatus.TICKET_READY, JourneyStatus.MATCH_ATTENDED]).count() + journeys.filter(ticket__isnull=False, status=JourneyStatus.BOOKED).count()
-            attended_count = journeys.filter(status=JourneyStatus.MATCH_ATTENDED).count()
-            # Pending should mirror MatchOperationsService: only TICKET_READY
+            attended_count = journeys.filter(status__in=[JourneyStatus.TICKET_COLLECTED, JourneyStatus.MATCH_ATTENDED]).count()
             pending_count = journeys.filter(status=JourneyStatus.TICKET_READY).count()
 
+            branch_match_analytics = BranchAnalyticsService.get_branch_match_metrics(branch, dashboard_match)
             journey_metrics = {
                 "allocated_count": allocated_count,
                 "booked_count": booked_count,
                 "pending_count": pending_count,
                 "attended_count": attended_count,
-                "booked_progress": round(
-                    (booked_count / max(booked_count, 1)) * 100, 1
-                ) if booked_count else 0,
-                "allocated_progress": round(
-                    (allocated_count / max(booked_count, 1)) * 100, 1
-                ) if booked_count else 0,
-                "pending_progress": round(
-                    (pending_count / max(booked_count, 1)) * 100, 1
-                ) if booked_count else 0,
-                "attended_progress": round(
-                    (attended_count / max(booked_count, 1)) * 100, 1
-                ) if booked_count else 0,
+                "booked_progress": round((booked_count / max(booked_count, 1)) * 100, 1) if booked_count else 0,
+                "allocated_progress": round((allocated_count / max(booked_count, 1)) * 100, 1) if booked_count else 0,
+                "pending_progress": round((pending_count / max(booked_count, 1)) * 100, 1) if booked_count else 0,
+                "attended_progress": round((attended_count / max(booked_count, 1)) * 100, 1) if booked_count else 0,
             }
         else:
+            branch_match_analytics = {
+                "match": None,
+                "booked": 0,
+                "attended": 0,
+                "attendance_rate": 0,
+                "verification_completed": 0,
+            }
             journey_metrics = {
                 "allocated_count": 0,
                 "booked_count": 0,
@@ -161,6 +160,8 @@ class BranchAdminDashboardService:
                 "pending_progress": 0,
                 "attended_progress": 0,
             }
+
+        branch_history = BranchAnalyticsService.get_branch_performance(branch)[:10]
 
         # ------------------------------------------------------------
         # Committee members
@@ -269,6 +270,8 @@ class BranchAdminDashboardService:
                 "ineligible_supporters": total_supporters - eligible_supporters,
             },
             "upcoming_match": upcoming_match,
+            "branch_analytics": branch_match_analytics,
+            "branch_performance": branch_history,
             "journey_metrics": journey_metrics,
             "committee_members": committee_members,
             "recent_activity": recent_activity,

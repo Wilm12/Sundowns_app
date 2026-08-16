@@ -267,6 +267,47 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
         self.assertEqual(journey.attended_by, admin)
 
+    def test_branch_admin_dashboard_renders_branch_analytics_for_current_branch_only(self):
+        branch = Branch.objects.create(name="Mamelodi East")
+        other_branch = Branch.objects.create(name="Tuks")
+        admin = self._create_user(username="branch-analytics-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter_one = self._create_user(username="branch-analytics-one")
+        supporter_two = self._create_user(username="branch-analytics-two")
+        supporter_three = self._create_user(username="branch-analytics-three")
+        other_supporter = self._create_user(username="other-branch-supporter")
+
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Kaizer Chiefs")
+        other_match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=2), location="Loftus", opponent="Cape Town City")
+
+        Journey.objects.create(supporter=supporter_one, branch=branch, match=match, status=JourneyStatus.BOOKED)
+        Journey.objects.create(supporter=supporter_two, branch=branch, match=match, status=JourneyStatus.TICKET_COLLECTED)
+        Journey.objects.create(supporter=supporter_three, branch=branch, match=other_match, status=JourneyStatus.BOOKED)
+        Journey.objects.create(supporter=other_supporter, branch=other_branch, match=match, status=JourneyStatus.MATCH_ATTENDED)
+
+        StudentVerification.objects.create(user=supporter_one, student_number="BA1", university="UP", status=StudentVerificationStatus.VERIFIED)
+        StudentVerification.objects.create(user=supporter_two, student_number="BA2", university="UP", status=StudentVerificationStatus.APPROVED)
+        StudentVerification.objects.create(user=supporter_three, student_number="BA3", university="UJ", status=StudentVerificationStatus.PENDING)
+        StudentVerification.objects.create(user=other_supporter, student_number="BA4", university="UCT", status=StudentVerificationStatus.VERIFIED)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+        content = response.content.decode()
+
+        self.assertContains(response, "Current Match Performance")
+        self.assertContains(response, "Supporters Booked")
+        self.assertContains(response, "Supporters Attended")
+        self.assertContains(response, "Attendance Rate")
+        self.assertContains(response, "Verification Completed")
+        self.assertContains(response, "Performance Across Matches")
+        self.assertContains(response, "Kaizer Chiefs")
+        self.assertContains(response, "Mamelodi East")
+        self.assertNotContains(response, "Tuks")
+        self.assertContains(response, "2")
+
     def test_dashboard_uses_branch_operational_match_when_available(self):
         branch = Branch.objects.create(name="Operational Match Branch")
         admin = self._create_user(username="operational-admin")
@@ -417,6 +458,71 @@ class BranchAdminDashboardTests(TestCase):
 
         committee_position.delete()
         self.assertFalse(CommitteePosition.objects.filter(branch=branch, branch_role=role).exists())
+
+    def test_branch_performance_page_loads_and_shows_only_current_branch_analytics(self):
+        branch = Branch.objects.create(name="Performance Analytics Branch")
+        other_branch = Branch.objects.create(name="Other Analytics Branch")
+        admin = self._create_user(username="perf-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter_one = self._create_user(username="perf-supp-one")
+        supporter_two = self._create_user(username="perf-supp-two")
+        other_supporter = self._create_user(username="perf-other-supp")
+
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Kaizer Chiefs")
+        other_match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=5), location="Ellis Park", opponent="Lions")
+
+        Journey.objects.create(supporter=supporter_one, branch=branch, match=match, status=JourneyStatus.BOOKED)
+        Journey.objects.create(supporter=supporter_two, branch=branch, match=match, status=JourneyStatus.TICKET_COLLECTED)
+        Journey.objects.create(supporter=other_supporter, branch=other_branch, match=match, status=JourneyStatus.MATCH_ATTENDED)
+        Journey.objects.create(supporter=other_supporter, branch=other_branch, match=other_match, status=JourneyStatus.BOOKED)
+
+        StudentVerification.objects.create(user=supporter_one, student_number="BPA1", university="UP", status=StudentVerificationStatus.VERIFIED)
+        StudentVerification.objects.create(user=supporter_two, student_number="BPA2", university="UP", status=StudentVerificationStatus.APPROVED)
+        StudentVerification.objects.create(user=other_supporter, student_number="BPA3", university="Wits", status=StudentVerificationStatus.VERIFIED)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_performance", args=[branch.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Branch Performance")
+        self.assertContains(response, branch.name)
+        self.assertContains(response, "Current Match Performance")
+        self.assertContains(response, "Performance Across Matches")
+        self.assertContains(response, "Supporters Booked")
+        self.assertContains(response, "Supporters Attended")
+        self.assertContains(response, "Attendance Rate")
+        self.assertContains(response, "Verification Completed")
+        self.assertContains(response, "Kaizer Chiefs")
+        self.assertNotContains(response, other_branch.name)
+
+    def test_branch_performance_page_requires_branch_admin_authorization(self):
+        branch = Branch.objects.create(name="Auth Test Branch")
+        supporter = self._create_user(username="auth-supp")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        self.client.force_login(supporter)
+        response = self.client.get(reverse("branch_performance", args=[branch.id]))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_dashboard_reports_card_shows_branch_performance_button(self):
+        branch = Branch.objects.create(name="Reports Button Branch")
+        admin = self._create_user(username="reports-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertContains(response, "Branch Performance")
+        self.assertNotContains(response, "Attendance Report")
+        self.assertContains(response, f'href="{reverse("branch_performance", args=[branch.id])}"')
 
     def test_last_branch_admin_cannot_be_removed(self):
         branch = Branch.objects.create(name="Last Admin Branch")

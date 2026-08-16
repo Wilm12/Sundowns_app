@@ -2,27 +2,45 @@ from django import forms
 
 from users.models import User
 
-from .models import BranchRole, CommitteePosition, MatchAllocation
+from .models import Branch, BranchRole, CommitteePosition, MatchAllocation
 from matches.models import Match
 
 
 class MatchAllocationForm(forms.Form):
-    match_id = forms.ModelChoiceField(
-        queryset=Match.objects.none(),
-        label="Match",
-        required=True,
-    )
-    allocated_tickets = forms.IntegerField(
-        min_value=0,
-        required=True,
-        label="Allocated tickets",
-        widget=forms.NumberInput(attrs={"min": 0, "placeholder": "0"}),
-    )
+    """Dynamic admin form for branch allocations tied to a match."""
 
-    def __init__(self, *args, branch=None, **kwargs):
+    def __init__(self, *args, branch=None, match=None, **kwargs):
         super().__init__(*args, **kwargs)
         if branch is not None:
-            self.fields["match_id"].queryset = Match.objects.filter(journeys__branch=branch).distinct().order_by("date")
+            eligible_branches = Branch.objects.filter(pk=branch.pk).order_by("name")
+        else:
+            eligible_branches = Branch.objects.order_by("name")
+
+        for branch_obj in eligible_branches:
+            field_name = f"allocation_{branch_obj.pk}"
+            initial_value = 0
+            if match is not None:
+                existing_allocation = MatchAllocation.objects.filter(branch=branch_obj, match=match).first()
+                if existing_allocation is not None:
+                    initial_value = existing_allocation.allocated_tickets
+            self.fields[field_name] = forms.IntegerField(
+                required=False,
+                min_value=0,
+                initial=initial_value,
+                label=branch_obj.name,
+                widget=forms.NumberInput(attrs={"min": 0, "class": "w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700", "placeholder": "0"}),
+            )
+
+    def get_allocation_values(self):
+        values = {}
+        for key, value in self.cleaned_data.items():
+            if not key.startswith("allocation_"):
+                continue
+            if value is None:
+                values[int(key.split("_", 1)[1])] = 0
+            else:
+                values[int(key.split("_", 1)[1])] = value
+        return values
 
 
 class MatchForm(forms.ModelForm):

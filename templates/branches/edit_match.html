@@ -40,6 +40,21 @@
                 {{ form.ticket_collection_timeframe }}
             </div>
 
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="mb-3">
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Branch Ticket Allocations</p>
+                    <p class="mt-1 text-sm text-slate-600">Update ticket allocations for this match.</p>
+                </div>
+                <div class="space-y-3">
+                    {% for field in allocation_form %}
+                        <div class="grid gap-2 md:grid-cols-[1fr_auto] md:items-center">
+                            <label for="{{ field.id_for_label }}" class="text-sm font-semibold text-slate-700">{{ field.label }}</label>
+                            <div class="w-full md:w-32">{{ field }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
             <div class="flex items-center gap-3 rounded-2xl bg-slate-50 px-3 py-2">
                 {{ form.published }}
                 <label for="id_published" class="text-sm font-semibold text-slate-700">Publish Immediately</label>

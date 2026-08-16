@@ -14,7 +14,7 @@ from supporters.models import EligibilityReason, SupporterEligibility, StudentVe
 from ticketing.models import Ticket
 from users.models import User
 
-from .models import Branch, BranchPolicy, BranchRole, BranchStatus, CommitteeActivity, CommitteeAction, CommitteePosition
+from .models import Branch, BranchPolicy, BranchRole, BranchStatus, CommitteeActivity, CommitteeAction, CommitteePosition, MatchAllocation
 from .serializers import BranchPolicySerializer, BranchRoleSerializer, BranchSerializer
 from .services.assign_branch_role import AssignBranchRoleService, BranchRoleAlreadyAssigned
 from .services.branch_admin_dashboard import BranchAdminDashboardService
@@ -472,20 +472,65 @@ class BranchAdminDashboardTests(TestCase):
         response = self.client.post(
             reverse("branch_committee", args=[branch.pk]),
             data={
-                "allocation_submit": "1",
-                "match_id": str(match.pk),
-                "allocated_tickets": "18",
+                "match_submit": "1",
+                "opponent": "Kaizer Chiefs",
+                "date": (timezone.now() + timezone.timedelta(days=6)).strftime("%Y-%m-%d"),
+                "location": "Loftus",
+                "ticket_collection_timeframe": "18:00-19:00",
+                "gate_number": "Gate 3",
+                "published": "on",
+                f"allocation_{branch.pk}": "18",
             },
             follow=True,
         )
 
         self.assertEqual(response.status_code, 200)
-        allocation = branch.match_allocations.get(match=match)
+        allocation = branch.match_allocations.get(match__opponent="Kaizer Chiefs")
         self.assertEqual(allocation.allocated_tickets, 18)
-        self.assertContains(response, "Ticket allocation updated")
+        self.assertContains(response, "Match created and published as the branch operational match.")
 
         dashboard = BranchAdminDashboardService.get_dashboard(admin, branch=branch)
         self.assertEqual(dashboard["journey_metrics"]["allocated_count"], 18)
+
+    def test_match_management_allocation_form_renders_and_edit_updates_values(self):
+        branch = Branch.objects.create(name="Allocation Edit Branch")
+        admin = self._create_user(username="allocation-edit-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=4), location="Loftus", opponent="Cape Town City")
+        MatchAllocation.objects.create(branch=branch, match=match, allocated_tickets=12)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_matches_manage", args=[branch.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Branch Ticket Allocations")
+        self.assertContains(response, f'name="allocation_{branch.pk}"')
+
+        edit_response = self.client.get(reverse("branch_match_edit", args=[branch.pk, match.pk]))
+        self.assertEqual(edit_response.status_code, 200)
+        self.assertContains(edit_response, "Branch Ticket Allocations")
+
+        update_response = self.client.post(
+            reverse("branch_match_edit", args=[branch.pk, match.pk]),
+            data={
+                "opponent": "Cape Town City",
+                "date": (timezone.now() + timezone.timedelta(days=5)).strftime("%Y-%m-%d"),
+                "location": "Loftus",
+                "ticket_collection_timeframe": "17:00-18:00",
+                "gate_number": "Gate 5",
+                "published": "on",
+                f"allocation_{branch.pk}": "28",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(update_response.status_code, 200)
+        match.refresh_from_db()
+        allocation = MatchAllocation.objects.get(branch=branch, match=match)
+        self.assertEqual(allocation.allocated_tickets, 28)
+        self.assertContains(update_response, "Match updated successfully.")
 
     def test_edit_match_action_links_to_existing_edit_page_and_requires_authorization(self):
         branch = Branch.objects.create(name="Edit Match Branch")

@@ -4,6 +4,7 @@ This module provides both API endpoints and page views for branch data,
 including admin-restricted operations and member dashboard navigation.
 """
 
+from django.db import transaction
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
@@ -91,39 +92,38 @@ def committee_management_view(request, branch_id):
     if request.method == "POST":
         if "match_submit" in request.POST:
             form = MatchForm(request.POST)
-            if form.is_valid():
+            allocation_form = MatchAllocationForm(request.POST, branch=branch)
+            if form.is_valid() and allocation_form.is_valid():
                 published = form.cleaned_data.get("published", False)
-                match = form.save(commit=False)
-                match.published = published
-                match.save()
-                if published:
-                    previous_operational = branch.operational_match
-                    if previous_operational and previous_operational.pk != match.pk:
-                        previous_operational.published = False
-                        previous_operational.save(update_fields=["published"])
-                    branch.operational_match = match
-                    branch.save(update_fields=["operational_match"])
-                    messages.success(request, "Match created and published as the branch operational match.")
-                else:
-                    if branch.operational_match_id == match.pk:
-                        branch.operational_match = None
+                with transaction.atomic():
+                    match = form.save(commit=False)
+                    match.published = published
+                    match.save()
+                    allocation_values = allocation_form.get_allocation_values()
+                    for target_branch in Branch.objects.filter(pk__in=allocation_values.keys()).order_by("name"):
+                        value = allocation_values.get(target_branch.pk, 0) or 0
+                        MatchAllocation.objects.update_or_create(
+                            branch=target_branch,
+                            match=match,
+                            defaults={"allocated_tickets": value, "updated_by": request.user},
+                        )
+                    if published:
+                        previous_operational = branch.operational_match
+                        if previous_operational and previous_operational.pk != match.pk:
+                            previous_operational.published = False
+                            previous_operational.save(update_fields=["published"])
+                        branch.operational_match = match
                         branch.save(update_fields=["operational_match"])
-                    match.published = False
-                    match.save(update_fields=["published"])
-                    messages.success(request, "Match saved successfully.")
+                        messages.success(request, "Match created and published as the branch operational match.")
+                    else:
+                        if branch.operational_match_id == match.pk:
+                            branch.operational_match = None
+                            branch.save(update_fields=["operational_match"])
+                        match.published = False
+                        match.save(update_fields=["published"])
+                        messages.success(request, "Match saved successfully.")
                 return redirect("branch_committee", branch_id=branch.pk)
-            messages.error(request, "Please correct the match form and try again.")
-        elif "allocation_submit" in request.POST:
-            form = MatchAllocationForm(request.POST, branch=branch)
-            if form.is_valid():
-                match = form.cleaned_data["match_id"]
-                allocation, _ = MatchAllocation.objects.get_or_create(branch=branch, match=match)
-                allocation.allocated_tickets = form.cleaned_data["allocated_tickets"]
-                allocation.updated_by = request.user
-                allocation.save(update_fields=["allocated_tickets", "updated_by", "updated_at"])
-                messages.success(request, "Ticket allocation updated.")
-            else:
-                messages.error(request, "Please select a valid match and ticket allocation.")
+            messages.error(request, "Please correct the match form and allocation values and try again.")
         elif "promote" in request.POST:
             form = PromoteBranchAdminForm(request.POST, branch=branch)
             if form.is_valid():
@@ -181,7 +181,6 @@ def committee_management_view(request, branch_id):
     stats = CommitteeService.get_committee_stats(branch)
     activities = branch.committee_activities.select_related("actor", "target_user")[:10]
     leadership_positions = CommitteeService.get_leadership_positions(branch)
-    operational_allocation = MatchAllocation.objects.filter(branch=branch, match=branch.operational_match).first() if branch.operational_match else None
     pending_verifications = (
         StudentVerification.objects.filter(
             user__branch=branch,
@@ -218,7 +217,6 @@ def committee_management_view(request, branch_id):
         "pending_verifications": pending_verifications,
         "match_form": MatchForm(),
         "match_allocation_form": MatchAllocationForm(branch=branch),
-        "operational_allocation": operational_allocation,
         "branch_matches": branch_matches,
         "supporter_email_query": supporter_email_query,
         "supporter_search_results": supporter_search_results,
@@ -239,25 +237,45 @@ def match_management_view(request, branch_id):
 
     if request.method == "POST":
         form = MatchForm(request.POST)
-        if form.is_valid():
-            match = form.save()
-            messages.success(request, "Match created successfully.")
-            # Optionally publish immediately when requested
-            if request.POST.get("publish"):
-                branch.operational_match = match
-                branch.save(update_fields=["operational_match"])
-                messages.success(request, "Match published as operational match.")
+        allocation_form = MatchAllocationForm(request.POST, branch=branch)
+        if form.is_valid() and allocation_form.is_valid():
+            with transaction.atomic():
+                match = form.save(commit=False)
+                match.save()
+                allocation_values = allocation_form.get_allocation_values()
+                for target_branch in Branch.objects.filter(pk__in=allocation_values.keys()).order_by("name"):
+                    value = allocation_values.get(target_branch.pk, 0) or 0
+                    MatchAllocation.objects.update_or_create(
+                        branch=target_branch,
+                        match=match,
+                        defaults={"allocated_tickets": value, "updated_by": request.user},
+                    )
+                if request.POST.get("publish"):
+                    previous_operational = branch.operational_match
+                    if previous_operational and previous_operational.pk != match.pk:
+                        previous_operational.published = False
+                        previous_operational.save(update_fields=["published"])
+                    branch.operational_match = match
+                    match.published = True
+                    match.save(update_fields=["published"])
+                    branch.save(update_fields=["operational_match"])
+                    messages.success(request, "Match published as operational match.")
+                else:
+                    messages.success(request, "Match created successfully.")
             return redirect("branch_matches_manage", branch_id=branch.pk)
+        messages.error(request, "Please correct the match form and allocation values and try again.")
 
     matches = Match.objects.filter(journeys__branch=branch).distinct().order_by("date")[:25]
     if not matches.exists():
         matches = Match.objects.order_by("date")[:25]
     form = MatchForm()
+    allocation_form = MatchAllocationForm(branch=branch)
 
     return render(request, "branches/match_management.html", {
         "branch": branch,
         "matches": matches,
         "form": form,
+        "match_allocation_form": allocation_form,
     })
 
 
@@ -272,17 +290,32 @@ def match_edit_view(request, branch_id, match_id):
 
     if request.method == "POST":
         form = MatchForm(request.POST, instance=match)
-        if form.is_valid():
-            form.save()
+        allocation_form = MatchAllocationForm(request.POST, branch=branch, match=match)
+        if form.is_valid() and allocation_form.is_valid():
+            with transaction.atomic():
+                form.save()
+                allocation_values = allocation_form.get_allocation_values()
+                matching_branches = Branch.objects.filter(pk__in=allocation_values.keys()).order_by("name")
+                for target_branch in matching_branches:
+                    value = allocation_values.get(target_branch.pk, 0) or 0
+                    MatchAllocation.objects.update_or_create(
+                        branch=target_branch,
+                        match=match,
+                        defaults={"allocated_tickets": value, "updated_by": request.user},
+                    )
+                MatchAllocation.objects.filter(match=match).exclude(branch__in=matching_branches).delete()
             messages.success(request, "Match updated successfully.")
             return redirect("branch_committee", branch_id=branch.pk)
+        messages.error(request, "Please correct the match form and allocation values and try again.")
     else:
         form = MatchForm(instance=match)
+        allocation_form = MatchAllocationForm(branch=branch, match=match)
 
     return render(request, "branches/edit_match.html", {
         "branch": branch,
         "match": match,
         "form": form,
+        "allocation_form": allocation_form,
     })
 
 

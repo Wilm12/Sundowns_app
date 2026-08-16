@@ -132,6 +132,21 @@
                         </div>
                     </div>
 
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                        <div class="mb-3">
+                            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Branch Ticket Allocations</p>
+                            <p class="mt-1 text-sm text-slate-600">Configure ticket allocations for this match.</p>
+                        </div>
+                        <div class="space-y-3">
+                            {% for field in match_allocation_form %}
+                                <div class="grid gap-2 md:grid-cols-[1fr_auto] md:items-center">
+                                    <label for="{{ field.id_for_label }}" class="text-sm font-semibold text-slate-700">{{ field.label }}</label>
+                                    <div class="w-full md:w-32">{{ field }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
                     <div class="flex items-center gap-3 rounded-2xl bg-white px-3 py-2">
                         {{ match_form.published }}
                         <label for="id_published" class="text-sm font-semibold text-slate-700">Publish Immediately</label>
@@ -188,24 +203,6 @@
                             <a href="{% url 'branch_match_publish' branch.id branch.operational_match.id %}" class="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">Close Match</a>
                         </div>
 
-                        <div class="mt-5 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
-                            <div class="mb-3 flex items-center justify-between gap-3">
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.2em] text-slate-500">Ticket Allocation</p>
-                                    <h4 class="text-lg font-bold text-slate-950">Branch allocation</h4>
-                                </div>
-                            </div>
-                            <form method="post" class="space-y-3">
-                                {% csrf_token %}
-                                <input type="hidden" name="allocation_submit" value="1">
-                                <input type="hidden" name="match_id" value="{{ branch.operational_match.id }}">
-                                <div>
-                                    <label for="id_allocated_tickets" class="mb-2 block text-sm font-semibold text-slate-700">Allocated tickets</label>
-                                    <input id="id_allocated_tickets" name="allocated_tickets" type="number" min="0" value="{{ operational_allocation.allocated_tickets|default:0 }}" class="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700">
-                                </div>
-                                <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Save Allocation</button>
-                            </form>
-                        </div>
                     </div>
                 {% else %}
                     <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-600">
@@ -280,27 +277,6 @@
                 </div>
             {% endfor %}
         </div>
-    </section>
-
-    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
-        <div class="mb-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Match Ticket Allocation</p>
-            <h2 class="text-xl font-bold text-slate-950">Set branch allocation for published matches</h2>
-        </div>
-
-        <form method="post" class="grid gap-3 md:grid-cols-[1.2fr_1fr_auto] md:items-end">
-            {% csrf_token %}
-            <input type="hidden" name="allocation_submit" value="1">
-            <div>
-                <label for="id_match_id" class="mb-2 block text-sm font-semibold text-slate-700">Select match</label>
-                {{ match_allocation_form.match_id }}
-            </div>
-            <div>
-                <label for="id_allocated_tickets" class="mb-2 block text-sm font-semibold text-slate-700">Allocated tickets</label>
-                {{ match_allocation_form.allocated_tickets }}
-            </div>
-            <button type="submit" class="rounded-full bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Save</button>
-        </form>
     </section>
 
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">

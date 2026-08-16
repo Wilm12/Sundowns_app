@@ -1,0 +1,116 @@
+Found 232 test(s).
+Using existing test database for alias 'default'...
+System check identified no issues (0 silenced).
+.........[2026-08-16 17:57:29,038] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: dec17e39-55f1-4a3d-a64f-836faa498375
+[2026-08-16 17:57:29,038] INFO engagement.handlers Ticket booked: user_id=4, ticket_id=1, match=Kaizer Chiefs, correlation_id=dec17e39-55f1-4a3d-a64f-836faa498375
+[2026-08-16 17:57:29,044] INFO engagement.dispatcher Publishing event: transport_booked, correlation_id: 34591c89-8121-40d1-848d-5e781af55e82
+[2026-08-16 17:57:29,045] INFO engagement.handlers Transport booked: user_id=4, booking_id=1, branch=Mamelodi East, correlation_id=34591c89-8121-40d1-848d-5e781af55e82
+...............................[2026-08-16 17:57:31,344] INFO engagement.dispatcher Publishing event: branch_role_assigned, correlation_id: 31870482-cfa1-4bb2-b124-ef587bf1036b
+[2026-08-16 17:57:31,344] INFO branches.handlers BranchRoleAssigned | branch=1 | supporter=None | role=BRANCH_ADMIN
+..[2026-08-16 17:57:31,401] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 20a38170-84f9-40ea-af99-d5132c1dd171
+[2026-08-16 17:57:31,401] INFO supporters.handlers StudentVerified | supporter=2 | verification=1
+[2026-08-16 17:57:31,411] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: e78c11c7-74be-4cdf-bcea-82d8d19bc5fd
+[2026-08-16 17:57:31,412] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=2 | recorder=1
+.[2026-08-16 17:57:31,512] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 4648da65-fb60-41a3-809e-04ae21916f38
+[2026-08-16 17:57:31,512] INFO supporters.handlers StudentVerified | supporter=2 | verification=1
+[2026-08-16 17:57:31,524] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: c54b3623-526b-4118-9786-d5a9b1515014
+[2026-08-16 17:57:31,524] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=2 | recorder=1
+.[2026-08-16 17:57:31,580] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 7a4485a7-84c2-4243-b9c3-9704795ea44b
+[2026-08-16 17:57:31,580] INFO supporters.handlers StudentVerified | supporter=2 | verification=1
+[2026-08-16 17:57:31,591] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 0d066368-79c7-4e61-88fb-790c85595d9e
+[2026-08-16 17:57:31,591] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=2 | recorder=1
+.....[2026-08-16 17:57:31,745] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: 6330af23-476e-49e2-9fd6-84f6f8fa85ed
+[2026-08-16 17:57:31,746] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=6330af23-476e-49e2-9fd6-84f6f8fa85ed
+[2026-08-16 17:57:31,746] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 17:57:31,746] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 17:57:31,746] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 17:57:31,746] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 17:57:31,746] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=6330af23-476e-49e2-9fd6-84f6f8fa85ed
+....................[2026-08-16 17:57:32,354] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: b72c7110-cdfb-44fd-92d6-e995e15bcd9f
+[2026-08-16 17:57:32,354] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,360] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: b0638f9c-c347-4af1-bab4-d6dc451e1aeb
+[2026-08-16 17:57:32,361] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,369] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 6c2ceb42-b1cd-4576-b8ce-8535e955ec08
+[2026-08-16 17:57:32,370] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Orlando Pirates, correlation_id=6c2ceb42-b1cd-4576-b8ce-8535e955ec08
+[2026-08-16 17:57:32,371] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: c646ebef-67f2-4889-93bc-70ea7fc33b1d
+[2026-08-16 17:57:32,372] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 17:57:32,412] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 0faba20c-7974-410c-8ae9-234691d2ed5f
+[2026-08-16 17:57:32,413] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,419] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: c8ed836e-ffbd-408f-8909-1ee942fdc85b
+[2026-08-16 17:57:32,420] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,426] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 4aedd4af-098c-4365-8408-3bb5c661bb55
+[2026-08-16 17:57:32,426] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Mamelodi Sundowns, correlation_id=4aedd4af-098c-4365-8408-3bb5c661bb55
+[2026-08-16 17:57:32,428] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 304fcbad-5e82-4162-a638-152697289b19
+[2026-08-16 17:57:32,428] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 17:57:32,449] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 85106428-ac5b-4bb9-9316-c74f79ef904d
+[2026-08-16 17:57:32,449] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,456] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: d1a0292b-5435-4ac6-947a-d513d7a51049
+[2026-08-16 17:57:32,456] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,463] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 1d3e7bf3-f930-4b2c-a57b-8c3829f9cdb0
+[2026-08-16 17:57:32,464] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Sekhukhune, correlation_id=1d3e7bf3-f930-4b2c-a57b-8c3829f9cdb0
+[2026-08-16 17:57:32,465] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 4dda8bad-1109-4e37-a67f-633de7474fa2
+[2026-08-16 17:57:32,465] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 17:57:32,494] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 7a7be128-b2e9-49e7-864a-650c88b91ce7
+[2026-08-16 17:57:32,494] INFO journeys.handlers JourneyOpened | supporter=2 | match=1 | branch=1
+[2026-08-16 17:57:32,499] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 61f8f2e5-8e79-4f93-b8ec-6506d5306149
+[2026-08-16 17:57:32,499] INFO journeys.handlers JourneyBooked | supporter=2 | match=1 | branch=1
+[2026-08-16 17:57:32,508] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: aa0e4aab-1d47-4c22-af47-24c79e477584
+[2026-08-16 17:57:32,508] INFO engagement.handlers Ticket booked: user_id=2, ticket_id=1, match=Kaizer Chiefs, correlation_id=aa0e4aab-1d47-4c22-af47-24c79e477584
+[2026-08-16 17:57:32,509] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: a68872f7-a6bd-43fa-b4ef-432c303348a5
+[2026-08-16 17:57:32,510] INFO journeys.handlers TicketAllocated | journey=1 | supporter=2 | ticket=1
+[2026-08-16 17:57:32,586] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 5b08a806-105d-4810-b490-890c2cc05c0f
+[2026-08-16 17:57:32,586] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=2 | recorder=1
+.[2026-08-16 17:57:32,669] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 417fc463-8517-4936-b243-85182d91953e
+[2026-08-16 17:57:32,669] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+..[2026-08-16 17:57:32,705] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 8250aa41-2224-4adf-8178-6837d199ebfe
+[2026-08-16 17:57:32,705] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,709] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: a196d882-f47d-4ce7-8df2-a76aa2084324
+[2026-08-16 17:57:32,709] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,715] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 6cc59c56-9c9e-42b6-af3d-967a352e0643
+[2026-08-16 17:57:32,715] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Ajax Cape Town, correlation_id=6cc59c56-9c9e-42b6-af3d-967a352e0643
+[2026-08-16 17:57:32,717] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: b8cfd6f6-2fcc-4bd8-a0f2-de74329b579f
+[2026-08-16 17:57:32,717] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+[2026-08-16 17:57:32,722] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 181b9add-9acf-493c-afe3-d92fddf9be36
+[2026-08-16 17:57:32,722] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=1 | recorder=2
+.[2026-08-16 17:57:32,738] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 9edf0ba6-da13-48da-bb0e-7f9da92dd5f2
+[2026-08-16 17:57:32,738] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,740] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: b6d7fe05-3670-42f4-8646-9f9340817091
+[2026-08-16 17:57:32,740] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,743] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: dde65120-b9fa-4971-8ee3-279311c79b6b
+[2026-08-16 17:57:32,743] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Maritzburg, correlation_id=dde65120-b9fa-4971-8ee3-279311c79b6b
+[2026-08-16 17:57:32,744] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: b9fb4b32-55d8-4ae5-8f9e-d8ec88a42750
+[2026-08-16 17:57:32,744] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 17:57:32,769] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: ec98b419-722e-4935-bf83-c583bbbe4530
+[2026-08-16 17:57:32,770] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,774] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 0df8684b-bf7c-4fb0-b1f3-39b31a4c1c5e
+[2026-08-16 17:57:32,774] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,784] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 0ab3744f-ac1c-469c-9c41-092889117ef0
+[2026-08-16 17:57:32,784] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Cape Town City, correlation_id=0ab3744f-ac1c-469c-9c41-092889117ef0
+[2026-08-16 17:57:32,785] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 522433a8-302c-4dab-936e-b6d7cae21ae8
+[2026-08-16 17:57:32,785] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+[2026-08-16 17:57:32,798] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: d26cd92c-2bad-410f-8fd6-fa9cd0e43f03
+[2026-08-16 17:57:32,802] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=1 | recorder=2
+.[2026-08-16 17:57:32,824] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 9b17749a-71c4-451f-a8c8-f6e7f2f3e454
+[2026-08-16 17:57:32,824] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+.[2026-08-16 17:57:32,845] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 80f8e7b8-c008-46ed-967a-5ecfc22e5961
+[2026-08-16 17:57:32,845] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,851] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 8e5a8615-1f7f-4efa-b203-628c0404568f
+[2026-08-16 17:57:32,852] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+.[2026-08-16 17:57:32,879] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: c38da114-e5b2-4779-b074-3f6ad300c37f
+[2026-08-16 17:57:32,879] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,883] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 7181e3c3-4795-45b4-b5d0-5bf37ac08e58
+[2026-08-16 17:57:32,883] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 17:57:32,895] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: e82310e1-9cd3-473e-a2df-30276876fd9d
+[2026-08-16 17:57:32,895] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=AmaZulu, correlation_id=e82310e1-9cd3-473e-a2df-30276876fd9d
+[2026-08-16 17:57:32,897] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: a28befb1-06fb-44ef-b2bb-229e9165c8f4
+[2026-08-16 17:57:32,897] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+...[2026-08-16 17:57:33,010] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 0ad68268-7094-4fd9-86a6-27a81b7a915d
+[2026-08-16 17:57:33,010] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+.[2026-08-16 17:57:33,055] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: fd8f396a-f004-4106-a5ad-181869644a6f
+[2026-08-16 17:57:33,055] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+.
+----------------------------------------------------------------------
+Ran 85 tests in 4.418s
+
+OK
+Preserving test database for alias 'default'...

@@ -33,12 +33,9 @@ class Sprint12UITests(TestCase):
         )
         self.client.force_login(self.user)
         resp = self.client.get(reverse('points_dashboard'))
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'Silver')
-        self.assertContains(resp, 'Progress:')
-        self.assertContains(resp, 'points until Gold')
+        self.assertEqual(resp.status_code, 403)
 
-    def test_reward_detail_displays_locked_message_when_below_required_tier(self):
+    def test_reward_detail_route_is_blocked_when_reward_feature_is_frozen(self):
         # user has 50 points (bronze)
         PointsTransaction.objects.create(
             account=self.account,
@@ -57,14 +54,9 @@ class Sprint12UITests(TestCase):
         )
         self.client.force_login(self.user)
         resp = self.client.get(reverse('reward_detail_page', args=[reward.id]))
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '🔒')
-        self.assertContains(resp, 'Requires Gold tier')
+        self.assertEqual(resp.status_code, 403)
 
     def test_tiers_page_renders(self):
         self.client.force_login(self.user)
         resp = self.client.get(reverse('tiers_page'))
-        self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'Loyalty Tiers')
-        for tier in tier_helpers.TIER_ORDER:
-            self.assertContains(resp, tier.capitalize())
+        self.assertEqual(resp.status_code, 403)

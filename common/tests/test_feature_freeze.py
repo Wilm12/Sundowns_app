@@ -102,6 +102,24 @@ class FeatureFreezeRouteProtectionTests(TestCase):
         response = self.client.get("/tickets/my-tickets/")
         self.assertNotEqual(response.status_code, 403)
 
+    def test_rewards_list_route_blocked_when_frozen(self):
+        """The rewards frontend route belongs to the frozen loyalty feature."""
+        self.client.force_login(self.supporter)
+        response = self.client.get("/rewards/")
+        self.assertEqual(response.status_code, 403)
+
+    def test_reward_redemption_route_blocked_when_frozen(self):
+        """Reward redemption is a frozen loyalty workflow and should be blocked."""
+        self.client.force_login(self.supporter)
+        response = self.client.post("/rewards/1/redeem/", follow=True)
+        self.assertEqual(response.status_code, 403)
+
+    def test_transport_booking_route_blocked_when_frozen(self):
+        """Transport booking is a frozen match-day workflow and should be blocked."""
+        self.client.force_login(self.supporter)
+        response = self.client.get("/transport/book/1/1/", follow=True)
+        self.assertEqual(response.status_code, 403)
+
 
 class FeatureFreezeNavigationTests(TestCase):
     """Test that the navigation properly displays frozen state."""

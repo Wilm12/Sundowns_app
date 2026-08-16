@@ -77,5 +77,5 @@ class TransportMatchConsistencyTests(TestCase):
             transport=transport,
         ).exists()
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
         self.assertFalse(booking_exists)

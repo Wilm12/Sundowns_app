@@ -1,0 +1,334 @@
+Found 232 test(s).
+Creating test database for alias 'default'...
+Destroying old test database for alias 'default'...
+System check identified no issues (0 silenced).
+.........[2026-08-16 18:30:01,826] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: d10cff3b-2367-43ba-8c41-f76fa7ebd4fe
+[2026-08-16 18:30:01,826] INFO engagement.handlers Ticket booked: user_id=4, ticket_id=1, match=Kaizer Chiefs, correlation_id=d10cff3b-2367-43ba-8c41-f76fa7ebd4fe
+[2026-08-16 18:30:01,842] INFO engagement.dispatcher Publishing event: transport_booked, correlation_id: 08fdc08a-c407-483f-9500-490f77656389
+[2026-08-16 18:30:01,846] INFO engagement.handlers Transport booked: user_id=4, booking_id=1, branch=Mamelodi East, correlation_id=08fdc08a-c407-483f-9500-490f77656389
+...............................[2026-08-16 18:30:05,741] INFO engagement.dispatcher Publishing event: branch_role_assigned, correlation_id: 55445558-690b-4be0-a86a-3e719dd65a5c
+[2026-08-16 18:30:05,742] INFO branches.handlers BranchRoleAssigned | branch=1 | supporter=None | role=BRANCH_ADMIN
+..[2026-08-16 18:30:05,919] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 10c8c88f-10a1-419c-afb6-f8d04cd45346
+[2026-08-16 18:30:05,919] INFO supporters.handlers StudentVerified | supporter=2 | verification=1
+[2026-08-16 18:30:05,932] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 891acecc-d553-4ecf-b545-f864d1cec496
+[2026-08-16 18:30:05,933] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=2 | recorder=1
+.[2026-08-16 18:30:06,027] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 65b92599-83b3-40cb-a716-d5b195e37ae1
+[2026-08-16 18:30:06,027] INFO supporters.handlers StudentVerified | supporter=2 | verification=1
+[2026-08-16 18:30:06,047] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 079f096a-4630-4239-a3d0-0e07eea910e4
+[2026-08-16 18:30:06,047] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=2 | recorder=1
+.[2026-08-16 18:30:06,111] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 152a8436-5b6e-41b8-b0c6-9b9a580455ce
+[2026-08-16 18:30:06,111] INFO supporters.handlers StudentVerified | supporter=2 | verification=1
+[2026-08-16 18:30:06,126] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 4c21763b-4634-4d92-952d-4dc3dd9a0867
+[2026-08-16 18:30:06,126] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=2 | recorder=1
+.....[2026-08-16 18:30:06,279] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: 6916afae-b912-4912-99fe-4107bb6b593a
+[2026-08-16 18:30:06,279] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=6916afae-b912-4912-99fe-4107bb6b593a
+[2026-08-16 18:30:06,280] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:06,280] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:06,280] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:06,280] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:06,280] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=6916afae-b912-4912-99fe-4107bb6b593a
+....................[2026-08-16 18:30:07,306] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 00373677-7dc0-4175-95db-86da0f984763
+[2026-08-16 18:30:07,307] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,311] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 69dc3ef5-703a-4760-a0e2-e955101d2dbe
+[2026-08-16 18:30:07,311] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,323] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 2f42de43-59ca-4eda-bbf8-583fbcb71587
+[2026-08-16 18:30:07,323] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Orlando Pirates, correlation_id=2f42de43-59ca-4eda-bbf8-583fbcb71587
+[2026-08-16 18:30:07,325] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: f22ed41e-352d-46a6-b6b9-8039be03ef38
+[2026-08-16 18:30:07,325] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 18:30:07,355] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 13a61dcd-6972-4fe9-9ba6-2c95dd6d05da
+[2026-08-16 18:30:07,355] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,360] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 075f2359-b4ac-480e-b464-822e3892d56a
+[2026-08-16 18:30:07,360] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,369] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: d5c8e35c-683b-4882-97dc-6adb1b83a5c4
+[2026-08-16 18:30:07,370] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Mamelodi Sundowns, correlation_id=d5c8e35c-683b-4882-97dc-6adb1b83a5c4
+[2026-08-16 18:30:07,371] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 8111816a-c74f-4a0e-b204-8234e816f68d
+[2026-08-16 18:30:07,371] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 18:30:07,403] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 74956e85-d9e0-48d5-8d38-a474ba82ff07
+[2026-08-16 18:30:07,403] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,411] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: bbd00bb7-3e89-4e91-aad1-2f7f018a1d72
+[2026-08-16 18:30:07,413] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,421] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 7248f2f1-87e3-444a-b533-111ea6432372
+[2026-08-16 18:30:07,421] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Sekhukhune, correlation_id=7248f2f1-87e3-444a-b533-111ea6432372
+[2026-08-16 18:30:07,422] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 03631e33-ea45-4412-aa77-8727cbefe064
+[2026-08-16 18:30:07,422] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 18:30:07,461] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 660b0663-293f-4d02-8bb8-a3eb81aaab08
+[2026-08-16 18:30:07,462] INFO journeys.handlers JourneyOpened | supporter=2 | match=1 | branch=1
+[2026-08-16 18:30:07,466] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 6cf74f87-ae33-4218-af39-3f81408fbcb0
+[2026-08-16 18:30:07,466] INFO journeys.handlers JourneyBooked | supporter=2 | match=1 | branch=1
+[2026-08-16 18:30:07,476] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 869309bb-a205-4f71-bcb0-7319ec60b561
+[2026-08-16 18:30:07,477] INFO engagement.handlers Ticket booked: user_id=2, ticket_id=1, match=Kaizer Chiefs, correlation_id=869309bb-a205-4f71-bcb0-7319ec60b561
+[2026-08-16 18:30:07,478] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: be69a43c-6ff0-40a8-8684-4fc1db2848d2
+[2026-08-16 18:30:07,479] INFO journeys.handlers TicketAllocated | journey=1 | supporter=2 | ticket=1
+[2026-08-16 18:30:07,600] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 4ed04013-4ae0-4a0d-b0f5-5a771f90775e
+[2026-08-16 18:30:07,600] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=2 | recorder=1
+.[2026-08-16 18:30:07,716] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 508b805d-3ff8-4e1d-9bb4-3b777aab9b13
+[2026-08-16 18:30:07,716] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+..[2026-08-16 18:30:07,776] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 2c9537a8-49ca-4275-be4c-fc1b555a6f8d
+[2026-08-16 18:30:07,776] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,780] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: c8ff2703-c442-491d-a1cd-ff7690c0d8e7
+[2026-08-16 18:30:07,781] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,792] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: b4d433fe-e2fa-48d3-9c81-3cd60ab547f2
+[2026-08-16 18:30:07,792] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Ajax Cape Town, correlation_id=b4d433fe-e2fa-48d3-9c81-3cd60ab547f2
+[2026-08-16 18:30:07,794] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: fc3dcac5-4295-40a7-ba39-314a9b024e0d
+[2026-08-16 18:30:07,794] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+[2026-08-16 18:30:07,797] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 0daa4f79-01ea-4d2a-b4d2-6ee4fbec2ded
+[2026-08-16 18:30:07,797] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=1 | recorder=2
+.[2026-08-16 18:30:07,823] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 00d64756-63c4-44cd-96c4-62cd394c21f8
+[2026-08-16 18:30:07,823] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,828] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 9cd7236b-a2c4-4a2d-9973-1cc76f71d443
+[2026-08-16 18:30:07,829] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,838] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 225db278-240b-4235-afef-270385fe4cac
+[2026-08-16 18:30:07,839] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Maritzburg, correlation_id=225db278-240b-4235-afef-270385fe4cac
+[2026-08-16 18:30:07,840] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: a9427cec-cf55-471c-a93a-8a574c4554fa
+[2026-08-16 18:30:07,840] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 18:30:07,872] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 7fe0afbd-05f7-4b4a-a862-87ef2be524b3
+[2026-08-16 18:30:07,872] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,877] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 21c963b6-8a25-4209-b950-b2a7b8756b46
+[2026-08-16 18:30:07,877] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,887] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: e1555ff4-43c5-47c3-ab12-c85a231ddc6f
+[2026-08-16 18:30:07,887] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Cape Town City, correlation_id=e1555ff4-43c5-47c3-ab12-c85a231ddc6f
+[2026-08-16 18:30:07,889] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 355c82fb-a41f-4e2a-b042-c64ae55ab1d8
+[2026-08-16 18:30:07,889] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+[2026-08-16 18:30:07,902] INFO engagement.dispatcher Publishing event: attendance_recorded, correlation_id: 604f2cd0-d566-48aa-ae78-8c15f68f92ef
+[2026-08-16 18:30:07,902] INFO journeys.handlers AttendanceRecorded | journey=1 | supporter=1 | recorder=2
+.[2026-08-16 18:30:07,927] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 57fb1f91-818e-40e3-bbf5-1841577de729
+[2026-08-16 18:30:07,927] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+.[2026-08-16 18:30:07,963] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 0f0a8aa8-7989-4810-8a14-95eb31471eff
+[2026-08-16 18:30:07,963] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:07,969] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 5717aa4c-d004-4e87-8787-c439ebfa3159
+[2026-08-16 18:30:07,970] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+.[2026-08-16 18:30:08,010] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 7e031c12-38ee-40d7-9371-b74af7b5730b
+[2026-08-16 18:30:08,010] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,014] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: bb359bc7-9c9b-4a4d-bf2a-89c93464369e
+[2026-08-16 18:30:08,014] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,026] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 07301d9e-4a63-413f-b313-f492e6a6c55b
+[2026-08-16 18:30:08,027] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=AmaZulu, correlation_id=07301d9e-4a63-413f-b313-f492e6a6c55b
+[2026-08-16 18:30:08,028] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 18f176a7-ece4-4089-ac21-e6b869c3e200
+[2026-08-16 18:30:08,028] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+...[2026-08-16 18:30:08,098] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 2f4c9a2e-1ff5-4399-b66e-2dd92b836be1
+[2026-08-16 18:30:08,098] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+.[2026-08-16 18:30:08,123] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 82528039-cc86-45c8-b3b5-ed84c2078294
+[2026-08-16 18:30:08,124] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+..[2026-08-16 18:30:08,188] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: c861dd85-8f7b-4609-bc57-ead1557d10e5
+[2026-08-16 18:30:08,188] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,194] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 7e1e7660-d888-47e0-8b46-529611b597db
+[2026-08-16 18:30:08,195] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,204] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: b8dcaadf-e29d-45ae-9322-677c801fcddb
+[2026-08-16 18:30:08,204] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Platinum Stars, correlation_id=b8dcaadf-e29d-45ae-9322-677c801fcddb
+[2026-08-16 18:30:08,209] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 30a6436a-8cd2-40f6-a0c3-1e8d712ecb0a
+[2026-08-16 18:30:08,209] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 18:30:08,244] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 9f2a501f-3463-423a-af84-d5a6694c1b4f
+[2026-08-16 18:30:08,244] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,249] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: f3d6ce70-356a-4a5d-bebf-cf6e19730814
+[2026-08-16 18:30:08,250] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+.[2026-08-16 18:30:08,274] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 6dda2178-bc4e-444b-816b-0ff7eb61cb66
+[2026-08-16 18:30:08,275] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+...[2026-08-16 18:30:08,380] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: e2978997-9441-4b08-9478-23edd96e45cd
+[2026-08-16 18:30:08,380] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,385] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 9ad9d82f-c9c4-4312-98b2-a0be9199d03f
+[2026-08-16 18:30:08,385] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,393] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: f5b70cd1-914a-445b-bda5-132714344acb
+[2026-08-16 18:30:08,395] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Stellenbosch, correlation_id=f5b70cd1-914a-445b-bda5-132714344acb
+.[2026-08-16 18:30:08,419] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 36d32f8c-a217-4312-9148-c107e34b8cbe
+[2026-08-16 18:30:08,420] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,423] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 8fd8f31c-eeaa-4368-8502-b883c023e3ab
+[2026-08-16 18:30:08,423] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,431] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 652450fd-d9bb-476c-a326-9909ec92aeaf
+[2026-08-16 18:30:08,431] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Free State Stars, correlation_id=652450fd-d9bb-476c-a326-9909ec92aeaf
+[2026-08-16 18:30:08,432] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: 2b2defeb-84e5-49b7-8a12-10be4f4621f7
+[2026-08-16 18:30:08,432] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+.[2026-08-16 18:30:08,450] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 3bfaee27-3239-49bc-8789-0d467790978a
+[2026-08-16 18:30:08,450] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,457] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: e9b7e9a1-b7d0-4809-ac4c-fa9564e66a3d
+[2026-08-16 18:30:08,457] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:08,463] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: b194ec0e-2e1f-455b-8043-b0f22ed8fcae
+[2026-08-16 18:30:08,463] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Chippa United, correlation_id=b194ec0e-2e1f-455b-8043-b0f22ed8fcae
+[2026-08-16 18:30:08,464] INFO engagement.dispatcher Publishing event: ticket_allocated, correlation_id: ba057d20-6937-43f9-b515-ed4a3fd63f90
+[2026-08-16 18:30:08,464] INFO journeys.handlers TicketAllocated | journey=1 | supporter=1 | ticket=1
+....................[2026-08-16 18:30:08,993] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: abee6102-9b85-4e74-aa5c-294ec216c66e
+[2026-08-16 18:30:08,993] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=abee6102-9b85-4e74-aa5c-294ec216c66e
+[2026-08-16 18:30:08,993] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:08,993] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:08,993] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:08,993] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:08,993] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=abee6102-9b85-4e74-aa5c-294ec216c66e
+[2026-08-16 18:30:09,015] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: 998ca365-ff18-48fc-903d-3bf6fda409d5
+[2026-08-16 18:30:09,015] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=998ca365-ff18-48fc-903d-3bf6fda409d5
+[2026-08-16 18:30:09,015] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,015] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,016] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,016] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,016] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=998ca365-ff18-48fc-903d-3bf6fda409d5
+.[2026-08-16 18:30:09,060] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: e77e86f7-5ff6-4c44-9871-ab0490d28b0a
+[2026-08-16 18:30:09,060] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=e77e86f7-5ff6-4c44-9871-ab0490d28b0a
+[2026-08-16 18:30:09,060] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,060] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,061] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,061] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,061] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=e77e86f7-5ff6-4c44-9871-ab0490d28b0a
+.[2026-08-16 18:30:09,087] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: 7bc14e58-efd6-4ff0-a0a7-025ad1379da4
+[2026-08-16 18:30:09,087] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=7bc14e58-efd6-4ff0-a0a7-025ad1379da4
+[2026-08-16 18:30:09,087] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,087] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,088] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,088] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,088] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=7bc14e58-efd6-4ff0-a0a7-025ad1379da4
+.[2026-08-16 18:30:09,104] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: 8e463514-0cb9-45ed-97c9-adaaeed837c2
+[2026-08-16 18:30:09,104] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=8e463514-0cb9-45ed-97c9-adaaeed837c2
+[2026-08-16 18:30:09,104] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,104] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,104] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,104] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,104] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=8e463514-0cb9-45ed-97c9-adaaeed837c2
+[2026-08-16 18:30:09,118] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: 32709aa0-416f-4e73-adce-530f2a86698c
+[2026-08-16 18:30:09,118] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=32709aa0-416f-4e73-adce-530f2a86698c
+[2026-08-16 18:30:09,118] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,118] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,118] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 3, 'payment_id': 2, 'tier': 'premium'}
+[2026-08-16 18:30:09,118] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 3, 'payment_id': 2, 'tier': 'premium'}
+[2026-08-16 18:30:09,118] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=32709aa0-416f-4e73-adce-530f2a86698c
+.[2026-08-16 18:30:09,135] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: 65823bf8-093d-4285-86d1-9f450c6ff292
+[2026-08-16 18:30:09,136] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=65823bf8-093d-4285-86d1-9f450c6ff292
+[2026-08-16 18:30:09,136] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,136] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,136] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,136] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,136] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=65823bf8-093d-4285-86d1-9f450c6ff292
+.[2026-08-16 18:30:09,167] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: d4ae6475-7d69-4721-9cd4-eef2f65bb87d
+[2026-08-16 18:30:09,168] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=d4ae6475-7d69-4721-9cd4-eef2f65bb87d
+[2026-08-16 18:30:09,168] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,168] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,168] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,168] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,168] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=d4ae6475-7d69-4721-9cd4-eef2f65bb87d
+.[2026-08-16 18:30:09,190] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: a9d4b776-b29c-42b2-8628-f214717db6bd
+[2026-08-16 18:30:09,190] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=a9d4b776-b29c-42b2-8628-f214717db6bd
+[2026-08-16 18:30:09,190] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,191] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,191] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,191] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,191] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=a9d4b776-b29c-42b2-8628-f214717db6bd
+.[2026-08-16 18:30:09,211] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: 8682bd24-afdb-4d23-9905-68491d9851e0
+[2026-08-16 18:30:09,212] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=8682bd24-afdb-4d23-9905-68491d9851e0
+[2026-08-16 18:30:09,212] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,212] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,212] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,212] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,212] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=8682bd24-afdb-4d23-9905-68491d9851e0
+[2026-08-16 18:30:09,228] INFO engagement.dispatcher Publishing event: membership_activated, correlation_id: b9909e41-5803-46a0-8896-04719d3e463d
+[2026-08-16 18:30:09,228] INFO engagement.handlers Processing MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=b9909e41-5803-46a0-8896-04719d3e463d
+[2026-08-16 18:30:09,228] INFO engagement.services.badge_service Award Welcome Badge: user_id=1
+[2026-08-16 18:30:09,228] INFO engagement.services.promotion_service Unlock Welcome Promotions: user_id=1
+[2026-08-16 18:30:09,228] INFO engagement.services.timeline_service Timeline Event: user_id=1, event=membership_activated, metadata={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,228] INFO engagement.services.analytics_service Membership Activation Analytics: user_id=1, payload={'membership_id': 2, 'payment_id': 1, 'tier': 'basic'}
+[2026-08-16 18:30:09,228] INFO engagement.handlers Completed MEMBERSHIP_ACTIVATED event | user=1 | correlation_id=b9909e41-5803-46a0-8896-04719d3e463d
+..........................................................................[2026-08-16 18:30:11,063] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 24b7236b-bf78-4e7a-9a1d-76a34e479408
+[2026-08-16 18:30:11,063] INFO supporters.handlers StudentVerified | supporter=1 | verification=1
+[2026-08-16 18:30:11,072] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: 66825ee9-0c76-4960-ad0f-0d237d6a9bed
+[2026-08-16 18:30:11,073] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+.[2026-08-16 18:30:11,120] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: 6c178c6d-d851-47d7-a194-5e8e9d909ab7
+[2026-08-16 18:30:11,120] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+.[2026-08-16 18:30:11,154] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 99824831-1aad-49fd-92f4-1b29a1e78d27
+[2026-08-16 18:30:11,154] INFO supporters.handlers StudentVerified | supporter=1 | verification=1
+[2026-08-16 18:30:11,162] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: 6e3e0175-fff2-4211-89ab-f2cccf988a45
+[2026-08-16 18:30:11,163] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+.[2026-08-16 18:30:11,192] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: ba8b9d66-1ab4-4c59-bf12-e761602ad847
+[2026-08-16 18:30:11,192] INFO supporters.handlers StudentVerified | supporter=1 | verification=1
+[2026-08-16 18:30:11,199] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: 3a1962dc-3897-42ab-9e69-6837c484fc4e
+[2026-08-16 18:30:11,200] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+..[2026-08-16 18:30:11,231] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: 09b34d59-2247-46b5-b35b-808414b71d4d
+[2026-08-16 18:30:11,231] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_PENDING
+..[2026-08-16 18:30:11,277] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: 3738c95f-5749-4c26-aaea-cb13cd853e6f
+[2026-08-16 18:30:11,277] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_PENDING
+..[2026-08-16 18:30:11,309] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: af25328f-5825-4ad4-be61-a24e6d356d45
+[2026-08-16 18:30:11,309] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_PENDING
+.[2026-08-16 18:30:11,337] INFO engagement.dispatcher Publishing event: student_verification_requested, correlation_id: 7671fd65-ac43-4fc8-85eb-6efd8e7f0df1
+[2026-08-16 18:30:11,337] INFO supporters.handlers StudentVerificationRequested | supporter=1 | verification=2
+[2026-08-16 18:30:11,343] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: 31aed0ce-57b6-4039-bf0e-bbd1135a40e2
+[2026-08-16 18:30:11,344] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_PENDING
+.[2026-08-16 18:30:11,370] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: fa6a3328-3514-4437-89fe-33bacd5932b9
+[2026-08-16 18:30:11,370] INFO supporters.handlers StudentVerified | supporter=1 | verification=2
+[2026-08-16 18:30:11,374] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: 8fbe7bca-07ed-4f3c-9eca-318397228704
+[2026-08-16 18:30:11,374] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+.[2026-08-16 18:30:11,387] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: ef9d391b-ddfc-4b84-85da-59fb93145d40
+[2026-08-16 18:30:11,388] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_EXPIRED
+.[2026-08-16 18:30:11,412] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 031e73f8-0cfd-496b-868a-c0f970f8d91f
+[2026-08-16 18:30:11,412] INFO supporters.handlers StudentVerified | supporter=1 | verification=1
+[2026-08-16 18:30:11,417] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: 12948962-be17-4505-aeaf-64b49de79448
+[2026-08-16 18:30:11,417] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+.[2026-08-16 18:30:11,482] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: f4ee6100-3b1e-470a-8aa7-e94ff07b1761
+[2026-08-16 18:30:11,482] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_PENDING
+.[2026-08-16 18:30:11,579] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: 062cfa93-54a3-461b-81f7-9c93aa604940
+[2026-08-16 18:30:11,585] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_REJECTED
+.[2026-08-16 18:30:11,595] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: 9c357f05-78f3-49c9-9084-b73c53ed1cd6
+[2026-08-16 18:30:11,599] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_REJECTED
+.[2026-08-16 18:30:11,617] INFO engagement.dispatcher Publishing event: student_verification_rejected, correlation_id: a8ecf2b3-02ed-4d8d-bd5b-acbcd5e2e990
+[2026-08-16 18:30:11,617] INFO supporters.handlers StudentVerificationRejected | supporter=1 | verification=1
+[2026-08-16 18:30:11,621] INFO engagement.dispatcher Publishing event: eligibility_revoked, correlation_id: 93055a08-cd22-4624-ab3a-3066a49bfa9b
+[2026-08-16 18:30:11,622] INFO supporters.handlers EligibilityRevoked | supporter=1 | eligibility=1 | reason=VERIFICATION_REJECTED
+.[2026-08-16 18:30:11,684] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 64c4883e-c637-4f58-be70-58c4e463b7f3
+[2026-08-16 18:30:11,684] INFO supporters.handlers StudentVerified | supporter=1 | verification=1
+[2026-08-16 18:30:11,689] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: 04848bc6-0ac7-4636-a34a-d19060126f44
+[2026-08-16 18:30:11,689] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+.[2026-08-16 18:30:11,703] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: c004044c-b4e1-4109-a101-b57063f61fd4
+[2026-08-16 18:30:11,703] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+.[2026-08-16 18:30:11,721] INFO engagement.dispatcher Publishing event: student_verified, correlation_id: 23750c14-e9be-4194-a2a9-ad66f8ed6bbe
+[2026-08-16 18:30:11,722] INFO supporters.handlers StudentVerified | supporter=1 | verification=1
+[2026-08-16 18:30:11,728] INFO engagement.dispatcher Publishing event: eligibility_granted, correlation_id: b641e532-24f0-45da-9483-12c8a40404f4
+[2026-08-16 18:30:11,728] INFO supporters.handlers EligibilityGranted | supporter=1 | eligibility=1 | reason=VERIFIED
+.[2026-08-16 18:30:11,759] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 7964d592-268e-4124-8e96-c9812a9f7bb6
+[2026-08-16 18:30:11,759] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=7964d592-268e-4124-8e96-c9812a9f7bb6
+.[2026-08-16 18:30:11,779] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 27aea06f-c4cc-467e-9a0a-8ef66fe5d097
+[2026-08-16 18:30:11,780] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=27aea06f-c4cc-467e-9a0a-8ef66fe5d097
+.[2026-08-16 18:30:11,802] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 9d2aa6ac-face-498f-a1bc-b55d44775902
+[2026-08-16 18:30:11,803] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=9d2aa6ac-face-498f-a1bc-b55d44775902
+.[2026-08-16 18:30:11,829] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: febd4d93-cef1-426b-9e37-feeaf8546433
+[2026-08-16 18:30:11,829] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=febd4d93-cef1-426b-9e37-feeaf8546433
+.[2026-08-16 18:30:11,856] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: bcb8a861-67b2-40be-bf76-763013f97dc3
+[2026-08-16 18:30:11,856] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=bcb8a861-67b2-40be-bf76-763013f97dc3
+.[2026-08-16 18:30:11,888] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 43e209fc-6974-4d5a-bc88-3b80f50304df
+[2026-08-16 18:30:11,888] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=43e209fc-6974-4d5a-bc88-3b80f50304df
+.[2026-08-16 18:30:11,907] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: e90240cc-5e2c-4440-8328-2b70f4c5ed6e
+[2026-08-16 18:30:11,907] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=e90240cc-5e2c-4440-8328-2b70f4c5ed6e
+.[2026-08-16 18:30:11,990] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 4e4ec511-6488-4a53-a208-015dc8537341
+[2026-08-16 18:30:11,991] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:11,995] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 0517029d-2d57-483a-9589-ac06af124564
+[2026-08-16 18:30:11,995] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:12,006] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: d36cc33b-0da2-4695-9721-cbc3e2c6e9d3
+[2026-08-16 18:30:12,010] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=d36cc33b-0da2-4695-9721-cbc3e2c6e9d3
+.[2026-08-16 18:30:12,063] INFO engagement.dispatcher Publishing event: journey_opened, correlation_id: 62c35b20-7707-4b1e-aed5-93d05c824c69
+[2026-08-16 18:30:12,069] INFO journeys.handlers JourneyOpened | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:12,073] INFO engagement.dispatcher Publishing event: journey_booked, correlation_id: 8e5a52db-93fd-4702-afb4-37c2b88d6c2f
+[2026-08-16 18:30:12,073] INFO journeys.handlers JourneyBooked | supporter=1 | match=1 | branch=1
+[2026-08-16 18:30:12,083] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: c67e1758-2e8e-44c0-bc8e-f3d097e93fc3
+[2026-08-16 18:30:12,084] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=c67e1758-2e8e-44c0-bc8e-f3d097e93fc3
+.[2026-08-16 18:30:12,122] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: d76dfc57-29cf-4908-a821-8522c3eafa60
+[2026-08-16 18:30:12,122] INFO engagement.handlers Ticket booked: user_id=2, ticket_id=1, match=Kaizer Chiefs, correlation_id=d76dfc57-29cf-4908-a821-8522c3eafa60
+.[2026-08-16 18:30:12,156] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 96b1cfc6-068d-4a91-bfd5-ed8be0dfc3c4
+[2026-08-16 18:30:12,156] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Orlando Pirates, correlation_id=96b1cfc6-068d-4a91-bfd5-ed8be0dfc3c4
+.[2026-08-16 18:30:12,197] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: f80529ea-94c5-4981-88f1-76db4418a456
+[2026-08-16 18:30:12,197] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=f80529ea-94c5-4981-88f1-76db4418a456
+.[2026-08-16 18:30:12,235] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: a2401b3b-f714-433f-86e9-e54c7fb6b8a0
+[2026-08-16 18:30:12,235] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Orlando Pirates, correlation_id=a2401b3b-f714-433f-86e9-e54c7fb6b8a0
+.[2026-08-16 18:30:12,289] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 7bd09bbf-cc68-437a-ab31-91a42ff63e32
+[2026-08-16 18:30:12,289] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Golden Arrows, correlation_id=7bd09bbf-cc68-437a-ab31-91a42ff63e32
+[2026-08-16 18:30:12,295] INFO engagement.dispatcher Publishing event: transport_booked, correlation_id: 4fc4221e-0a9c-4ea6-bbcb-826dfff0c1fb
+[2026-08-16 18:30:12,295] INFO engagement.handlers Transport booked: user_id=1, booking_id=1, branch=Cape Town Branch, correlation_id=4fc4221e-0a9c-4ea6-bbcb-826dfff0c1fb
+.[2026-08-16 18:30:12,323] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: e991690a-befd-4d1d-bfbc-4e7c1b24ecdf
+[2026-08-16 18:30:12,324] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Golden Arrows, correlation_id=e991690a-befd-4d1d-bfbc-4e7c1b24ecdf
+[2026-08-16 18:30:12,336] INFO engagement.dispatcher Publishing event: transport_booked, correlation_id: 0f0c4f41-8d81-4c55-b390-621c092a54a0
+[2026-08-16 18:30:12,336] INFO engagement.handlers Transport booked: user_id=1, booking_id=1, branch=Cape Town Branch, correlation_id=0f0c4f41-8d81-4c55-b390-621c092a54a0
+.[2026-08-16 18:30:12,373] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: eff517a3-7cda-4300-aff2-d2eec93ba5a4
+[2026-08-16 18:30:12,373] INFO engagement.handlers Ticket booked: user_id=2, ticket_id=1, match=Kaizer Chiefs, correlation_id=eff517a3-7cda-4300-aff2-d2eec93ba5a4
+[2026-08-16 18:30:12,384] INFO engagement.dispatcher Publishing event: transport_booked, correlation_id: 6b715fe1-38c6-4b60-8fdf-5a45477c13f7
+[2026-08-16 18:30:12,384] INFO engagement.handlers Transport booked: user_id=2, booking_id=1, branch=Johannesburg Branch, correlation_id=6b715fe1-38c6-4b60-8fdf-5a45477c13f7
+[2026-08-16 18:30:12,399] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 878ff2c8-0848-4090-9cda-5cbbf2144e4f
+[2026-08-16 18:30:12,399] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=2, match=Kaizer Chiefs, correlation_id=878ff2c8-0848-4090-9cda-5cbbf2144e4f
+.[2026-08-16 18:30:12,459] INFO engagement.dispatcher Publishing event: ticket_booked, correlation_id: 48c111ac-6d05-4caa-a651-71d3a06df5ff
+[2026-08-16 18:30:12,459] INFO engagement.handlers Ticket booked: user_id=1, ticket_id=1, match=Kaizer Chiefs, correlation_id=48c111ac-6d05-4caa-a651-71d3a06df5ff
+.
+----------------------------------------------------------------------
+Ran 232 tests in 11.810s
+
+OK
+Destroying test database for alias 'default'...

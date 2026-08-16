@@ -19,6 +19,7 @@ from sundowns_app.feature_freeze import is_frozen
 FROZEN_ROUTE_MAPPING = {
     "/membership/": "supporter",
     "/branches/": "supporter",
+    "/payments/": "supporter",
     "/points/": "loyalty",
     "/rewards/": "loyalty",
     "/engagement/": "engagement",

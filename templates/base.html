@@ -6,6 +6,20 @@
     <title>{% block title %}BranchRoute{% endblock %}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .frozen-button {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .frozen-button:hover {
+            background-color: inherit !important;
+        }
+        .frozen-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
 
@@ -28,18 +42,34 @@
                         <a href="/dashboard/" class="px-3 py-2 rounded hover:bg-yellow-400 transition">Dashboard</a>
                     {% endif %}
 
-                    <div class="relative group">
-                        <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
-                            Supporter
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div class="absolute left-0 z-20 top-full mt-0 w-44 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
-                            <a href="/membership/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Membership</a>
-                            <a href="/branches/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Branch</a>
+                    {% if supporter_frozen %}
+                        <div class="relative group">
+                            <button type="button" disabled class="frozen-button inline-flex items-center gap-1 px-3 py-2 rounded transition focus:outline-none">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 1L3 5v6c0 5.55 3.6 10.74 9 12 5.4-1.26 9-6.45 9-12V5l-9-4zm0 2l7 3.5v5.5c0 4.4-2.8 8.6-7 9.9-4.2-1.3-7-5.5-7-9.9V6.5L12 3zm0 6c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
+                                </svg>
+                                Supporter
+                                <span class="text-xs px-1 py-0.5 bg-yellow-300 rounded">Frozen</span>
+                            </button>
+                            <div class="absolute left-0 z-20 top-full mt-0 w-44 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
+                                <span class="block px-4 py-2 text-sm text-green-900/70 cursor-not-allowed">Membership (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-green-900/70 cursor-not-allowed">Branch (Frozen)</span>
+                            </div>
                         </div>
-                    </div>
+                    {% else %}
+                        <div class="relative group">
+                            <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
+                                Supporter
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 z-20 top-full mt-0 w-44 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
+                                <a href="/membership/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Membership</a>
+                                <a href="/branches/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Branch</a>
+                            </div>
+                        </div>
+                    {% endif %}
 
                     <div class="relative group">
                         <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
@@ -51,36 +81,71 @@
                         <div class="absolute left-0 z-20 top-full mt-0 w-48 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
                             <a href="/matches/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Matches</a>
                             <a href="/tickets/my-tickets/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Tickets</a>
-                            <a href="/transport/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Transport</a>
+                            {% if not transport_frozen %}
+                                <a href="/transport/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Transport</a>
+                            {% endif %}
                         </div>
                     </div>
 
-                    <div class="relative group">
-                        <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
-                            Loyalty
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div class="absolute left-0 z-20 top-full mt-0 w-48 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
-                            <a href="/points/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Points</a>
-                            <a href="/rewards/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Rewards</a>
-                            <a href="/rewards/my-redemptions/" class="block px-4 py-2 text-sm hover:bg-yellow-300">My Redemptions</a>
+                    {% if loyalty_frozen %}
+                        <div class="relative group">
+                            <button type="button" disabled class="frozen-button inline-flex items-center gap-1 px-3 py-2 rounded transition focus:outline-none">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 1L3 5v6c0 5.55 3.6 10.74 9 12 5.4-1.26 9-6.45 9-12V5l-9-4zm0 2l7 3.5v5.5c0 4.4-2.8 8.6-7 9.9-4.2-1.3-7-5.5-7-9.9V6.5L12 3zm0 6c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
+                                </svg>
+                                Loyalty
+                                <span class="text-xs px-1 py-0.5 bg-yellow-300 rounded">Frozen</span>
+                            </button>
+                            <div class="absolute left-0 z-20 top-full mt-0 w-48 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
+                                <span class="block px-4 py-2 text-sm text-green-900/70 cursor-not-allowed">Points (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-green-900/70 cursor-not-allowed">Rewards (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-green-900/70 cursor-not-allowed">My Redemptions (Frozen)</span>
+                            </div>
                         </div>
-                    </div>
+                    {% else %}
+                        <div class="relative group">
+                            <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
+                                Loyalty
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 z-20 top-full mt-0 w-48 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
+                                <a href="/points/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Points</a>
+                                <a href="/rewards/" class="block px-4 py-2 text-sm hover:bg-yellow-300">Rewards</a>
+                                <a href="/rewards/my-redemptions/" class="block px-4 py-2 text-sm hover:bg-yellow-300">My Redemptions</a>
+                            </div>
+                        </div>
+                    {% endif %}
 
-                    <div class="relative group">
-                        <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
-                            Engagement
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-                        <div class="absolute left-0 z-20 top-full mt-0 w-52 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
-                            <span class="block px-4 py-2 text-sm text-green-900/80">Campaigns (future)</span>
-                            <span class="block px-4 py-2 text-sm text-green-900/80">Competitions (future)</span>
+                    {% if engagement_frozen %}
+                        <div class="relative group">
+                            <button type="button" disabled class="frozen-button inline-flex items-center gap-1 px-3 py-2 rounded transition focus:outline-none">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 1L3 5v6c0 5.55 3.6 10.74 9 12 5.4-1.26 9-6.45 9-12V5l-9-4zm0 2l7 3.5v5.5c0 4.4-2.8 8.6-7 9.9-4.2-1.3-7-5.5-7-9.9V6.5L12 3zm0 6c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
+                                </svg>
+                                Engagement
+                                <span class="text-xs px-1 py-0.5 bg-yellow-300 rounded">Frozen</span>
+                            </button>
+                            <div class="absolute left-0 z-20 top-full mt-0 w-52 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
+                                <span class="block px-4 py-2 text-sm text-green-900/70">Campaigns (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-green-900/70">Competitions (Frozen)</span>
+                            </div>
                         </div>
-                    </div>
+                    {% else %}
+                        <div class="relative group">
+                            <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
+                                Engagement
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            <div class="absolute left-0 z-20 top-full mt-0 w-52 rounded bg-yellow-400 border border-green-900/20 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
+                                <span class="block px-4 py-2 text-sm text-green-900/80">Campaigns (future)</span>
+                                <span class="block px-4 py-2 text-sm text-green-900/80">Competitions (future)</span>
+                            </div>
+                        </div>
+                    {% endif %}
 
                     <div class="relative group">
                         <button type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded hover:bg-yellow-400 transition focus:outline-none focus:ring-2 focus:ring-green-900">
@@ -142,23 +207,48 @@
                     {% endif %}
 
                     <div class="pt-4 border-t border-green-900/20">
-                        <p class="px-3 pb-2 text-xs uppercase tracking-widest font-semibold">Supporter</p>
-                        <a href="/membership/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Membership</a>
-                        <a href="/branches/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Branch</a>
+                        {% if supporter_frozen %}
+                            <div class="flex items-center gap-2 px-3 pb-2 text-xs uppercase tracking-widest font-semibold opacity-60">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 1L3 5v6c0 5.55 3.6 10.74 9 12 5.4-1.26 9-6.45 9-12V5l-9-4zm0 2l7 3.5v5.5c0 4.4-2.8 8.6-7 9.9-4.2-1.3-7-5.5-7-9.9V6.5L12 3zm0 6c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
+                                </svg>
+                                Supporter (Frozen)
+                            </div>
+                            <span class="block rounded-lg px-3 py-3 text-lg text-green-900/70 cursor-not-allowed">Membership</span>
+                            <span class="block rounded-lg px-3 py-3 text-lg text-green-900/70 cursor-not-allowed">Branch</span>
+                        {% else %}
+                            <p class="px-3 pb-2 text-xs uppercase tracking-widest font-semibold">Supporter</p>
+                            <a href="/membership/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Membership</a>
+                            <a href="/branches/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Branch</a>
+                        {% endif %}
                     </div>
 
                     <div class="pt-4 border-t border-green-900/20">
                         <p class="px-3 pb-2 text-xs uppercase tracking-widest font-semibold">Match Day</p>
                         <a href="/matches/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Matches</a>
                         <a href="/tickets/my-tickets/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Tickets</a>
-                        <a href="/transport/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Transport</a>
+                        {% if not transport_frozen %}
+                            <a href="/transport/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Transport</a>
+                        {% endif %}
                     </div>
 
                     <div class="pt-4 border-t border-green-900/20">
-                        <p class="px-3 pb-2 text-xs uppercase tracking-widest font-semibold">Loyalty</p>
-                        <a href="/points/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Points</a>
-                        <a href="/rewards/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Rewards</a>
-                        <a href="/rewards/my-redemptions/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">My Redemptions</a>
+                        {% if loyalty_frozen %}
+                            <div class="flex items-center gap-2 px-3 pb-2 text-xs uppercase tracking-widest font-semibold opacity-60">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M12 1L3 5v6c0 5.55 3.6 10.74 9 12 5.4-1.26 9-6.45 9-12V5l-9-4zm0 2l7 3.5v5.5c0 4.4-2.8 8.6-7 9.9-4.2-1.3-7-5.5-7-9.9V6.5L12 3zm0 6c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
+                                </svg>
+                                Loyalty (Frozen)
+                            </div>
+                            <span class="block rounded-lg px-3 py-3 text-lg text-green-900/70 cursor-not-allowed">Points</span>
+                            <span class="block rounded-lg px-3 py-3 text-lg text-green-900/70 cursor-not-allowed">Rewards</span>
+                            <span class="block rounded-lg px-3 py-3 text-lg text-green-900/70 cursor-not-allowed">My Redemptions</span>
+                        {% else %}
+                            <p class="px-3 pb-2 text-xs uppercase tracking-widest font-semibold">Loyalty</p>
+                            <a href="/points/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Points</a>
+                            <a href="/rewards/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">Rewards</a>
+                            <a href="/rewards/my-redemptions/" class="block rounded-lg px-3 py-3 text-lg hover:bg-yellow-300 transition-colors">My Redemptions</a>
+                        {% endif %}
                     </div>
 
                     <div class="pt-4 border-t border-green-900/20">

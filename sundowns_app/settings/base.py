@@ -78,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "sundowns_app.middleware.FeatureFreezeMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 

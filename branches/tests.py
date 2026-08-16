@@ -453,6 +453,38 @@ class BranchAdminDashboardTests(TestCase):
         branch.refresh_from_db()
         self.assertEqual(branch.operational_match, match)
 
+    def test_edit_match_action_links_to_existing_edit_page_and_requires_authorization(self):
+        branch = Branch.objects.create(name="Edit Match Branch")
+        admin = self._create_user(username="edit-match-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=3), location="Loftus", opponent="Cape Town City")
+        branch.operational_match = match
+        branch.save(update_fields=["operational_match"])
+
+        self.client.force_login(admin)
+        committee_response = self.client.get(reverse("branch_committee", args=[branch.pk]))
+
+        self.assertEqual(committee_response.status_code, 200)
+        self.assertContains(committee_response, "Edit Match")
+        edit_url = reverse("branch_match_edit", args=[branch.pk, match.pk])
+        self.assertContains(committee_response, f'href="{edit_url}"')
+
+        edit_response = self.client.get(edit_url)
+        self.assertEqual(edit_response.status_code, 200)
+        self.assertContains(edit_response, "Edit Match")
+
+        supporter = self._create_user(username="edit-match-supporter")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        self.client.force_login(supporter)
+        forbidden_response = self.client.get(edit_url)
+        self.assertEqual(forbidden_response.status_code, 403)
+
     def test_dashboard_renders_leadership_positions_and_reports_before_committee(self):
         branch = Branch.objects.create(name="Leadership Branch")
         admin = self._create_user(username="leadership-admin")

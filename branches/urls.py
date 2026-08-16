@@ -17,6 +17,7 @@ urlpatterns = [
     path('<int:branch_id>/supporters/<int:supporter_id>/verify/', supporter_verification_view, name='branch_supporter_verification'),
     path('<int:branch_id>/matches/<int:match_id>/operations/', match_operations_console, name='match_operations_console'),
     path('<int:branch_id>/matches/manage/', views.match_management_view, name='branch_matches_manage'),
+    path('<int:branch_id>/matches/<int:match_id>/edit/', views.match_edit_view, name='branch_match_edit'),
     path('<int:branch_id>/matches/<int:match_id>/publish/', views.match_publish_view, name='branch_match_publish'),
 ]
 

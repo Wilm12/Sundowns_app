@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Match | BranchRoute{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl space-y-6">
+    <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
+        <div class="mb-5">
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Match Management</p>
+            <h1 class="text-2xl font-bold text-slate-950">Edit Match</h1>
+        </div>
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="space-y-2">
+                    <label for="id_opponent" class="block text-sm font-semibold text-slate-700">Opposition</label>
+                    {{ form.opponent }}
+                </div>
+                <div class="space-y-2">
+                    <label for="id_date" class="block text-sm font-semibold text-slate-700">Match Date</label>
+                    {{ form.date }}
+                </div>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="space-y-2">
+                    <label for="id_location" class="block text-sm font-semibold text-slate-700">Venue</label>
+                    {{ form.location }}
+                </div>
+                <div class="space-y-2">
+                    <label for="id_gate_number" class="block text-sm font-semibold text-slate-700">Gate Number</label>
+                    {{ form.gate_number }}
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label for="id_ticket_collection_timeframe" class="block text-sm font-semibold text-slate-700">Ticket Collection Window</label>
+                {{ form.ticket_collection_timeframe }}
+            </div>
+
+            <div class="flex items-center gap-3 rounded-2xl bg-slate-50 px-3 py-2">
+                {{ form.published }}
+                <label for="id_published" class="text-sm font-semibold text-slate-700">Publish Immediately</label>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+                <button type="submit" class="inline-flex items-center justify-center rounded-full bg-green-700 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-green-700/20 hover:bg-green-800">Save Changes</button>
+                <a href="{% url 'branch_committee' branch.id %}" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900">Cancel</a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}

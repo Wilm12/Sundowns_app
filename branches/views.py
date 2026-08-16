@@ -7,12 +7,14 @@ including admin-restricted operations and member dashboard navigation.
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from users.models import User
 from transport.models import Transport
 from supporters.models import StudentVerification, StudentVerificationStatus
 from supporters.services.verify_student import VerifyStudentService
 from journeys.services.collect_ticket import CollectTicketService
+from analytics.services import AnalyticsSnapshotService
 from matches.models import Match
 from .models import Branch, BranchRole, CommitteeAction, CommitteePosition
 from authentication.permissions import IsAdminOrReadOnly
@@ -246,17 +248,43 @@ def match_management_view(request, branch_id):
 
 
 @login_required
+def match_edit_view(request, branch_id, match_id):
+    """Edit an existing match for the branch while preserving the current admin workflow."""
+    branch = get_object_or_404(Branch, id=branch_id)
+    if not is_branch_admin(request.user, branch):
+        return HttpResponseForbidden()
+
+    match = get_object_or_404(Match, id=match_id)
+
+    if request.method == "POST":
+        form = MatchForm(request.POST, instance=match)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Match updated successfully.")
+            return redirect("branch_committee", branch_id=branch.pk)
+    else:
+        form = MatchForm(instance=match)
+
+    return render(request, "branches/edit_match.html", {
+        "branch": branch,
+        "match": match,
+        "form": form,
+    })
+
+
+@login_required
 def match_publish_view(request, branch_id, match_id):
     branch = get_object_or_404(Branch, id=branch_id)
     if not is_branch_admin(request.user, branch):
         return render(request, "403.html", status=403)
 
     match = get_object_or_404(Match, id=match_id)
-    # Toggle publish if already published
+    # Toggle publish if already published; closing an active match finalizes the snapshot.
     if branch.operational_match_id == match.id:
+        AnalyticsSnapshotService.generate_for_match(match)
         branch.operational_match = None
         branch.save(update_fields=["operational_match"])
-        messages.success(request, "Operational match cleared.")
+        messages.success(request, "Operational match cleared and analytics finalized.")
     else:
         branch.operational_match = match
         branch.save(update_fields=["operational_match"])

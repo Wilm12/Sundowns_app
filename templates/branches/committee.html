@@ -184,7 +184,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-2 pt-2">
-                            <button type="button" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900">Edit Match</button>
+                            <a href="{% url 'branch_match_edit' branch.id branch.operational_match.id %}" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900">Edit Match</a>
                             <a href="{% url 'branch_match_publish' branch.id branch.operational_match.id %}" class="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700">Close Match</a>
                         </div>
                     </div>

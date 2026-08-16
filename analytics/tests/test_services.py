@@ -325,6 +325,49 @@ class AnalyticsServiceTests(TestCase):
         self.assertEqual(metrics['attended'], 2)
         self.assertEqual(metrics['attendance_rate'], 50.0)
 
+    def test_close_match_generates_branch_snapshot_with_approved_metrics_and_idempotent_finalization(self):
+        branch_one = Branch.objects.create(name='Mamelodi East', branch_code='ME', category='COMMUNITY')
+        branch_two = Branch.objects.create(name='Tuks', branch_code='TUKS', category='INSTITUTIONAL')
+        match = Match.objects.create(date=timezone.now(), location='Loftus', opponent='Kaizer Chiefs', published=True)
+
+        supporter_a = User.objects.create_user(username='close_a', email='close_a@example.com', password='pass123')
+        supporter_b = User.objects.create_user(username='close_b', email='close_b@example.com', password='pass123')
+        supporter_c = User.objects.create_user(username='close_c', email='close_c@example.com', password='pass123')
+        supporter_d = User.objects.create_user(username='close_d', email='close_d@example.com', password='pass123')
+
+        StudentVerification.objects.create(user=supporter_a, student_number='A2001', university='UP', status=StudentVerificationStatus.VERIFIED)
+        StudentVerification.objects.create(user=supporter_b, student_number='B2002', university='UP', status=StudentVerificationStatus.APPROVED)
+        StudentVerification.objects.create(user=supporter_c, student_number='C2003', university='Wits', status=StudentVerificationStatus.VERIFIED)
+
+        Journey.objects.create(supporter=supporter_a, branch=branch_one, match=match, status=JourneyStatus.BOOKED)
+        Journey.objects.create(supporter=supporter_b, branch=branch_one, match=match, status=JourneyStatus.TICKET_COLLECTED)
+        Journey.objects.create(supporter=supporter_c, branch=branch_one, match=match, status=JourneyStatus.MATCH_ATTENDED)
+        Journey.objects.create(supporter=supporter_d, branch=branch_two, match=match, status=JourneyStatus.BOOKED)
+
+        snapshots_before = BranchMatchSnapshot.objects.filter(match=match)
+        self.assertEqual(snapshots_before.count(), 0)
+
+        branch_one.operational_match = match
+        branch_one.save(update_fields=['operational_match'])
+
+        AnalyticsSnapshotService.generate_for_match(match)
+        branch_one_snapshot = BranchMatchSnapshot.objects.get(match=match, branch=branch_one)
+
+        self.assertEqual(branch_one_snapshot.booked, 3)
+        self.assertEqual(branch_one_snapshot.collected, 2)
+        self.assertEqual(branch_one_snapshot.attended, 1)
+        self.assertEqual(branch_one_snapshot.verification_completed, 3)
+        self.assertEqual(branch_one_snapshot.attended, 1)
+        self.assertEqual(round(branch_one_snapshot.attended / branch_one_snapshot.booked * 100, 2), 33.33)
+
+        branch_two_snapshot = BranchMatchSnapshot.objects.get(match=match, branch=branch_two)
+        self.assertEqual(branch_two_snapshot.booked, 1)
+        self.assertEqual(branch_two_snapshot.attended, 0)
+        self.assertEqual(branch_two_snapshot.verification_completed, 0)
+
+        AnalyticsSnapshotService.generate_for_match(match)
+        self.assertEqual(BranchMatchSnapshot.objects.filter(match=match).count(), 2)
+
     def test_branch_analytics_handles_zero_booking_case(self):
         branch = Branch.objects.create(name='Mamelodi East', branch_code='ME', category='COMMUNITY')
         match = Match.objects.create(date=timezone.now(), location='Loftus', opponent='Cape Town City', published=True)

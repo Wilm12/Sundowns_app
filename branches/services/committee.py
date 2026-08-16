@@ -23,8 +23,12 @@ class CommitteeService:
             for position_value, _ in CommitteePosition.Position.choices
         }
         for committee_position in CommitteePosition.objects.filter(branch=branch).select_related("branch_role", "branch_role__user"):
-            if committee_position.branch_role and committee_position.branch_role.is_active:
-                positions[committee_position.get_position_display()] = committee_position.branch_role.user
+            if not committee_position.branch_role or not committee_position.branch_role.is_active:
+                continue
+            display_name = committee_position.get_position_display()
+            if display_name not in positions:
+                continue
+            positions[display_name] = committee_position.branch_role.user
         return positions
 
     @staticmethod

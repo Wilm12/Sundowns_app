@@ -157,11 +157,12 @@ class BranchRole(models.Model):
 class CommitteePosition(models.Model):
     class Position(models.TextChoices):
         CHAIRPERSON = "CHAIRPERSON", "Chairperson"
-        VICE_CHAIRPERSON = "VICE_CHAIRPERSON", "Vice Chairperson"
+        DEPUTY_CHAIRPERSON = "DEPUTY_CHAIRPERSON", "Deputy Chairperson"
         SECRETARY = "SECRETARY", "Secretary"
+        DEPUTY_SECRETARY = "DEPUTY_SECRETARY", "Deputy Secretary"
         TREASURER = "TREASURER", "Treasurer"
-        MEDIA_OFFICER = "MEDIA_OFFICER", "Media Officer"
-        LOGISTICS_COORDINATOR = "LOGISTICS_COORDINATOR", "Logistics Coordinator"
+        TRANSFORMATION_OFFICER = "TRANSFORMATION_OFFICER", "Transformation Officer"
+        SPORTS_OFFICER = "SPORTS_OFFICER", "Sports Officer"
 
     branch = models.ForeignKey(
         Branch,

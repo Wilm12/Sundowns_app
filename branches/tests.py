@@ -14,6 +14,7 @@ from supporters.models import EligibilityReason, SupporterEligibility, StudentVe
 from ticketing.models import Ticket
 from users.models import User
 
+from .forms import CommitteePositionManagementForm
 from .models import Branch, BranchPolicy, BranchRole, BranchStatus, CommitteeActivity, CommitteeAction, CommitteePosition, MatchAllocation
 from .serializers import BranchPolicySerializer, BranchRoleSerializer, BranchSerializer
 from .services.assign_branch_role import AssignBranchRoleService, BranchRoleAlreadyAssigned
@@ -607,6 +608,64 @@ class BranchAdminDashboardTests(TestCase):
             ).exists()
         )
         self.assertIn("Chairperson", dashboard["committee_members"][0]["position"])
+
+    def test_committee_position_catalog_has_exactly_the_seven_official_positions(self):
+        expected_positions = [
+            ("CHAIRPERSON", "Chairperson"),
+            ("DEPUTY_CHAIRPERSON", "Deputy Chairperson"),
+            ("SECRETARY", "Secretary"),
+            ("DEPUTY_SECRETARY", "Deputy Secretary"),
+            ("TREASURER", "Treasurer"),
+            ("TRANSFORMATION_OFFICER", "Transformation Officer"),
+            ("SPORTS_OFFICER", "Sports Officer"),
+        ]
+
+        self.assertEqual(CommitteePosition.Position.choices, expected_positions)
+        self.assertEqual(len(CommitteePosition.Position.choices), 7)
+
+    def test_committee_position_form_exposes_only_the_official_positions(self):
+        branch = Branch.objects.create(name="Official Positions Branch")
+        admin = self._create_user(username="official-positions-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        form = CommitteePositionManagementForm(branch=branch)
+
+        self.assertEqual(
+            [choice[0] for choice in form.fields["position"].choices[1:]],
+            [
+                "CHAIRPERSON",
+                "DEPUTY_CHAIRPERSON",
+                "SECRETARY",
+                "DEPUTY_SECRETARY",
+                "TREASURER",
+                "TRANSFORMATION_OFFICER",
+                "SPORTS_OFFICER",
+            ],
+        )
+
+    def test_get_leadership_positions_ignores_unknown_legacy_values_without_changing_assignments(self):
+        branch = Branch.objects.create(name="Legacy Position Branch")
+        admin = self._create_user(username="legacy-position-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        admin_role = BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        legacy_admin = self._create_user(username="legacy-position-admin-2")
+        legacy_admin.branch = branch
+        legacy_admin.save(update_fields=["branch"])
+        legacy_role = BranchRole.objects.create(branch=branch, user=legacy_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        CommitteePosition.objects.create(branch=branch, branch_role=legacy_role, position="VICE_CHAIRPERSON", created_by=admin)
+        CommitteePosition.objects.create(branch=branch, branch_role=admin_role, position=CommitteePosition.Position.CHAIRPERSON, created_by=admin)
+
+        leadership_positions = CommitteeService.get_leadership_positions(branch)
+
+        self.assertEqual(leadership_positions["Chairperson"], admin)
+        self.assertNotIn("Vice Chairperson", leadership_positions)
+        self.assertNotIn("Media Officer", leadership_positions)
+        self.assertNotIn("Logistics Coordinator", leadership_positions)
 
     def test_dashboard_renders_single_reports_and_recent_activity_sections(self):
         branch = Branch.objects.create(name="Layout Branch")

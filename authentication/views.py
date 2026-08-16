@@ -19,7 +19,9 @@ from .serializers import RegisterSerializer, MeSerializer, EmailTokenObtainPairS
 
 
 def _get_app_redirect(user):
-    if user.is_superuser or is_branch_admin(user):
+    if user.is_superuser:
+        return "admin_dashboard"
+    if is_branch_admin(user):
         return "branch_admin_dashboard"
     return "dashboard"
 

@@ -109,6 +109,29 @@ class LoginTests(APITestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse("branch_admin_dashboard"))
 
+    def test_superuser_without_branch_role_redirects_to_admin_dashboard(self):
+        user = User.objects.create_user(
+            username="admin1",
+            email="admin1@example.com",
+            password="StrongPass123!",
+        )
+        user.is_superuser = True
+        user.is_staff = True
+        user.is_active = True
+        user.role = "admin"
+        user.save(update_fields=["is_superuser", "is_staff", "is_active", "role"])
+
+        response = self.client.post(
+            reverse("login_page"),
+            {
+                "email": user.email,
+                "password": "StrongPass123!",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("admin_dashboard"))
+
     def test_navigation_shows_branch_admin_link_for_authorized_users(self):
         branch = Branch.objects.create(name="Durban Branch", location="Durban")
         user = User.objects.create_user(

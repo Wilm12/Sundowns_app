@@ -267,46 +267,135 @@ class BranchAdminDashboardTests(TestCase):
         self.assertEqual(journey.status, JourneyStatus.MATCH_ATTENDED)
         self.assertEqual(journey.attended_by, admin)
 
-    def test_branch_admin_dashboard_renders_branch_analytics_for_current_branch_only(self):
-        branch = Branch.objects.create(name="Mamelodi East")
-        other_branch = Branch.objects.create(name="Tuks")
-        admin = self._create_user(username="branch-analytics-admin")
+    def test_branch_admin_dashboard_displays_operational_current_match_report(self):
+        """Landing dashboard shows operational report: Allocated, Booked, Pending, Attended."""
+        branch = Branch.objects.create(name="Operational Branch")
+        admin = self._create_user(username="operational-admin")
         admin.branch = branch
         admin.save(update_fields=["branch"])
         BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
 
-        supporter_one = self._create_user(username="branch-analytics-one")
-        supporter_two = self._create_user(username="branch-analytics-two")
-        supporter_three = self._create_user(username="branch-analytics-three")
-        other_supporter = self._create_user(username="other-branch-supporter")
+        supporter_one = self._create_user(username="op-supp-one")
+        supporter_two = self._create_user(username="op-supp-two")
+        supporter_three = self._create_user(username="op-supp-three")
+        supporter_four = self._create_user(username="op-supp-four")
 
         match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Kaizer Chiefs")
-        other_match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=2), location="Loftus", opponent="Cape Town City")
 
+        # Booked (not collected)
         Journey.objects.create(supporter=supporter_one, branch=branch, match=match, status=JourneyStatus.BOOKED)
-        Journey.objects.create(supporter=supporter_two, branch=branch, match=match, status=JourneyStatus.TICKET_COLLECTED)
-        Journey.objects.create(supporter=supporter_three, branch=branch, match=other_match, status=JourneyStatus.BOOKED)
-        Journey.objects.create(supporter=other_supporter, branch=other_branch, match=match, status=JourneyStatus.MATCH_ATTENDED)
+        # Ticket ready (pending)
+        Journey.objects.create(supporter=supporter_two, branch=branch, match=match, status=JourneyStatus.TICKET_READY)
+        # Ticket collected (counts as attended)
+        Journey.objects.create(supporter=supporter_three, branch=branch, match=match, status=JourneyStatus.TICKET_COLLECTED)
+        # Match attended
+        Journey.objects.create(supporter=supporter_four, branch=branch, match=match, status=JourneyStatus.MATCH_ATTENDED)
 
-        StudentVerification.objects.create(user=supporter_one, student_number="BA1", university="UP", status=StudentVerificationStatus.VERIFIED)
-        StudentVerification.objects.create(user=supporter_two, student_number="BA2", university="UP", status=StudentVerificationStatus.APPROVED)
-        StudentVerification.objects.create(user=supporter_three, student_number="BA3", university="UJ", status=StudentVerificationStatus.PENDING)
-        StudentVerification.objects.create(user=other_supporter, student_number="BA4", university="UCT", status=StudentVerificationStatus.VERIFIED)
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        # Operational report should be visible
+        self.assertContains(response, "Current Match Report")
+        self.assertContains(response, "Kaizer Chiefs")
+        
+        # Operational metrics should be visible
+        self.assertContains(response, "Allocated")
+        self.assertContains(response, "Booked")
+        self.assertContains(response, "Pending")
+        self.assertContains(response, "Attended")
+
+    def test_branch_admin_dashboard_does_not_show_analytics_cards_inline(self):
+        """Landing dashboard must NOT display the Branch Performance analytics cards directly."""
+        branch = Branch.objects.create(name="No Analytics Branch")
+        admin = self._create_user(username="no-analytics-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter = self._create_user(username="no-analytics-supp")
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Pirates")
+        Journey.objects.create(supporter=supporter, branch=branch, match=match, status=JourneyStatus.BOOKED)
 
         self.client.force_login(admin)
         response = self.client.get(reverse("branch_admin_dashboard"))
         content = response.content.decode()
 
+        # Analytics cards should NOT appear on landing dashboard
+        self.assertNotContains(response, "Current Match Performance")
+        self.assertNotContains(response, "Performance Across Matches")
+        self.assertNotContains(response, "Supporters Booked")
+        self.assertNotContains(response, "Supporters Attended")
+        self.assertNotContains(response, "Verification Completed")
+        self.assertNotContains(response, "Attendance Rate")
+
+    def test_branch_performance_page_loads_and_shows_only_current_branch_analytics(self):
+        branch = Branch.objects.create(name="Performance Analytics Branch")
+        other_branch = Branch.objects.create(name="Other Analytics Branch")
+        admin = self._create_user(username="perf-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        supporter_one = self._create_user(username="perf-supp-one")
+        supporter_two = self._create_user(username="perf-supp-two")
+        other_supporter = self._create_user(username="perf-other-supp")
+
+        match = Match.objects.create(date=timezone.now(), location="Loftus", opponent="Kaizer Chiefs")
+        other_match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=5), location="Ellis Park", opponent="Lions")
+
+        Journey.objects.create(supporter=supporter_one, branch=branch, match=match, status=JourneyStatus.BOOKED)
+        Journey.objects.create(supporter=supporter_two, branch=branch, match=match, status=JourneyStatus.TICKET_COLLECTED)
+        Journey.objects.create(supporter=other_supporter, branch=other_branch, match=match, status=JourneyStatus.MATCH_ATTENDED)
+        Journey.objects.create(supporter=other_supporter, branch=other_branch, match=other_match, status=JourneyStatus.BOOKED)
+
+        StudentVerification.objects.create(user=supporter_one, student_number="BPA1", university="UP", status=StudentVerificationStatus.VERIFIED)
+        StudentVerification.objects.create(user=supporter_two, student_number="BPA2", university="UP", status=StudentVerificationStatus.APPROVED)
+        StudentVerification.objects.create(user=other_supporter, student_number="BPA3", university="Wits", status=StudentVerificationStatus.VERIFIED)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_performance", args=[branch.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Branch Performance")
+        self.assertContains(response, branch.name)
         self.assertContains(response, "Current Match Performance")
+        self.assertContains(response, "Performance Across Matches")
         self.assertContains(response, "Supporters Booked")
         self.assertContains(response, "Supporters Attended")
         self.assertContains(response, "Attendance Rate")
         self.assertContains(response, "Verification Completed")
-        self.assertContains(response, "Performance Across Matches")
         self.assertContains(response, "Kaizer Chiefs")
-        self.assertContains(response, "Mamelodi East")
-        self.assertNotContains(response, "Tuks")
-        self.assertContains(response, "2")
+        self.assertNotContains(response, other_branch.name)
+
+    def test_dashboard_reports_card_shows_branch_performance_button(self):
+        """Landing dashboard Reports section must show 'Branch Performance' button."""
+        branch = Branch.objects.create(name="Reports Button Branch")
+        admin = self._create_user(username="reports-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        # Should have "Branch Performance" button
+        self.assertContains(response, "Branch Performance")
+        # Should NOT have "Attendance Report" button
+        self.assertNotContains(response, "Attendance Report")
+        # Button should link to dedicated performance page
+        self.assertContains(response, f'href="{reverse("branch_performance", args=[branch.id])}"')
+
+    def test_branch_performance_page_requires_branch_admin_authorization(self):
+        branch = Branch.objects.create(name="Auth Test Branch")
+        supporter = self._create_user(username="auth-supp")
+        supporter.branch = branch
+        supporter.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=supporter, role=BranchRole.Role.MEMBER, is_active=True)
+
+        self.client.force_login(supporter)
+        response = self.client.get(reverse("branch_performance", args=[branch.id]))
+
+        self.assertEqual(response.status_code, 403)
 
     def test_dashboard_uses_branch_operational_match_when_available(self):
         branch = Branch.objects.create(name="Operational Match Branch")

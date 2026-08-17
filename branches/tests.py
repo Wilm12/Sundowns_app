@@ -704,6 +704,51 @@ class BranchAdminDashboardTests(TestCase):
             ],
         )
 
+    def test_assign_leadership_position_via_committee_form(self):
+        branch = Branch.objects.create(name="Assignment Form Branch")
+        chair_admin = self._create_user(username="leadership-chair-admin")
+        chair_admin.branch = branch
+        chair_admin.save(update_fields=["branch"])
+        chair_role = BranchRole.objects.create(branch=branch, user=chair_admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+        CommitteePosition.objects.create(branch=branch, branch_role=chair_role, position=CommitteePosition.Position.CHAIRPERSON, created_by=chair_admin)
+
+        treasurer_admin = self._create_user(username="leadership-treasurer-admin")
+        treasurer_admin.branch = branch
+        treasurer_admin.save(update_fields=["branch"])
+        treasurer_role = BranchRole.objects.create(
+            branch=branch,
+            user=treasurer_admin,
+            role=BranchRole.Role.BRANCH_ADMIN,
+            is_active=True,
+        )
+
+        self.client.force_login(chair_admin)
+        response = self.client.post(
+            reverse("branch_committee", args=[branch.pk]),
+            {
+                "committee_action": "1",
+                "action": "assign",
+                "member": treasurer_admin.pk,
+                "position": CommitteePosition.Position.TREASURER,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            CommitteePosition.objects.filter(
+                branch=branch,
+                branch_role=treasurer_role,
+                position=CommitteePosition.Position.TREASURER,
+            ).exists()
+        )
+        self.assertTrue(
+            CommitteePosition.objects.filter(
+                branch=branch,
+                branch_role=chair_role,
+                position=CommitteePosition.Position.CHAIRPERSON,
+            ).exists()
+        )
+
     def test_get_leadership_positions_ignores_unknown_legacy_values_without_changing_assignments(self):
         branch = Branch.objects.create(name="Legacy Position Branch")
         admin = self._create_user(username="legacy-position-admin")

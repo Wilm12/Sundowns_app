@@ -303,6 +303,7 @@
             <form method="post" class="grid gap-3 md:grid-cols-[1.2fr_1fr_auto]">
                 {% csrf_token %}
                 <input type="hidden" name="committee_action" value="1">
+                <input type="hidden" name="action" value="assign">
                 <div>
                     <label for="id_member" class="mb-2 block text-sm font-semibold text-slate-700">Committee member</label>
                     {{ position_form.member }}

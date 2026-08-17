@@ -624,6 +624,39 @@ class BranchAdminDashboardTests(TestCase):
         forbidden_response = self.client.get(edit_url)
         self.assertEqual(forbidden_response.status_code, 403)
 
+    def test_branch_admin_dashboard_shows_disabled_ticket_collection_when_no_match(self):
+        branch = Branch.objects.create(name="No Match Ticket Branch")
+        admin = self._create_user(username="no-match-ticket-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ticket Collection")
+        self.assertContains(response, "No match currently available")
+        self.assertNotIn(">Ticket Collection</a>", response.content.decode())
+
+    def test_branch_admin_dashboard_ticket_collection_remains_active_link_when_match_exists(self):
+        branch = Branch.objects.create(name="Match Ticket Branch")
+        admin = self._create_user(username="match-ticket-admin")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        match = Match.objects.create(date=timezone.now() + timezone.timedelta(days=3), location="Loftus", opponent="Cape Town City")
+        branch.operational_match = match
+        branch.save(update_fields=["operational_match"])
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'href="' + reverse("match_operations_console", args=[branch.pk, match.pk]) + '"')
+        self.assertContains(response, "Ticket Collection")
+
     def test_dashboard_renders_leadership_positions_and_reports_before_committee(self):
         branch = Branch.objects.create(name="Leadership Branch")
         admin = self._create_user(username="leadership-admin")

@@ -9,13 +9,16 @@ from branches.services.authorization import is_branch_admin
 def branch_admin_dashboard_view(request):
     branch = request.user.branch
 
-    if branch is None:
+    if branch is None and not request.user.is_superuser:
         branch_role = BranchRole.objects.filter(
             user=request.user,
             role=BranchRole.Role.BRANCH_ADMIN,
             is_active=True,
         ).select_related("branch").first()
         branch = branch_role.branch if branch_role else None
+
+    if branch is None:
+        return HttpResponseForbidden("This user has no assigned branch and cannot access the branch admin dashboard.")
 
     if not is_branch_admin(request.user, branch):
         return HttpResponseForbidden()

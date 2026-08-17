@@ -37,6 +37,65 @@ class BranchAdminDashboardTests(TestCase):
         self.assertTrue(is_branch_admin(admin))
         self.assertTrue(is_branch_admin(admin, branch))
 
+    def test_superuser_with_assigned_branch_is_authorized_for_branch_admin_dashboard(self):
+        branch = Branch.objects.create(name="Tuks Authorization Branch")
+        superuser = self._create_user(username="superuser-branch-authorized")
+        superuser.branch = branch
+        superuser.is_superuser = True
+        superuser.role = "admin"
+        superuser.save(update_fields=["branch", "is_superuser", "role"])
+
+        self.assertTrue(is_branch_admin(superuser))
+        self.assertTrue(is_branch_admin(superuser, branch))
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_superuser_without_assigned_branch_cannot_access_branch_admin_dashboard(self):
+        superuser = self._create_user(username="superuser-no-branch")
+        superuser.is_superuser = True
+        superuser.role = "admin"
+        superuser.save(update_fields=["is_superuser", "role"])
+
+        self.client.force_login(superuser)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_branch_admin_with_active_role_can_access_branch_admin_dashboard(self):
+        branch = Branch.objects.create(name="Authorized Branch Admin Branch")
+        admin = self._create_user(username="branch-admin-dashboard-access")
+        admin.branch = branch
+        admin.save(update_fields=["branch"])
+        BranchRole.objects.create(branch=branch, user=admin, role=BranchRole.Role.BRANCH_ADMIN, is_active=True)
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_normal_member_cannot_access_branch_admin_dashboard(self):
+        branch = Branch.objects.create(name="Member Forbidden Branch")
+        member = self._create_user(username="member-no-branch-access")
+        member.branch = branch
+        member.save(update_fields=["branch"])
+
+        self.client.force_login(member)
+        response = self.client.get(reverse("branch_admin_dashboard"))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_dashboard_route_remains_available_for_global_admins(self):
+        admin = self._create_user(username="legacy-admin")
+        admin.role = "admin"
+        admin.save(update_fields=["role"])
+
+        self.client.force_login(admin)
+        response = self.client.get(reverse("admin_dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
     def test_dashboard_metrics_are_correct(self):
         branch = Branch.objects.create(name="Metrics Branch")
         admin = self._create_user(username="metrics-admin")

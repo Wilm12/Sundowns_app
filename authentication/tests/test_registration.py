@@ -60,3 +60,121 @@ class RegistrationTests(APITestCase):
         user = get_user(self.client)
         self.assertTrue(user.is_authenticated)
         self.assertEqual(user.email, "newuser@example.com")
+
+    def test_register_page_password_mismatch_preserves_safe_values_and_renders_error(self):
+        branch = Branch.objects.create(name="Soweto Branch", location="Soweto")
+        password = "StrongPass123!"
+        confirmation = "DifferentPass123!"
+
+        response = self.client.post(
+            reverse("register_page"),
+            {
+                "first_name": "Anele",
+                "last_name": "Mokoena",
+                "email": "anele@example.com",
+                "password": password,
+                "password_confirm": confirmation,
+                "branch": branch.id,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Passwords do not match.")
+        self.assertContains(response, 'value="Anele"')
+        self.assertContains(response, 'value="Mokoena"')
+        self.assertContains(response, 'value="anele@example.com"')
+        self.assertNotContains(response, password)
+        self.assertNotContains(response, confirmation)
+
+    def test_register_page_duplicate_email_preserves_safe_values_and_renders_error(self):
+        branch = Branch.objects.create(name="Soweto Branch", location="Soweto")
+        User.objects.create_user(
+            username="existing@example.com",
+            email="existing@example.com",
+            password="StrongPass123!",
+            branch=branch,
+        )
+        password = "AnotherPass123!"
+
+        response = self.client.post(
+            reverse("register_page"),
+            {
+                "first_name": "Thabo",
+                "last_name": "Nkosi",
+                "email": "existing@example.com",
+                "password": password,
+                "password_confirm": password,
+                "branch": branch.id,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "A user with this email already exists.")
+        self.assertContains(response, 'value="Thabo"')
+        self.assertContains(response, 'value="Nkosi"')
+        self.assertContains(response, 'value="existing@example.com"')
+        self.assertNotContains(response, password)
+
+    def test_register_page_password_policy_error_does_not_repopulate_passwords(self):
+        branch = Branch.objects.create(name="Soweto Branch", location="Soweto")
+        password = "short"
+
+        response = self.client.post(
+            reverse("register_page"),
+            {
+                "first_name": "Lerato",
+                "last_name": "Dube",
+                "email": "lerato@example.com",
+                "password": password,
+                "password_confirm": password,
+                "branch": branch.id,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Ensure this field has at least 8 characters.")
+        self.assertContains(response, 'value="Lerato"')
+        self.assertContains(response, 'value="Dube"')
+        self.assertContains(response, 'value="lerato@example.com"')
+        self.assertNotContains(response, password)
+
+    def test_register_page_missing_required_field_renders_field_error(self):
+        branch = Branch.objects.create(name="Soweto Branch", location="Soweto")
+        password = "StrongPass123!"
+
+        response = self.client.post(
+            reverse("register_page"),
+            {
+                "last_name": "Maseko",
+                "email": "maseko@example.com",
+                "password": password,
+                "password_confirm": password,
+                "branch": branch.id,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This field is required.")
+        self.assertContains(response, 'value="Maseko"')
+        self.assertContains(response, 'value="maseko@example.com"')
+        self.assertNotContains(response, password)
+
+    def test_register_page_preserves_selected_branch_after_validation_failure(self):
+        branch = Branch.objects.create(name="Soweto Branch", location="Soweto")
+        password = "StrongPass123!"
+
+        response = self.client.post(
+            reverse("register_page"),
+            {
+                "first_name": "Nandi",
+                "last_name": "Zulu",
+                "email": "nandi@example.com",
+                "password": password,
+                "password_confirm": "Mismatch123!",
+                "branch": branch.id,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, f'<option value="{branch.id}" selected>')
+        self.assertNotContains(response, password)

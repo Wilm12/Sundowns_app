@@ -12,6 +12,8 @@ The monitoring stack provides:
 * Early warning of system failures
 * Operational troubleshooting support
 
+For the planned progression from monitoring to observability and SRE practices, see the [Observability & SRE Roadmap](../../observability_sre_roadmap.md).
+
 ---
 
 # Monitoring Architecture

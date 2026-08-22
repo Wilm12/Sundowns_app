@@ -15,24 +15,36 @@
         <input
             name="first_name"
             placeholder="First Name"
+            value="{{ registration_values.first_name }}"
             class="w-full border rounded px-4 py-2"
             required
         >
+        {% for error in registration_serializer.errors.first_name %}
+            <p class="text-red-700">{{ error }}</p>
+        {% endfor %}
 
         <input
             name="last_name"
             placeholder="Last Name"
+            value="{{ registration_values.last_name }}"
             class="w-full border rounded px-4 py-2"
             required
         >
+        {% for error in registration_serializer.errors.last_name %}
+            <p class="text-red-700">{{ error }}</p>
+        {% endfor %}
 
         <input
             name="email"
             type="email"
             placeholder="Email"
+            value="{{ registration_values.email }}"
             class="w-full border rounded px-4 py-2"
             required
         >
+        {% for error in registration_serializer.errors.email %}
+            <p class="text-red-700">{{ error }}</p>
+        {% endfor %}
 
         <input
             name="password"
@@ -49,6 +61,9 @@
             class="w-full border rounded px-4 py-2"
             required
         >
+        {% for error in registration_serializer.errors.password %}
+            <p class="text-red-700">{{ error }}</p>
+        {% endfor %}
 
         <select
             name="branch"
@@ -58,11 +73,18 @@
             <option value="">Select your branch</option>
 
             {% for branch in branches %}
-                <option value="{{ branch.id }}">
+                <option value="{{ branch.id }}"{% if registration_values.branch == branch.id|stringformat:"s" %} selected{% endif %}>
                     {{ branch.name }}
                 </option>
             {% endfor %}
         </select>
+        {% for error in registration_serializer.errors.branch %}
+            <p class="text-red-700">{{ error }}</p>
+        {% endfor %}
+
+        {% for error in registration_serializer.errors.non_field_errors %}
+            <p class="text-red-700">{{ error }}</p>
+        {% endfor %}
 
         <button
             type="submit"

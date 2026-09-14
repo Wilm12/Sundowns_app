@@ -12,7 +12,7 @@
                     <h1 class="mt-2 text-2xl font-bold sm:text-3xl">{{ branch.name }}</h1>
                 </div>
                 <div class="rounded-2xl bg-white/12 px-4 py-3 backdrop-blur-sm">
-                    <p class="text-xs uppercase tracking-[0.2em] text-green-100">Branch Admins</p>
+                    <p class="text-xs uppercase tracking-[0.2em] text-cyan-100">Branch Admins</p>
                     <p class="mt-2 text-xl font-semibold">{{ committee_members|length }}</p>
                 </div>
             </div>
@@ -241,7 +241,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="promote" value="1">
                                     <input type="hidden" name="supporter" value="{{ supporter.id }}">
-                                    <button type="submit" class="rounded-full border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-800">Promote to Committee</button>
+                                    <button type="submit" class="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-brand-secondary">Promote to Committee</button>
                                 </form>
                             </div>
                         {% endfor %}

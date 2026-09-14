@@ -11,9 +11,9 @@
                     <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-100">Branch Admin Dashboard</p>
                     <h1 class="text-2xl font-bold sm:text-3xl">{{ dashboard.branch.name }}</h1>
                     {% if dashboard.branch.category == 'INSTITUTIONAL' %}
-                        <p class="text-sm sm:text-base text-green-50/90">{{ dashboard.branch.institution }}</p>
+                        <p class="text-sm sm:text-base text-slate-200">{{ dashboard.branch.institution }}</p>
                     {% else %}
-                        <p class="text-sm sm:text-base text-green-50/90">Community Branch</p>
+                        <p class="text-sm sm:text-base text-slate-200">Community Branch</p>
                     {% endif %}
                     <p class="text-sm sm:text-base text-slate-200">2026/27 Season</p>
                 </div>
@@ -70,7 +70,7 @@
                 <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Current Match Report</p>
                 <h2 class="text-xl font-bold text-slate-950">{{ dashboard.dashboard_match.opponent|default:"No upcoming match" }}</h2>
             </div>
-            <div class="rounded-2xl bg-green-50 px-3 py-2 text-sm font-semibold text-green-800">
+            <div class="rounded-2xl bg-blue-50 px-3 py-2 text-sm font-semibold text-brand-secondary">
                 {% if dashboard.dashboard_match %}
                     {{ dashboard.dashboard_match.date|date:"M j, Y" }}
                 {% endif %}
@@ -139,7 +139,7 @@
                 {% else %}
                     <div class="rounded-full border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-500 opacity-70" aria-disabled="true" tabindex="-1">
                         <div>Ticket Collection</div>
-                        <div class="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">No match currently available</div>
+                        <div class="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-slate-600">No match currently available</div>
                     </div>
                 {% endif %}
             </div>

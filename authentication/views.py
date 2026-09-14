@@ -127,8 +127,15 @@ def register_page(request):
 
     branches = Branch.objects.all().order_by("name")
 
+    registration_values = {}
+    serializer = None
+
     if request.method == "POST":
         serializer = RegisterSerializer(data=request.POST)
+        registration_values = {
+            field: request.POST.get(field, "")
+            for field in ("first_name", "last_name", "email", "branch")
+        }
 
         if serializer.is_valid():
             user = serializer.save()
@@ -148,13 +155,12 @@ def register_page(request):
             )
             return redirect("login_page")
 
+        for field, errors in serializer.errors.items():
+            for error in errors:
+                messages.error(request, f"{field}: {error}")
+
     return render(request, "authentication/register.html", {
         "branches": branches,
-        "registration_serializer": serializer if request.method == "POST" else None,
-        "registration_values": {
-            "first_name": request.POST.get("first_name", "") if request.method == "POST" else "",
-            "last_name": request.POST.get("last_name", "") if request.method == "POST" else "",
-            "email": request.POST.get("email", "") if request.method == "POST" else "",
-            "branch": request.POST.get("branch", "") if request.method == "POST" else "",
-        },
+        "registration_values": registration_values,
+        "registration_serializer": serializer,
     })

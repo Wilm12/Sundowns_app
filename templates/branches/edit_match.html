@@ -6,7 +6,7 @@
 <div class="mx-auto max-w-2xl space-y-6">
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="mb-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Match Management</p>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Match Management</p>
             <h1 class="text-2xl font-bold text-slate-950">Edit Match</h1>
         </div>
 
@@ -42,7 +42,7 @@
 
             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div class="mb-3">
-                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Branch Ticket Allocations</p>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Branch Ticket Allocations</p>
                     <p class="mt-1 text-sm text-slate-600">Update ticket allocations for this match.</p>
                 </div>
                 <div class="space-y-3">
@@ -61,7 +61,7 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-3 pt-2">
-                <button type="submit" class="inline-flex items-center justify-center rounded-full bg-green-700 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-green-700/20 hover:bg-green-800">Save Changes</button>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-full bg-brand-secondary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-900/20 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent">Save Changes</button>
                 <a href="{% url 'branch_committee' branch.id %}" class="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900">Cancel</a>
             </div>
         </form>

@@ -3,9 +3,9 @@
 {% block title %}Home | BranchRoute{% endblock %}
 
 {% block content %}
-<section class="bg-gradient-to-br from-white to-yellow-50 rounded-lg shadow p-8 border border-yellow-100">
+<section class="bg-white rounded-lg shadow p-8 border border-slate-200">
 
-    <h1 class="text-3xl md:text-5xl font-bold text-green-900 mb-4">
+    <h1 class="text-3xl md:text-5xl font-bold text-brand-primary mb-4">
         Welcome to BranchRoute
     </h1>
 
@@ -20,14 +20,14 @@
             {% if is_branch_admin %}
                 <a
                     href="{{ branch_admin_dashboard_url|default:'/branch-admin/' }}"
-                    class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400 text-center"
+                    class="bg-brand-secondary text-white px-5 py-3 rounded font-semibold hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent text-center"
                 >
                     Go to Branch Admin
                 </a>
             {% else %}
                 <a
                     href="/dashboard/"
-                    class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400 text-center"
+                    class="bg-brand-secondary text-white px-5 py-3 rounded font-semibold hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent text-center"
                 >
                     Go to Dashboard
                 </a>
@@ -35,7 +35,7 @@
 
             <a
                 href="/matches/"
-                class="bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700 text-center"
+                class="bg-brand-accent text-white px-5 py-3 rounded font-semibold hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-brand-secondary text-center"
             >
                 View Matches
             </a>
@@ -44,14 +44,14 @@
 
             <a
                 href="/api/auth/login-page/"
-                class="bg-yellow-500 text-green-900 px-5 py-3 rounded font-semibold hover:bg-yellow-400 text-center"
+                class="bg-brand-secondary text-white px-5 py-3 rounded font-semibold hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent text-center"
             >
                 Login
             </a>
 
             <a
                 href="/api/auth/register-page/"
-                class="bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700 text-center"
+                class="bg-brand-accent text-white px-5 py-3 rounded font-semibold hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-brand-secondary text-center"
             >
                 Register
             </a>

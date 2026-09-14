@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="bg-white rounded-lg shadow p-8">
-    <h1 class="text-3xl font-bold text-green-900 mb-6">
+    <h1 class="text-3xl font-bold text-brand-primary mb-6">
         My Transport Bookings
     </h1>
 
@@ -12,7 +12,7 @@
         <div class="space-y-5">
             {% for booking in bookings %}
                 <div class="border rounded-lg p-5">
-                    <h2 class="text-xl font-bold text-green-900">
+                    <h2 class="text-xl font-bold text-brand-primary">
                         Sundowns vs {{ booking.ticket.match.opponent }}
                     </h2>
 

@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feature Frozen</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --brand-primary: #0B1220; --brand-secondary: #2563EB; --warning: #F59E0B; }
+    </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
     <main class="min-h-screen flex items-center justify-center px-4">
-        <div class="max-w-xl w-full rounded-lg border border-yellow-300 bg-white p-8 shadow-sm">
-            <div class="mb-4 inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-sm font-semibold text-yellow-800">
+        <div class="max-w-xl w-full rounded-lg border border-amber-200 bg-white p-8 shadow-sm">
+            <div class="mb-4 inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">
                 Temporarily unavailable
             </div>
             <h1 class="text-3xl font-bold text-gray-900">This feature is currently frozen.</h1>
@@ -20,7 +23,7 @@
                 <p class="mt-2 text-sm text-gray-600">Feature: {{ feature|title }}</p>
             {% endif %}
             <div class="mt-6">
-                <a href="/dashboard/" class="inline-flex items-center rounded bg-yellow-500 px-4 py-2 font-medium text-green-900 hover:bg-yellow-400">
+                <a href="/dashboard/" class="inline-flex items-center rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-amber-500">
                     Return to dashboard
                 </a>
             </div>

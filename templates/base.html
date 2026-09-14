@@ -49,7 +49,7 @@
         }
 
         .frozen-button {
-            opacity: 0.6;
+            opacity: 0.95;
             cursor: not-allowed;
         }
         .frozen-button:hover {
@@ -69,7 +69,7 @@
 
             <a href="/" class="flex flex-col font-bold text-xl leading-tight">
                 <span>BranchRoute</span>
-                <span class="text-sm font-medium text-slate-300">Supporter operations</span>
+                <span class="text-sm font-medium text-slate-200">Supporter operations</span>
             </a>
 
             <!-- Desktop Navigation (hidden on mobile & tablet) -->
@@ -93,8 +93,8 @@
                                 <span class="text-xs px-1 py-0.5 bg-warning text-brand-primary rounded">Frozen</span>
                             </button>
                             <div class="absolute left-0 z-20 top-full mt-0 w-44 rounded bg-surface-dark border border-slate-600 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
-                                <span class="block px-4 py-2 text-sm text-slate-300 cursor-not-allowed">Membership (Frozen)</span>
-                                <span class="block px-4 py-2 text-sm text-slate-300 cursor-not-allowed">Branch (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200 cursor-not-allowed">Membership (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200 cursor-not-allowed">Branch (Frozen)</span>
                             </div>
                         </div>
                     {% else %}
@@ -138,9 +138,9 @@
                                 <span class="text-xs px-1 py-0.5 bg-warning text-brand-primary rounded">Frozen</span>
                             </button>
                             <div class="absolute left-0 z-20 top-full mt-0 w-48 rounded bg-surface-dark border border-slate-600 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
-                                <span class="block px-4 py-2 text-sm text-slate-300 cursor-not-allowed">Points (Frozen)</span>
-                                <span class="block px-4 py-2 text-sm text-slate-300 cursor-not-allowed">Rewards (Frozen)</span>
-                                <span class="block px-4 py-2 text-sm text-slate-300 cursor-not-allowed">My Redemptions (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200 cursor-not-allowed">Points (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200 cursor-not-allowed">Rewards (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200 cursor-not-allowed">My Redemptions (Frozen)</span>
                             </div>
                         </div>
                     {% else %}
@@ -169,8 +169,8 @@
                                 <span class="text-xs px-1 py-0.5 bg-warning text-brand-primary rounded">Frozen</span>
                             </button>
                             <div class="absolute left-0 z-20 top-full mt-0 w-52 rounded bg-surface-dark border border-slate-600 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
-                                <span class="block px-4 py-2 text-sm text-slate-300">Campaigns (Frozen)</span>
-                                <span class="block px-4 py-2 text-sm text-slate-300">Competitions (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200">Campaigns (Frozen)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200">Competitions (Frozen)</span>
                             </div>
                         </div>
                     {% else %}
@@ -182,8 +182,8 @@
                                 </svg>
                             </button>
                             <div class="absolute left-0 z-20 top-full mt-0 w-52 rounded bg-surface-dark border border-slate-600 shadow-lg opacity-0 invisible group-hover:visible group-hover:opacity-100 hover:visible hover:opacity-100 transition duration-200">
-                                <span class="block px-4 py-2 text-sm text-slate-300">Campaigns (future)</span>
-                                <span class="block px-4 py-2 text-sm text-slate-300">Competitions (future)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200">Campaigns (future)</span>
+                                <span class="block px-4 py-2 text-sm text-slate-200">Competitions (future)</span>
                             </div>
                         </div>
                     {% endif %}
@@ -249,7 +249,7 @@
 
                     <div class="pt-4 border-t border-slate-700">
                         {% if supporter_frozen %}
-                            <div class="flex items-center gap-2 px-3 pb-2 text-xs uppercase tracking-widest font-semibold opacity-60">
+                            <div class="flex items-center gap-2 px-3 pb-2 text-xs uppercase tracking-widest font-semibold opacity-80">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M12 1L3 5v6c0 5.55 3.6 10.74 9 12 5.4-1.26 9-6.45 9-12V5l-9-4zm0 2l7 3.5v5.5c0 4.4-2.8 8.6-7 9.9-4.2-1.3-7-5.5-7-9.9V6.5L12 3zm0 6c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
                                 </svg>
@@ -275,15 +275,15 @@
 
                     <div class="pt-4 border-t border-slate-700">
                         {% if loyalty_frozen %}
-                            <div class="flex items-center gap-2 px-3 pb-2 text-xs uppercase tracking-widest font-semibold opacity-60">
+                            <div class="flex items-center gap-2 px-3 pb-2 text-xs uppercase tracking-widest font-semibold text-slate-200 opacity-90">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <path d="M12 1L3 5v6c0 5.55 3.6 10.74 9 12 5.4-1.26 9-6.45 9-12V5l-9-4zm0 2l7 3.5v5.5c0 4.4-2.8 8.6-7 9.9-4.2-1.3-7-5.5-7-9.9V6.5L12 3zm0 6c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4z" />
                                 </svg>
                                 Loyalty (Frozen)
                             </div>
-                            <span class="block rounded-lg px-3 py-3 text-lg text-slate-300 cursor-not-allowed">Points</span>
-                            <span class="block rounded-lg px-3 py-3 text-lg text-slate-300 cursor-not-allowed">Rewards</span>
-                            <span class="block rounded-lg px-3 py-3 text-lg text-slate-300 cursor-not-allowed">My Redemptions</span>
+                            <span class="block rounded-lg px-3 py-3 text-lg text-slate-200 cursor-not-allowed">Points</span>
+                            <span class="block rounded-lg px-3 py-3 text-lg text-slate-200 cursor-not-allowed">Rewards</span>
+                            <span class="block rounded-lg px-3 py-3 text-lg text-slate-200 cursor-not-allowed">My Redemptions</span>
                         {% else %}
                             <p class="px-3 pb-2 text-xs uppercase tracking-widest font-semibold">Loyalty</p>
                             <a href="/points/" class="block rounded-lg px-3 py-3 text-lg hover:bg-brand-secondary transition-colors">Points</a>

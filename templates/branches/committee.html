@@ -4,15 +4,15 @@
 
 {% block content %}
 <div class="space-y-6">
-    <section class="overflow-hidden rounded-[2rem] brand-gradient text-white shadow-2xl shadow-slate-950/20">
+    <section class="overflow-hidden rounded-[2rem] bg-gradient-to-r from-green-900 via-green-800 to-yellow-500 text-white shadow-2xl shadow-green-950/20">
         <div class="px-4 py-5 sm:px-6 sm:py-8">
             <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-100">Branch Operations</p>
+                    <p class="text-sm font-semibold uppercase tracking-[0.24em] text-green-100">Branch Operations</p>
                     <h1 class="mt-2 text-2xl font-bold sm:text-3xl">{{ branch.name }}</h1>
                 </div>
                 <div class="rounded-2xl bg-white/12 px-4 py-3 backdrop-blur-sm">
-                    <p class="text-xs uppercase tracking-[0.2em] text-cyan-100">Branch Admins</p>
+                    <p class="text-xs uppercase tracking-[0.2em] text-green-100">Branch Admins</p>
                     <p class="mt-2 text-xl font-semibold">{{ committee_members|length }}</p>
                 </div>
             </div>
@@ -32,7 +32,7 @@
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="mb-5 flex items-center justify-between gap-3">
             <div>
-                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Supporter Verification</p>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Supporter Verification</p>
                 <h2 class="text-xl font-bold text-slate-950">Pending verifications</h2>
             </div>
             <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-800">
@@ -52,7 +52,7 @@
                             <span class="rounded-full bg-yellow-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-yellow-800">Pending</span>
                         </div>
                         <div class="mt-4">
-                            <a href="{% url 'branch_supporter_verification' branch.id verification.user.id %}?next=ticket-collection&code={{ request.GET.code|default:'' }}&match_id={{ request.GET.match_id|default:'' }}" class="inline-flex items-center justify-center rounded-full bg-brand-secondary px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                            <a href="{% url 'branch_supporter_verification' branch.id verification.user.id %}?next=ticket-collection&code={{ request.GET.code|default:'' }}&match_id={{ request.GET.match_id|default:'' }}" class="inline-flex items-center justify-center rounded-full bg-green-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-800">
                                 Review Supporter
                             </a>
                         </div>
@@ -68,7 +68,7 @@
 
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="mb-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Match Management</p>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Match Management</p>
             <h2 class="text-xl font-bold text-slate-950">Operational match planning</h2>
         </div>
 
@@ -134,7 +134,7 @@
 
                     <div class="rounded-2xl border border-slate-200 bg-white p-4">
                         <div class="mb-3">
-                            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Branch Ticket Allocations</p>
+                            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Branch Ticket Allocations</p>
                             <p class="mt-1 text-sm text-slate-600">Configure ticket allocations for this match.</p>
                         </div>
                         <div class="space-y-3">
@@ -152,7 +152,7 @@
                         <label for="id_published" class="text-sm font-semibold text-slate-700">Publish Immediately</label>
                     </div>
 
-                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-brand-secondary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-900/20 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent">
+                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-green-700 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-green-700/20 hover:bg-green-800">
                         Publish Match
                     </button>
                 </form>
@@ -215,7 +215,7 @@
 
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="mb-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Committee Members</p>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Committee Members</p>
             <h2 class="text-xl font-bold text-slate-950">Branch committee</h2>
         </div>
 
@@ -225,7 +225,7 @@
                     <label for="supporter_email" class="mb-2 block text-sm font-semibold text-slate-700">Search supporter by email</label>
                     <input id="supporter_email" name="supporter_email" type="email" value="{{ supporter_email_query }}" placeholder="supporter@email.com" class="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-slate-700">
                 </div>
-                <button type="submit" class="rounded-full bg-brand-secondary px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent">Search</button>
+                <button type="submit" class="rounded-full bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Search</button>
             </form>
 
             {% if supporter_email_query %}
@@ -241,7 +241,7 @@
                                     {% csrf_token %}
                                     <input type="hidden" name="promote" value="1">
                                     <input type="hidden" name="supporter" value="{{ supporter.id }}">
-                                    <button type="submit" class="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-brand-secondary">Promote to Committee</button>
+                                    <button type="submit" class="rounded-full border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-800">Promote to Committee</button>
                                 </form>
                             </div>
                         {% endfor %}
@@ -281,7 +281,7 @@
 
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="mb-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Leadership Assignment</p>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Leadership Assignment</p>
             <h2 class="text-xl font-bold text-slate-950">Committee leadership</h2>
         </div>
 
@@ -313,7 +313,7 @@
                     {{ position_form.position }}
                 </div>
                 <div class="self-end">
-                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-brand-secondary px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent">Assign</button>
+                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-full bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Assign</button>
                 </div>
             </form>
         </div>
@@ -321,7 +321,7 @@
 
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="mb-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Branch Administrators</p>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Branch Administrators</p>
             <h2 class="text-xl font-bold text-slate-950">Manage branch access</h2>
         </div>
 
@@ -352,14 +352,14 @@
                     <label for="id_supporter" class="mb-2 block text-sm font-semibold text-slate-700">Promote member to admin</label>
                     {{ promote_form.supporter }}
                 </div>
-                <button type="submit" class="rounded-full bg-brand-secondary px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent">Add Admin</button>
+                <button type="submit" class="rounded-full bg-green-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-green-800">Add Admin</button>
             </form>
         </div>
     </section>
 
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="mb-5">
-            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Recent Activity</p>
+            <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Recent Activity</p>
             <h2 class="text-xl font-bold text-slate-950">Branch operations log</h2>
         </div>
 

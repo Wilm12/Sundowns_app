@@ -6,7 +6,7 @@
 <div class="space-y-8">
 
     <div class="bg-white rounded-lg shadow p-8">
-        <h1 class="text-3xl font-bold text-brand-primary mb-3">
+        <h1 class="text-3xl font-bold text-green-900 mb-3">
             Sundowns vs {{ match.opponent }}
         </h1>
 
@@ -20,14 +20,14 @@
 
         <a
             href="{% url 'book_ticket_page' match.id %}"
-            class="inline-block bg-brand-secondary text-white px-5 py-3 rounded font-semibold hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent"
+            class="inline-block bg-green-800 text-white px-5 py-3 rounded font-semibold hover:bg-green-700"
         >
             Book Ticket
         </a>
     </div>
 
     <div class="bg-white rounded-lg shadow p-8">
-        <h2 class="text-2xl font-bold text-brand-primary mb-4">
+        <h2 class="text-2xl font-bold text-green-900 mb-4">
             Available Transport
         </h2>
 
@@ -35,7 +35,7 @@
             <div class="space-y-4">
                 {% for transport in transports %}
                     <div class="border rounded-lg p-5">
-                        <h3 class="text-xl font-bold text-brand-primary">
+                        <h3 class="text-xl font-bold text-green-900">
                             {{ transport.branch.name }}
                         </h3>
 
@@ -49,7 +49,7 @@
 
                         <a
                             href="/transport/"
-                            class="inline-block mt-3 bg-brand-secondary text-white px-4 py-2 rounded font-semibold hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-brand-accent"
+                            class="inline-block mt-3 bg-yellow-500 text-green-900 px-4 py-2 rounded font-semibold hover:bg-yellow-400"
                         >
                             Book Transport
                         </a>

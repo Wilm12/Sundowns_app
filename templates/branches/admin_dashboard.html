@@ -4,21 +4,21 @@
 
 {% block content %}
 <div class="space-y-4 sm:space-y-6">
-    <section class="overflow-hidden rounded-[2rem] brand-gradient text-white shadow-2xl shadow-slate-950/20">
+    <section class="overflow-hidden rounded-[2rem] bg-gradient-to-r from-green-900 via-green-800 to-yellow-500 text-white shadow-2xl shadow-green-950/20">
         <div class="px-4 py-5 sm:px-6 sm:py-8">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div class="space-y-2">
-                    <p class="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-100">Branch Admin Dashboard</p>
+                    <p class="text-sm font-semibold uppercase tracking-[0.24em] text-green-100">Branch Admin Dashboard</p>
                     <h1 class="text-2xl font-bold sm:text-3xl">{{ dashboard.branch.name }}</h1>
                     {% if dashboard.branch.category == 'INSTITUTIONAL' %}
-                        <p class="text-sm sm:text-base text-slate-200">{{ dashboard.branch.institution }}</p>
+                        <p class="text-sm sm:text-base text-green-50/90">{{ dashboard.branch.institution }}</p>
                     {% else %}
-                        <p class="text-sm sm:text-base text-slate-200">Community Branch</p>
+                        <p class="text-sm sm:text-base text-green-50/90">Community Branch</p>
                     {% endif %}
-                    <p class="text-sm sm:text-base text-slate-200">2026/27 Season</p>
+                    <p class="text-sm sm:text-base text-green-50/90">2026/27 Season</p>
                 </div>
                 <div class="rounded-2xl bg-white/15 p-4 backdrop-blur-sm">
-                        <p class="text-xs uppercase tracking-[0.2em] text-cyan-100">Current Match</p>
+                    <p class="text-xs uppercase tracking-[0.2em] text-green-100">Current Match</p>
                     <p class="mt-2 text-sm font-semibold">
                         {% if dashboard.dashboard_match %}
                             {{ dashboard.dashboard_match.opponent }}
@@ -33,10 +33,10 @@
 
     {% if dashboard.admin_branches|length > 1 %}
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
-        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Branch Selector</p>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Branch Selector</p>
         <div class="mt-3 flex flex-wrap gap-2">
             {% for branch in dashboard.admin_branches %}
-                <a href="{% url 'branch_admin_dashboard_branch' branch.id %}" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-brand-secondary hover:bg-blue-50">
+                <a href="{% url 'branch_admin_dashboard_branch' branch.id %}" class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:border-green-400 hover:bg-green-50">
                     {{ branch.name }}
                 </a>
             {% endfor %}
@@ -67,10 +67,10 @@
     <section class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
         <div class="flex items-center justify-between gap-3">
             <div>
-                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Current Match Report</p>
+                <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Current Match Report</p>
                 <h2 class="text-xl font-bold text-slate-950">{{ dashboard.dashboard_match.opponent|default:"No upcoming match" }}</h2>
             </div>
-            <div class="rounded-2xl bg-blue-50 px-3 py-2 text-sm font-semibold text-brand-secondary">
+            <div class="rounded-2xl bg-green-50 px-3 py-2 text-sm font-semibold text-green-800">
                 {% if dashboard.dashboard_match %}
                     {{ dashboard.dashboard_match.date|date:"M j, Y" }}
                 {% endif %}
@@ -101,7 +101,7 @@
         <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
             <div class="flex items-center justify-between gap-3">
                 <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Reports</p>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Reports</p>
                     <h2 class="text-xl font-bold text-slate-950">Quick access to branch reporting</h2>
                 </div>
             </div>
@@ -116,7 +116,7 @@
         <div class="rounded-[2rem] bg-white p-4 shadow-xl shadow-slate-200 sm:p-6">
             <div class="flex items-center justify-between gap-3">
                 <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-brand-secondary">Committee</p>
+                    <p class="text-sm font-semibold uppercase tracking-[0.2em] text-green-700">Committee</p>
                     <h2 class="text-xl font-bold text-slate-950">Leadership Panel</h2>
                 </div>
             </div>
@@ -135,7 +135,7 @@
             <div class="mt-4 flex flex-wrap gap-2">
                 <a href="{{ dashboard.quick_action_urls.verify_supporter }}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900">Branch Operations</a>
                 {% if dashboard.dashboard_match %}
-                    <a href="{{ dashboard.quick_action_urls.view_match_console }}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900 transition hover:border-brand-secondary hover:bg-blue-50">Ticket Collection</a>
+                    <a href="{{ dashboard.quick_action_urls.view_match_console }}" class="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-900 transition hover:border-green-400 hover:bg-green-50">Ticket Collection</a>
                 {% else %}
                     <div class="rounded-full border border-slate-300 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-500 opacity-70" aria-disabled="true" tabindex="-1">
                         <div>Ticket Collection</div>
